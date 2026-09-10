@@ -1,0 +1,59 @@
+# Essperto Reclutamiento — contexto general
+
+## Qué hace
+
+Automatiza el reclutamiento de punta a punta. La empresa crea una oferta; el sistema
+la publica en portales de empleo, recoge las hojas de vida, contacta a cada candidato
+por WhatsApp y lo pasa por filtros hasta dejarlo agendado en una entrevista.
+
+El candidato solo ve la conversación de WhatsApp. El portal es para el reclutador.
+
+## Repositorios
+
+- `esscoti-backend` — NestJS sobre MongoDB. Toda la lógica. API en `/docs`.
+- `esscoti-frontend` — React Router 7 con Material UI. El portal del reclutador.
+
+⚠️ **Cada carpeta es su propio repositorio git, y la raíz del workspace no lo es.**
+Esta carpeta de documentación también es un repositorio aparte.
+
+## Verificación
+
+- Backend: `npm run build` y `npm test`.
+- Frontend: `npm run typecheck`.
+
+🔴 No correr `npm run lint` en el backend: está definido con corrección automática y
+reformatea archivos que nadie tocó.
+
+## Vocabulario
+
+- **Tenant** — la empresa cliente. Casi todo se configura por tenant; el valor de
+  entorno solo aplica si el tenant no lo define.
+- **Oferta** — la vacante. Tiene plazas; cuando se llenan, se cierra.
+- **Candidato** — la persona, que existe una sola vez y participa en varias ofertas.
+  El estado de la conversación vive en su participación, no en la persona.
+- **ATS** — los portales de empleo: Computrabajo, elempleo, Pandapé.
+- **Robot** — procesos externos que operan esos portales. No corren aquí.
+
+## Dónde está lo importante
+
+El embudo de etapas —publicación, captación, compatibilidad, preguntas por WhatsApp,
+prueba psicométrica, verificación de requisitos, documentos, agendamiento— tiene su
+**fuente única en `stage-order.ts`**. Cualquier cambio de etapas empieza ahí.
+
+El recorrido del candidato está en `pipeline-orchestrator.service.ts`, el archivo más
+grande del proyecto.
+
+## Al leer el código
+
+Los comentarios largos casi siempre documentan una trampa averiguada en producción, no
+la lógica de negocio. Antes de simplificar uno, leerlo. Los `.spec` son la mejor
+documentación de comportamiento que hay.
+
+## Deuda conocida
+
+- Hay una credencial real de un proveedor externo como valor por defecto en el esquema
+  de entorno del backend, y está commiteada. Pendiente de rotar.
+- Los clientes externos vuelcan al log peticiones y respuestas completas, con datos
+  personales de candidatos.
+- El soporte de varios portales de empleo se resolvió con condicionales repartidos, no
+  con una capa de proveedor. Es el precedente de la casa; conviene no repetirlo.
