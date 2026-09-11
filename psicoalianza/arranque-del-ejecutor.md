@@ -1,7 +1,10 @@
-# Arranque · para quien ejecuta un paso de la integración de PsicoAlianza
+# Arranque · cómo se trabaja en la integración de PsicoAlianza
 
 Este documento no dice qué hacer —eso lo dice el brief del paso—, sino **cómo se trabaja
 en este frente y qué ya salió mal**. Se lee una vez, al empezar.
+
+**Lo leen los dos papeles.** Casi todo va dirigido a quien ejecuta, pero *El rigor se
+ajusta al riesgo* y *Cómo es un paso* son también para quien escribe los briefs.
 
 ## Los dos papeles
 
@@ -39,6 +42,41 @@ Los briefs **apuntan** a la bitácora, nunca la repiten: dos copias de una decis
 desincronizan y nadie lo nota. Si ves una decisión explicada entera dentro de un brief,
 probablemente sobra ahí.
 
+## 🔴 El rigor se ajusta al riesgo, no al hábito
+
+Esta ida y vuelta cuesta: rondas de revisión antes de escribir una línea, y una persona
+llevando los mensajes a mano entre dos conversaciones. **No todos los pasos merecen lo
+mismo, y aplicarles el mismo tratamiento a todos es pagar por lo que no lo necesita.**
+
+**Un paso aditivo** —nada lo llama todavía, no puede romper nada— lleva **brief corto y una
+sola ronda**: el ejecutor opina, el planificador responde, se arranca. Si aparece algo
+grande, se para; si no, sigue.
+
+**Un paso que toca el embudo** —donde se invita, se descarta o se le escribe a una persona—
+lleva **el tratamiento completo**, tantas rondas como haga falta. Ahí un fallo silencioso
+le cuesta el proceso a alguien real y nadie se entera.
+
+**Un paso mecánico** —renombrar, mover, mismo comportamiento— lleva brief corto.
+
+⚠️ **Y no todas las rondas compran lo mismo.** Cuando el ejecutor encuentra una trampa del
+código que nadie había visto, esa ronda vale su precio. Cuando encuentra que el brief se
+contradice a sí mismo —pide una cosa en el alcance y otra en las pruebas—, eso no es
+descubrimiento: es que el brief estaba mal escrito y esa ronda es desperdicio.
+
+🔴 **Por eso, quien escribe el brief lo revisa antes contra los dos fallos que más se
+repiten:** prometer que un paso no cambia nada sin haberlo comprobado, y que el alcance y
+las pruebas pidan cosas distintas.
+
+🔴 **Y lo que el brief da por comprobado tiene que estar comprobado.** Una frase que se
+presenta como verificada se reutiliza sin mirar, y ahí un dato falso sale caro. En los pasos
+5 a 7 pasó varias veces. **Una búsqueda de texto demuestra que algo existe, nunca que no
+existe**: si el brief afirma que algo no pasa, tiene que decir cómo se comprobó y qué formas
+no cubre la búsqueda.
+
+⚠️ **Los mensajes se pierden al llevarlos a mano.** En una ronda del paso 7, cuatro puntos del
+ejecutor no llegaron al planificador. Si una opinión previa trae puntos numerados, **se
+contestan uno por uno**; si alguien cita algo que nunca recibiste, se dice en vez de asumir.
+
 ## Cómo es un paso
 
 - **Uno por brief, con línea de parada explícita.** El brief dice qué NO se hace. Esa
@@ -51,7 +89,7 @@ probablemente sobra ahí.
 
 ## Lo que ya salió mal aquí
 
-Cinco cosas, todas ocurridas en este frente:
+Siete cosas, todas ocurridas en este frente:
 
 🔴 **Un formateador reformateó archivos que nadie tocó.** Entraron ~190 líneas de ruido
 en dos archivos y desaparecieron comentarios. No rompió nada, pero el diff dejó de ser
@@ -59,7 +97,9 @@ revisable y `git blame` sobre esas líneas ahora apunta al commit equivocado. **
 el lint ni ningún formateador. Si el editor formatea al guardar, apagarlo.**
 
 🔴 **Una prueba nueva quedó sin rastrear** y estuvo a punto de no revisarse, porque
-"revisa el diff" no la incluía. **Los archivos nuevos se añaden al índice.**
+"revisa el diff" no la incluía. **Los archivos nuevos se añaden al índice.** Y ojo: *marcado
+para añadir* no es *añadido*, y los modificados tampoco entran solos. Varios diffs llegaron
+listos con nada en el índice, y un commit a secas no habría guardado nada.
 
 🔴 **Un archivo temporal de prueba dejó rastro.** Si creas uno para tantear, **bórralo y
 limpia la caché de Jest** antes de reportar, o la verificación puede fallar en frío para
@@ -70,6 +110,15 @@ guardado una versión distinta de la revisada. Comprueba los dos antes de report
 
 🔴 **Dos pasos estuvieron a punto de mezclarse en un solo diff.** Si el paso anterior
 sigue sin commitear, dilo y espera: mezclarlos hace irrevisables los dos.
+
+🔴 **Un merge de `develop` entró encima de un paso ya revisado.** Trae código que nadie
+revisó en este frente. **Cada merge se verifica** —qué trajo, si toca la zona del cambio,
+compilación y pruebas— antes de dar nada por verde.
+
+🔴 **Un brief afirmó cosas que el código desmentía**, y se descubrió en la opinión previa:
+que el plazo descartaba a unos candidatos a los que en realidad no descartaba nada, o que
+había una sola comparación contra un motivo de rechazo cuando había tres. **Si el brief da
+algo por comprobado y el código dice otra cosa, dilo antes de empezar.**
 
 Y una que no llegó a pasar porque se paró a tiempo: **`git checkout`, `restore`,
 `reset --hard` y `clean` no son herramientas de recuperación, son de destrucción.** En

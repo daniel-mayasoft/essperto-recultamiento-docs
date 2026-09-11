@@ -76,7 +76,8 @@ Lista los procesos (vacantes) de la empresa. Formato DataTables.
 
 **Lo que NO trae:** ningún campo de enlace, URL, token ni código de la vacante — solo
 el `slug` de cada prueba. **El enlace del candidato no sale de aquí**; queda para la
-invitación o un detalle aparte (A6 abierto).
+invitación o un detalle aparte. *(Resuelto más abajo: se pide aparte con `POST
+/regenerar-acceso-usuario/{usuario_id}`.)*
 
 ## `GET /participantes-proceso/{proceso_id}` — participantes y resultados de una vacante
 
@@ -114,10 +115,9 @@ datos de la empresa dueña.
 | `fecha_procesamiento` | timestamp \| null. Cuándo se calificó; `null` mientras esté pendiente |
 | `fecha_inicio` / `fecha_cierre` | **La ventana de la prueba.** ~2 días; pasada `fecha_cierre` sin terminar, la agenda queda `Expirada` |
 
-**Lo que sigue faltando:** **tampoco aquí hay enlace del candidato** — ni URL, ni token,
-ni código. Si el enlace solo viaja por correo (ver `medio_envio` de la vacante), el
-modelo de entregarlo por WhatsApp se cae; hay que confirmarlo en la respuesta de la
-invitación. A6 y B2 siguen abiertos, y con más peso.
+**Tampoco aquí hay enlace del candidato** — ni URL, ni token, ni código. *(Resuelto más
+abajo: el enlace personal se pide aparte con `POST /regenerar-acceso-usuario/{usuario_id}`
+y no depende del correo, así que la entrega por WhatsApp se sostiene.)*
 
 **Catálogos, hasta ahora:**
 

@@ -43,6 +43,13 @@ prueba psicométrica, verificación de requisitos, documentos, agendamiento— t
 El recorrido del candidato está en `pipeline-orchestrator.service.ts`, el archivo más
 grande del proyecto.
 
+La **prueba psicométrica habla con su proveedor a través de una capa propia**, en
+`src/offers/psychometrics/`: un puerto que no conoce a ningún proveedor, el adaptador de
+EvaluaTest que envuelve su cliente, y los tipos del contrato. El arranque de la etapa y el
+cron de resultados del orquestador pasan por ahí. **El modo demo es la excepción a
+propósito**: sigue siendo un condicional dentro del embudo. El detalle y el porqué están en
+`psicoalianza/integrate-psicoalianza.md`.
+
 ## Al leer el código
 
 Los comentarios largos casi siempre documentan una trampa averiguada en producción, no
@@ -51,9 +58,13 @@ documentación de comportamiento que hay.
 
 ## Deuda conocida
 
-- Hay una credencial real de un proveedor externo como valor por defecto en el esquema
-  de entorno del backend, y está commiteada. Pendiente de rotar.
+- Hubo una credencial real de un proveedor externo como valor por defecto en el esquema
+  de entorno del backend. **Ya no está en el código** —hoy esos valores por defecto están
+  vacíos, comprobado en `develop` y en la rama de trabajo—, pero **sigue en el historial de
+  git**, en el commit que introdujo la integración. Por eso el arreglo es rotarla, no
+  borrarla.
 - Los clientes externos vuelcan al log peticiones y respuestas completas, con datos
   personales de candidatos.
 - El soporte de varios portales de empleo se resolvió con condicionales repartidos, no
-  con una capa de proveedor. Es el precedente de la casa; conviene no repetirlo.
+  con una capa de proveedor. Es el precedente de la casa; conviene no repetirlo. **El
+  contraejemplo a seguir ya existe**: la capa psicométrica de arriba.
