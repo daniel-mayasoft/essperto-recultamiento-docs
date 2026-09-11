@@ -221,6 +221,12 @@ Se da por terminado cuando se cumplen las dos condiciones:
 5. La oferta **congela** qué conexión usa, siempre, aunque no se haya mostrado
    selector. Si se deduce al leer, habilitar la segunda conexión vuelve ambiguas las
    ofertas viejas.
+
+   ⚠️ **Choca con la 19 en un caso** (levantado el 2026-09-11). La oferta que nadie
+   vuelve a editar no se migra, así que **nunca tendrá su conexión guardada** y hay que
+   deducirla al leer. Hoy no es ambiguo —una conexión por empresa (decisión 2) y solo
+   EvaluaTest—. Lo es el día que una empresa tenga dos conexiones, o se pase de proveedor
+   con ofertas viejas todavía vivas. Se decide con B3, en la etapa 3.
 6. Cada candidato en curso lleva anotado a qué proveedor fue invitado: el cron
    pregunta al del momento de la invitación, no al que hoy diga la oferta.
 7. La configuración guardada en la oferta es neutra: qué conexión, qué se eligió y con
@@ -340,6 +346,29 @@ Se da por terminado cuando se cumplen las dos condiciones:
     doble guardado existe solo para que **devolverse sea inofensivo** — si no, una
     oferta guardada con la forma nueva aparece sin prueba configurada bajo el código
     viejo.
+
+    ⚠️ **Aclarado el 2026-09-11, porque se confunde fácil: son dos piezas, no una, y
+    ninguna sustituye a la otra.**
+
+    - **Leer la nueva y, si falta, la vieja tratándola como EvaluaTest.** Protege al
+      código nuevo frente a las ofertas que nadie vuelve a editar. Dura mientras existan
+      esas ofertas; quitarla del todo exige convertirlas una vez, y no hace falta para
+      cerrar ninguna etapa.
+    - **Escribir también la vieja al guardar.** Protege otra cosa: si hay que volver a la
+      versión anterior, el código que queda corriendo **no tiene el respaldo de arriba** y
+      solo conoce la forma vieja. Una oferta editada después del despliegue y guardada solo
+      en la nueva aparecería sin prueba, y el arranque de la etapa **la aprueba sola**: los
+      candidatos pasan sin filtro y nada falla. Dura unas semanas: con el brief 8 estable,
+      un cambio pequeño deja de escribir la vieja, y volver atrás desde ahí cae en una
+      versión que ya lee la nueva.
+
+    **La regla que ordena las dos:** la versión a la que se podría volver tiene que
+    entender lo que haya guardado en la base. Se despliega la rama entera, así que esa
+    versión es la de antes de la rama.
+
+    🔴 **El paso 6b no es el precedente para escribir.** Escribió solo la forma nueva a
+    propósito (decisión 15), y eso lo deja sin vuelta atrás: ver su entrada. Lo que el 6b
+    sí sienta como precedente es la lectura.
 20. **Criterio de pruebas: lo necesario es lo que avisaría si rompemos EvaluaTest**, no
     cubrirlo todo. Con lo que ya existe, lo que falta y vale la pena son los **dos
     caminos de descarte del cron** —reprueba por puntaje y vence por plazo—, porque
@@ -407,7 +436,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
     *permanecer conectado*, reautenticar en cada pasada del cron dispararía la
     factura y multiplicaría las probabilidades de que el proveedor lo note. Extiende la
     decisión 9 de token cacheado a la cookie de sesión.
-27. **La invitación de PsicoAlianza lleva tres pasos, no uno**, por cómo funciona su
+27. **La invitación de PsicoAlianza lleva cuatro pasos, no uno**, por cómo funciona su
     API (contrato en el API doc):
     1. **Consultar el correo del documento** (`/obtener-correo-usuario`) antes de
        invitar. Si el documento ya existe, se invita con el correo que devuelve; si no,
@@ -814,6 +843,49 @@ Se da por terminado cuando se cumplen las dos condiciones:
 
     **Va en su propio cambio**, con la 34, porque cambia comportamiento.
 
+    ⚠️ **Levantado del código el 2026-09-11, para el brief de este cambio:**
+
+    - **El respaldo no vive en el aviso de credenciales incompletas: vive en el cliente de
+      EvaluaTest**, que usa la cuenta del entorno cada vez que le llegan credenciales
+      vacías. Le llegan vacías por dos caminos: el adaptador —sus cinco operaciones con
+      credencial, incluido el selector de vacantes del reclutador— y la lectura propia del
+      embudo, **más laxa** porque no exige el identificador de empresa, que usan las pruebas
+      adicionales del cron y el enlace de la rama de error del arranque. Quitar el respaldo
+      es quitarlo del cliente y **dejar una sola regla de lectura de credenciales**, que es
+      la unificación que el paso 2 dejó para el recableado y los pasos 6a y 6b aplazaron. La
+      creación de ofertas con IA y la sincronización del índice **ya no usan** la cuenta
+      compartida: se saltan a la empresa sin credenciales.
+    - 🔴 **El modo demo depende hoy de la cuenta compartida, y la bitácora no lo decía.** El
+      cron declara que una empresa demo no necesita EvaluaTest configurado, y en la
+      invitación y en el cron es cierto. Pero **el selector de vacantes no tiene rama
+      demo**: a una empresa demo sin credenciales le lista las vacantes de la cuenta
+      compartida. Sin respaldo, ese reclutador no puede elegir vacante y la oferta demo no
+      puede encender la prueba.
+    - 🔴 **Dónde va la comprobación de "sin conexión".** El sitio que parece natural —junto a
+      *oferta sin prueba configurada, aprobar*— está **antes** de la comprobación del modo
+      demo, y ahí una demo en vivo se saltaría la prueba. Va en la **rama real**: la rama
+      demo no usa credenciales.
+
+    **Propuesta del usuario, pendiente de confirmar:** que la empresa demo se quede con las
+    credenciales de la cuenta compartida **como conexión propia**. No reabre el problema de
+    la 34 —en modo demo no se registra a ningún candidato real— y evita cualquier caso
+    especial en el código. Condiciones y efectos:
+
+    - **Medir antes** qué empresas tienen el modo demo encendido y si ya tienen
+      credenciales.
+    - **Cargarlas antes de desplegar** este cambio, o la demo queda rota entre medias.
+    - **Enciende dos cosas que hoy están apagadas para esa empresa:** la sincronización del
+      índice de vacantes empieza a incluir esa cuenta, y la creación con IA empieza a elegir
+      sola una vacante de EvaluaTest.
+    - **Si alguien apaga el modo demo en esa empresa**, empieza a invitar candidatos reales
+      a la cuenta compartida.
+    - **El cliente potencial ve en el selector los nombres de las vacantes** de esa cuenta:
+      comprobar que se pueden enseñar.
+    - **Rotar la contraseña** de esa cuenta incluye actualizarla en esa empresa.
+
+    **Siguen abiertas dos preguntas antes del brief:** si se impide encender la prueba al
+    guardar una oferta sin conexión (arriba), y si se confirma la propuesta de la demo.
+
 ## Falta de PsicoAlianza
 
 | #   | Qué                                               | Por qué importa                                                                  |
@@ -838,10 +910,10 @@ Se da por terminado cuando se cumplen las dos condiciones:
 | --- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | B1  | ~~Qué se hace con el documento que teclea el candidato~~ **DECIDIDO: se corre con el riesgo** | No se le pregunta nada (decisión 31), así que el documento llega como lo tecleó el candidato al postularse en el portal. **Se usa en la etapa 5 para invitar y solo se puede comprobar en la 7**, contra la foto de la cédula — que tolera **un** error en 10 dígitos, así que cambiar dos de orden ya rebota. Si está mal, el candidato queda pidiendo reenviar el frente sin entender por qué. **Se acepta a sabiendas y no se añade nada para manejarlo.** Ojo: en PsicoAlianza queda registrado con el documento errado, y corregirlo aquí no lo corrige allá |
 | B2  | ~~Candidato sin correo~~ **RESUELTO, y corregido por la decisión 33** | Lo que sigue en pie: el enlace personal se obtiene por la API (`POST /regenerar-acceso-usuario/{id}`, funciona registrado o no), **lleva a presentar las pruebas** y se manda por WhatsApp, así que **el enlace no depende del correo**. ~~Al candidato sin correo se le inventa uno único y no reutilizable~~ — **retirado por la decisión 33** (2026-09-11): no se inventa ningún correo; quien no trae correo no puede ser invitado y **se descarta** |
-| B3  | Cambio de proveedor con ofertas vivas                | Hay gente a mitad de prueba cuando la empresa se cambia                                                                                                                                                                                  |
+| B3  | Cambio de proveedor con ofertas vivas                | Hay gente a mitad de prueba cuando la empresa se cambia. Incluye las ofertas guardadas en la forma vieja, que no llevan su conexión: ver la nota de la decisión 5 |
 | B4  | De dónde se corta el indicativo del teléfono         | Se guarda con +57                                                                                                                                                                                                                        |
 | B5  | ¿La IA sigue sugiriendo vacante?                     | Depende de A4                                                                                                                                                                                                                            |
-| B6  | ~~Qué se hace con lo ya guardado~~ **CASI RESUELTO** (2026-09-11) | **Sin migración en los tres.** Campos del candidato (paso 6b): al leer, el nuevo y si está vacío el viejo; al escribir, siempre el nuevo — la compatibilidad caduca sola. Motivos de rechazo (paso 7): el portal y las métricas entienden viejo y nuevo **para siempre**, porque un rechazado no caduca. **Falta solo la configuración de la oferta**, que es del brief 8 con la doble escritura de la decisión 19. **Esos dos pasos son el precedente a seguir** |
+| B6  | ~~Qué se hace con lo ya guardado~~ **CASI RESUELTO** (2026-09-11) | **Sin migración en los tres.** Campos del candidato (paso 6b): al leer, el nuevo y si está vacío el viejo; al escribir, siempre el nuevo — la compatibilidad caduca sola. Motivos de rechazo (paso 7): el portal y las métricas entienden viejo y nuevo **para siempre**, porque un rechazado no caduca. **Falta solo la configuración de la oferta**, que es del brief 8. **Esos dos pasos son el precedente para leer, no para escribir**: la oferta escribe las dos formas mientras se pueda volver atrás (decisión 19 y su aclaración del 2026-09-11) |
 | B7  | ~~Cómo autenticarse contra el reCAPTCHA v3 del login~~ **DECIDIDO** | Solucionador de pago con **SolveCaptcha**; el login humano queda descartado. Ver decisión 23. Queda por medir con qué puntaje mínimo pasa el sitio |
 | B8  | ~~¿El identificador de empresa hace falta para considerar válida una conexión?~~ **CERRADO: no afecta a nadie** | Medido en producción el 2026-09-10: **cero empresas** con correo y contraseña pero sin identificador. La divergencia entre las cuatro resoluciones existe en el código pero **no toca a ningún tenant**, así que se puede unificar con la regla estricta sin riesgo y **el recableado del embudo deja de estar bloqueado**. Sigue en pie la otra mitad: solo el orquestador arrastra el correo de pruebas, y la resolución canónica tiene que conservarlo o se rompe el desvío de QA (ya cubierto en el paso 3) |
 
@@ -1088,6 +1160,14 @@ seguido.
 campo viejo al contar el incidente de los cuatro candidatos parados hasta 9,6 días. El hecho
 es cierto, el nombre ya no existe. Se ajusta cuando se toque esa zona.
 
+🔴 **No tiene vuelta atrás, y eso es del despliegue** (levantado el 2026-09-11). Como solo se
+escriben los campos nuevos, si tras desplegar la rama hubiera que volver a la versión
+anterior, el código de antes no ve el identificador de quien se invitó después del
+despliegue, lo toma por un registro fallido y **le manda la prueba otra vez**. Nadie pasa sin
+filtro, pero esa persona recibe dos invitaciones. **Desplegada la rama, un fallo se corrige
+hacia adelante, no volviendo a la versión anterior del backend.** Es también el motivo por el
+que la configuración de la oferta no copia este paso al escribir (decisión 19).
+
 ### Rescate de los atascados — ✅ HECHO (2026-09-11)
 
 Brief en `brief-rescate-de-atascados.md`. Cambio de comportamiento, en su propio commit. Cuando
@@ -1175,7 +1255,7 @@ no se renumeran cuando uno se cierra.
 | # | Brief | Nota |
 | --- | --- | --- |
 | 7 | ✅ **Los motivos de rechazo con prefijo neutro** — HECHO, commiteado en los dos repositorios: `brief-paso-7-motivos-neutros.md` | Decisiones 13 y 16. **Toca los dos repositorios**: enum del backend, etiquetas y textos del portal |
-| 8 | **Las conexiones como lista con nombre** y la configuración neutra de la oferta con doble escritura | Decisiones 1, 5, 7 y 19. **Aquí cae también la decisión 8** —sacar "IGI" de la interfaz y llamarlo "puntaje mínimo"—, porque es la misma pantalla que se toca. **Toca los dos repositorios**. Para lo ya guardado, **seguir los precedentes de B6** |
+| 8 | **Las conexiones como lista con nombre** y la configuración neutra de la oferta con doble escritura | Decisiones 1, 5, 7, 19 y **28** —el identificador de vacante se revisa cuando la configuración se vuelve neutra, que es aquí—. **Aquí cae también la decisión 8** —sacar "IGI" de la interfaz y llamarlo "puntaje mínimo"—, porque es la misma pantalla que se toca. **Toca los dos repositorios**. Para lo ya guardado: B6 para leer y la 19 para escribir. ⚠️ **Hay que partirlo.** La configuración de la oferta no la usa solo la pantalla: en el backend la leen o la escriben, como mínimo, el embudo, el servicio de ofertas, la creación con IA, el agente de WhatsApp que crea ofertas, el borrador por WhatsApp y la creación desde administración (búsqueda de texto del 2026-09-11, que no descarta otros). La partición se propone después de leerlos, buscando que lean desde un único sitio que entienda las dos formas |
 
 ~~El proveedor falso y el resolvedor.~~ **Descartados de la etapa 1** por la decisión 38.
 El resolvedor pasa a la etapa 3.
@@ -1191,7 +1271,14 @@ psicotécnica, con aviso al reclutador y sin detener a ningún candidato). ⚠�
 tiene que tocar también **el aviso de credenciales incompletas** del adaptador, que hoy
 dice que se usará la cuenta global (ver paso 3), y antes de escribirlo hay que **confirmar
 con el usuario si además se impide encender la prueba** al guardar una oferta sin conexión.
-La mitad viva de la 35 **ya está cerrada** en el paso 5.
+La mitad viva de la 35 **ya está cerrada** en el paso 5. Antes de escribir el brief de la 34
+y la 40, leer lo levantado en la 40 el 2026-09-11: dónde vive de verdad el respaldo, el modo
+demo y la propuesta de dejarle la cuenta compartida.
+
+**Orden propuesto el 2026-09-11, sin confirmar:** el cambio de la 34 y la 40 va **antes** del
+brief 8 —es más pequeño, y al dejar una sola regla de lectura de credenciales el brief 8 tiene
+menos lectores que tocar al convertir las conexiones en lista—; el de la 33 va a continuación,
+antes del brief 8, porque toca la misma zona del arranque que la 40 y no se mezcla con ella.
 
 Y la **decisión 37**, que no tenía dónde caer y se encontró aplicando la regla de abajo
 (2026-09-10): el cliente convierte en **cero** el puntaje que el proveedor no manda, y un
@@ -1228,6 +1315,27 @@ primera tarea del siguiente planificador, antes del brief 8.** La bitácora se r
 el código ese mismo día y se corrigieron las contradicciones que tenía: decisiones 35, 36,
 38 y 39, filas B2 y B6, y la entrada del paso 3.
 
+**Dos condiciones para ese documento:** entra en el orden de lectura del arranque y del
+contexto del proyecto, o el ejecutor no lo lee; y todo brief que cambie el flujo lo actualiza
+en la misma revisión, o después del brief 8 será una tercera copia desincronizada.
+
+**Segunda revisión, el mismo 2026-09-11, al recibir el traspaso.** Se volvió a verificar el
+estado —backend 98 suites y 855 pruebas, portal con tipos limpios, los dos al día con
+`develop`— y se anotó: el choque de las decisiones 5 y 19 con las ofertas viejas, la
+aclaración de la 19 (dos piezas) y la fila B6 corregida, la falta de vuelta atrás del paso 6b,
+lo levantado en la 40 sobre el respaldo y el modo demo, la 28 en la fila del brief 8, y la 27
+corregida (decía tres pasos y enumera cuatro).
+
+**Sin paso todavía, cada uno en su propio cambio** (encontrados aplicando la regla de abajo el
+2026-09-11; ninguno bloquea cerrar la etapa 1):
+
+- **El arreglo del cliente de la decisión 36**: que la consulta del tablero distinga *no pude
+  preguntar* de *no hay nadie*. Sin él no se puede actuar nunca sobre *no se pudo consultar*
+  sin arriesgarse a congelar el plazo.
+- **La quinta puerta de la decisión 39**: el botón "Continuar proceso" de un recordatorio se
+  traga el fallo permanente, y el candidato gasta la reapertura de la ventana de WhatsApp en
+  un botón que no hace nada. Prioridad baja.
+
 ⚠️ **Toda decisión tiene que tener un paso donde caiga.** Si al leer la lista de decisiones
 encuentras una que no aparece en ninguna fila de arriba ni está marcada como de otra etapa,
 es trabajo acordado que se va a perder solo. Anótala aquí en vez de suponer que alguien se
@@ -1240,6 +1348,7 @@ se debe usar.** Una empresa sin credenciales propias de un proveedor **no hace p
 psicotécnicas**, y punto. Con eso la decisión 34 queda confirmada y la 40 deja de tener
 alternativa: el respaldo por entorno se elimina.
 
-Sigue abierto solo **rotar la contraseña de PsicoAlianza**, que necesita acceso a la cuenta
-y no depende de nadie de este frente. Es el único riesgo de los anotados que empeora con el
-tiempo.
+Sigue abierto **rotar dos credenciales**, que necesitan acceso a las cuentas y no dependen de
+nadie de este frente: la contraseña de **PsicoAlianza** (ver *Riesgos*) y la credencial de
+**EvaluaTest** que sigue en el historial de git (decisión 21). Son los únicos riesgos de los
+anotados que empeoran con el tiempo.
