@@ -1104,13 +1104,11 @@ apareció en la auditoría de la rama del 2026-09-10):
   cambia comportamiento, pero era el rastro con el que se comprobaba a mano que un
   candidato recibió el enlace correcto.
 
-⚠️ **Falta una medición antes de desplegar**, y no se puede hacer leyendo código: **cuántas
-ofertas activas tienen la prueba psicométrica encendida y el nombre de la vacante ausente o
-en blanco** —el campo se guarda recortado, así que una cadena de espacios queda como cadena
-vacía y contar solo los nulos deja fuera casos reales—. Mide dos poblaciones a la vez: los
-casos nuevos que se evitan y los que ya están atrapados, que se reconocen por estar
-esperando resultado sin identificador del proveedor. No bloquea nada ya escrito; decide si
-el despliegue va tranquilo o con aviso.
+✅ **Medido en producción el 2026-09-11: cero.** De 18 ofertas vivas con la prueba
+psicométrica encendida, **ninguna** tiene el nombre de la vacante ausente ni en blanco. El
+cero se comprobó quitando la condición del nombre —las 18 aparecen—, así que no es un filtro
+mal escrito. **El paso 5 se despliega sin aviso.** La consulta contó también los nombres en
+blanco, porque el campo se guarda recortado y una cadena de espacios queda como cadena vacía.
 
 ### Paso 6a — ✅ HECHO (2026-09-10)
 
@@ -1198,10 +1196,11 @@ candidato nuevo que entre a esa etapa.
 **Queda fuera, a propósito:** el candidato cuyo documento no se puede cargar. Su reintento ni
 se intenta, y qué hacer con alguien que ya no existe es otra decisión.
 
-⚠️ **Falta medir antes de desplegar cuánta gente sale**, con la consulta del brief —filtrando
-todo menos las ofertas canceladas, igual que el cron—. **No son los mismos de siempre**: sin
-este cambio no iban a salir nunca. El número suma además a los del documento que no carga, que
-no se rescatan.
+✅ **Medido en producción el 2026-09-11: cero.** Hay 18 personas esperando resultado en la
+etapa psicométrica, en todas las ofertas menos las canceladas, y **todas tienen identificador
+del proveedor**: no hay nadie atascado. El cero se comprobó contando la etapa sin la condición
+del identificador —salen las 18—. **El rescate se despliega sin sacar a nadie**; queda como
+protección para el futuro.
 
 ### Paso 7 — ✅ HECHO (2026-09-11)
 
@@ -1243,6 +1242,18 @@ que quedan son las lecturas de la normalización de métricas.
 fuera de los dos repositorios filtra por `evaluatest_...`. Dejaría de contar a los rechazados
 nuevos sin dar error, y la normalización de las métricas no lo protege porque esos informes
 leen la base directamente.
+
+### Mediciones en producción (2026-09-11)
+
+Las dos que faltaban para desplegar, hechas en la base real con consultas de solo lectura:
+
+| Qué | Resultado | Comprobación de que el cero es real |
+| --- | --- | --- |
+| Ofertas vivas con la prueba encendida y vacante sin nombre (paso 5) | **0** | Sin la condición del nombre salen 18 |
+| Personas atascadas sin identificador del proveedor (rescate) | **0** | Sin la condición del identificador salen 18, todas esperando resultado |
+
+**Ninguno de los dos despliegues necesita aviso.** Las consultas siguen en la bitácora y en
+el brief del rescate por si hay que repetirlas.
 
 ### Estado a 2026-09-11
 
