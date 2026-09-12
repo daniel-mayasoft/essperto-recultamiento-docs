@@ -65,6 +65,16 @@ documentación de comportamiento que hay.
   borrarla.
 - Los clientes externos vuelcan al log peticiones y respuestas completas, con datos
   personales de candidatos.
+- **El backend entrega desencriptadas las contraseñas de las cuentas externas de la
+  empresa** —portales de empleo, EvaluaTest y antecedentes— en la respuesta de "mi
+  compañía", que piden la lista de ofertas, el detalle de una oferta, la tarjeta de
+  agendamiento y Mi compañía. Se guardan encriptadas, pero cualquier usuario de la empresa,
+  incluido el rol más bajo, las recibe en texto plano en su navegador; el listado interno de
+  empresas devuelve las de todas. Anotado el 2026-09-11; no es de ningún frente abierto y se
+  arregla cuando haya tiempo. **El arreglo va aparte y con cuidado:** el formulario de
+  credenciales se rellena con la contraseña recibida y la reenvía al guardar, y el portal
+  decide si muestra la prueba psicométrica según reciba o no las credenciales — las dos cosas
+  hay que pasarlas a un "configurado: sí" sin borrar lo guardado.
 - El soporte de varios portales de empleo se resolvió con condicionales repartidos, no
   con una capa de proveedor. Es el precedente de la casa; conviene no repetirlo. **El
   contraejemplo a seguir ya existe**: la capa psicométrica de arriba.

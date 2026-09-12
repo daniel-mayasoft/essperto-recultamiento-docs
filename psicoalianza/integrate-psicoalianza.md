@@ -855,36 +855,44 @@ Se da por terminado cuando se cumplen las dos condiciones:
       la unificación que el paso 2 dejó para el recableado y los pasos 6a y 6b aplazaron. La
       creación de ofertas con IA y la sincronización del índice **ya no usan** la cuenta
       compartida: se saltan a la empresa sin credenciales.
-    - 🔴 **El modo demo depende hoy de la cuenta compartida, y la bitácora no lo decía.** El
-      cron declara que una empresa demo no necesita EvaluaTest configurado, y en la
-      invitación y en el cron es cierto. Pero **el selector de vacantes no tiene rama
-      demo**: a una empresa demo sin credenciales le lista las vacantes de la cuenta
-      compartida. Sin respaldo, ese reclutador no puede elegir vacante y la oferta demo no
-      puede encender la prueba.
+    - **El modo demo no depende de la cuenta compartida** (corregido el mismo 2026-09-11: una
+      primera versión de esta nota decía que sí). En el backend el selector de vacantes no
+      tiene rama demo, y a una empresa sin credenciales le listaría la cuenta compartida,
+      pero **el portal no llega a pedirlo**: solo muestra la sección de prueba psicométrica
+      —al crear la oferta y en su detalle— si la empresa tiene credenciales de EvaluaTest
+      guardadas. Una empresa demo sin credenciales no tiene prueba en sus ofertas y la etapa
+      se salta, hoy y después de este cambio; una con credenciales usa las suyas. La única
+      forma de que una oferta demo tenga prueba sin credenciales es crearla desde
+      administración, que acepta la configuración directamente.
     - 🔴 **Dónde va la comprobación de "sin conexión".** El sitio que parece natural —junto a
       *oferta sin prueba configurada, aprobar*— está **antes** de la comprobación del modo
       demo, y ahí una demo en vivo se saltaría la prueba. Va en la **rama real**: la rama
       demo no usa credenciales.
 
-    **Propuesta del usuario, pendiente de confirmar:** que la empresa demo se quede con las
-    credenciales de la cuenta compartida **como conexión propia**. No reabre el problema de
-    la 34 —en modo demo no se registra a ningún candidato real— y evita cualquier caso
-    especial en el código. Condiciones y efectos:
+    **Decidido el 2026-09-11: la demo se queda como está.** Se descartó dejarle a la empresa
+    demo las credenciales de la cuenta compartida: no se le guarda nada y el modo demo no se
+    toca. Si no tiene credenciales, sus ofertas siguen sin prueba psicométrica, como hoy.
 
-    - **Medir antes** qué empresas tienen el modo demo encendido y si ya tienen
-      credenciales.
-    - **Cargarlas antes de desplegar** este cambio, o la demo queda rota entre medias.
-    - **Enciende dos cosas que hoy están apagadas para esa empresa:** la sincronización del
-      índice de vacantes empieza a incluir esa cuenta, y la creación con IA empieza a elegir
-      sola una vacante de EvaluaTest.
-    - **Si alguien apaga el modo demo en esa empresa**, empieza a invitar candidatos reales
-      a la cuenta compartida.
-    - **El cliente potencial ve en el selector los nombres de las vacantes** de esa cuenta:
-      comprobar que se pueden enseñar.
-    - **Rotar la contraseña** de esa cuenta incluye actualizarla en esa empresa.
+    **Decidido el 2026-09-11: cómo es el aviso al reclutador.** Hoy hay dos sitios y ninguno
+    sirve tal cual. Al crear la oferta, el paso de la prueba muestra un aviso que habla de
+    "tenant" y de "EvaluaTest" y no lleva a ningún sitio. En el detalle de la oferta, pestaña
+    Filtros, la sección **desaparece sin decir nada** — y ahí es donde más importa, porque una
+    oferta que ya tenía la prueba activa se la salta sin que el reclutador lo sepa. Se pone
+    **un mensaje neutro en los dos sitios**, del estilo *tu empresa no tiene un proveedor de
+    pruebas psicométricas conectado; esta etapa se omitirá*, con **enlace a Mi compañía solo
+    para quien tiene permiso de editar la empresa**, que es el que exige esa sección; a quien
+    no lo tiene se le dice que lo pida a un administrador de su empresa. Con eso **este cambio
+    toca los dos repositorios**. El portal no tiene pruebas: el cambio tiene que ser pequeño y
+    se verifica leyendo.
 
-    **Siguen abiertas dos preguntas antes del brief:** si se impide encender la prueba al
-    guardar una oferta sin conexión (arriba), y si se confirma la propuesta de la demo.
+    **La pregunta de impedir encender la prueba casi se contesta sola:** en el portal ya es
+    imposible, porque sin credenciales no se muestra la sección. Queda revisar, al escribir el
+    brief, los otros caminos que crean ofertas —el agente de WhatsApp y la creación desde
+    administración— y decidir si el backend también la rechaza.
+
+    ⚠️ **Coordinar antes del brief:** Elvis y Henry Peña tocaron la semana del 2026-09-07 justo
+    estas pantallas — el guardado de credenciales de EvaluaTest, el detalle de la oferta y el
+    formulario de creación.
 
 ## Falta de PsicoAlianza
 
@@ -919,9 +927,10 @@ Se da por terminado cuando se cumplen las dos condiciones:
 
 ### Abierto, para cuando exista el resolvedor (etapa 3)
 
-**Qué ve el reclutador de una empresa en modo demo en el selector de vacantes.** Hoy ve
-las vacantes reales de EvaluaTest, porque el modo demo **no es un proveedor: son cuatro
-momentos** del recorrido y ninguno toca ese camino.
+**Qué ve el reclutador de una empresa en modo demo en el selector de vacantes.** Si la
+empresa demo tiene credenciales guardadas, ve las vacantes reales de esa cuenta, porque el
+modo demo **no es un proveedor: son cinco momentos** del recorrido (decisión 38) y ninguno
+toca ese camino. Si no las tiene, el portal ni siquiera muestra la sección (ver la 40).
 
 El día que un resolvedor decida *todas* las operaciones, ese reclutador dejaría de ver
 vacantes reales y vería las falsas. Puede ser lo que queramos o no, pero **es un cambio de
@@ -1269,11 +1278,12 @@ inventado y el candidato sin datos se descarta) y las decisiones 34 y 40, que va
 (se elimina el respaldo por entorno, y la empresa sin conexión propia se queda sin prueba
 psicotécnica, con aviso al reclutador y sin detener a ningún candidato). ⚠️ Ese cambio
 tiene que tocar también **el aviso de credenciales incompletas** del adaptador, que hoy
-dice que se usará la cuenta global (ver paso 3), y antes de escribirlo hay que **confirmar
-con el usuario si además se impide encender la prueba** al guardar una oferta sin conexión.
+dice que se usará la cuenta global (ver paso 3). Lo de impedir encender la prueba al guardar
+una oferta sin conexión ya casi está contestado (ver la 40).
 La mitad viva de la 35 **ya está cerrada** en el paso 5. Antes de escribir el brief de la 34
-y la 40, leer lo levantado en la 40 el 2026-09-11: dónde vive de verdad el respaldo, el modo
-demo y la propuesta de dejarle la cuenta compartida.
+y la 40, leer lo levantado en la 40 el 2026-09-11: dónde vive de verdad el respaldo, dónde va
+la comprobación de "sin conexión", por qué la demo no se toca, cómo es el aviso al reclutador
+y qué caminos de creación de ofertas quedan por revisar.
 
 **Orden propuesto el 2026-09-11, sin confirmar:** el cambio de la 34 y la 40 va **antes** del
 brief 8 —es más pequeño, y al dejar una sola regla de lectura de credenciales el brief 8 tiene
@@ -1323,7 +1333,9 @@ en la misma revisión, o después del brief 8 será una tercera copia desincroni
 estado —backend 98 suites y 855 pruebas, portal con tipos limpios, los dos al día con
 `develop`— y se anotó: el choque de las decisiones 5 y 19 con las ofertas viejas, la
 aclaración de la 19 (dos piezas) y la fila B6 corregida, la falta de vuelta atrás del paso 6b,
-lo levantado en la 40 sobre el respaldo y el modo demo, la 28 en la fila del brief 8, y la 27
+lo levantado en la 40 sobre el respaldo, el modo demo —corregido ese mismo día: no depende de
+la cuenta compartida y se queda como está— y el aviso al reclutador, la 28 en la fila del
+brief 8, y la 27
 corregida (decía tres pasos y enumera cuatro).
 
 **Sin paso todavía, cada uno en su propio cambio** (encontrados aplicando la regla de abajo el
