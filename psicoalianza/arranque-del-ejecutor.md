@@ -34,9 +34,15 @@ el árbol de trabajo limpio, no a mitad del cambio.
 2. `integrate-psicoalianza.md` — **la bitácora, que es la fuente única de la verdad.**
    Tiene las decisiones numeradas, las preguntas abiertas y el registro de avance. Si el
    brief y la bitácora se contradicen, avisa: alguien tiene que arreglar uno de los dos.
-3. `psicoalianza-api.md` — el contrato observado del segundo proveedor. Sirve para no
+3. `flujo-actual-etapa-psicometrica.md` — **cómo funciona hoy la etapa de punta a punta**,
+   leído del código. La bitácora dice qué se decidió y cuándo; este dice qué le pasa a una
+   persona. Si el brief lo contradice, gana el código y hay que decirlo.
+4. `psicoalianza-api.md` — el contrato observado del segundo proveedor. Sirve para no
    dibujar contratos calcados del primero.
-4. El brief del paso, que dice qué se hace y dónde se para.
+5. El brief del paso, que dice qué se hace y dónde se para.
+
+🔴 **Si el paso cambia el flujo, el diff incluye la actualización de
+`flujo-actual-etapa-psicometrica.md`.** No es documentación aparte: es parte del paso.
 
 Los briefs **apuntan** a la bitácora, nunca la repiten: dos copias de una decisión se
 desincronizan y nadie lo nota. Si ves una decisión explicada entera dentro de un brief,

@@ -1328,17 +1328,13 @@ etapa 3, cuando exista otro.
 El selector de proveedor en el portal es de la **etapa 3**, no de esta — y con él la
 decisión 3, que dice que solo aparece si hay más de una conexión.
 
-⚠️ **Falta una descripción de cómo funciona hoy la etapa psicométrica de punta a punta**
-(detectado el 2026-09-11). Esta bitácora registra decisiones y pasos por fecha; el flujo
-actual —invitación y consulta por el puerto, campos y motivos neutros, fallo permanente,
-rescate, y los cinco puntos del modo demo— hay que reconstruirlo leyéndola entera. **Es la
-primera tarea del siguiente planificador, antes del brief 8.** La bitácora se revisó contra
-el código ese mismo día y se corrigieron las contradicciones que tenía: decisiones 35, 36,
-38 y 39, filas B2 y B6, y la entrada del paso 3.
-
-**Dos condiciones para ese documento:** entra en el orden de lectura del arranque y del
-contexto del proyecto, o el ejecutor no lo lee; y todo brief que cambie el flujo lo actualiza
-en la misma revisión, o después del brief 8 será una tercera copia desincronizada.
+✅ **La descripción de cómo funciona hoy la etapa de punta a punta existe desde el
+2026-09-11**: `flujo-actual-etapa-psicometrica.md`, leída del código tras el paso 7 y el
+rescate. Está en el orden de lectura del arranque y del contexto del proyecto, y **todo brief
+que cambie el flujo la actualiza en la misma revisión del diff**. Esta bitácora sigue siendo
+la fuente de las decisiones; aquella, del comportamiento. La bitácora se revisó contra el
+código ese mismo día y se corrigieron las contradicciones que tenía: decisiones 35, 36, 38 y
+39, filas B2 y B6, y la entrada del paso 3.
 
 **Segunda revisión, el mismo 2026-09-11, al recibir el traspaso.** Se volvió a verificar el
 estado —backend 98 suites y 855 pruebas, portal con tipos limpios, los dos al día con

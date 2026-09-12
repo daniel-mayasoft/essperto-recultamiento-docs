@@ -47,8 +47,9 @@ La **prueba psicométrica habla con su proveedor a través de una capa propia**,
 `src/offers/psychometrics/`: un puerto que no conoce a ningún proveedor, el adaptador de
 EvaluaTest que envuelve su cliente, y los tipos del contrato. El arranque de la etapa y el
 cron de resultados del orquestador pasan por ahí. **El modo demo es la excepción a
-propósito**: sigue siendo un condicional dentro del embudo. El detalle y el porqué están en
-`psicoalianza/integrate-psicoalianza.md`.
+propósito**: sigue siendo un condicional dentro del embudo. Cómo funciona la etapa hoy, de
+punta a punta, está en `psicoalianza/flujo-actual-etapa-psicometrica.md`; el detalle de
+cada decisión y el porqué, en `psicoalianza/integrate-psicoalianza.md`.
 
 ## Al leer el código
 
