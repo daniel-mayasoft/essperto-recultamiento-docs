@@ -230,7 +230,9 @@ Se da por terminado cuando se cumplen las dos condiciones:
 6. Cada candidato en curso lleva anotado a qué proveedor fue invitado: el cron
    pregunta al del momento de la invitación, no al que hoy diga la oferta.
 7. La configuración guardada en la oferta es neutra: qué conexión, qué se eligió y con
-   qué criterio se aprueba. No se extiende el bloque actual de EvaluaTest.
+   qué criterio se aprueba. ~~No se extiende el bloque actual de EvaluaTest.~~ **Corregida
+   por la 41** (2026-09-12): sí se extiende. La neutralidad la da el ayudante de lectura,
+   no el nombre de los campos.
 8. "IGI" sale de la interfaz —es marca de EvaluaTest— y pasa a "puntaje mínimo".
 9. Se reutiliza el patrón de autenticación existente: login, cookies, token cacheado,
    un reintento ante "no autorizado".
@@ -339,9 +341,11 @@ Se da por terminado cuando se cumplen las dos condiciones:
     pasado el retardo configurado. Queda de paso como la prueba más barata de la capa.
     **Solo la parte psicométrica** — el modo demo también simula el lector de
     documentos y los antecedentes, y eso no se toca.
-19. **Al guardar una oferta se escriben las dos formas de configuración** durante la
+19. ~~**Al guardar una oferta se escriben las dos formas de configuración** durante la
     etapa 1, leyendo la nueva primero; cuando esté estable se deja de escribir la
-    vieja. Sin migración: el guardado ya reescribe el bloque completo, así que las
+    vieja.~~ **RETIRADA por la 41** (2026-09-12): no hay dos formas. Se conserva el texto
+    porque explica el riesgo que la 41 resuelve de otra manera. Sin migración: el guardado ya
+    reescribe el bloque completo, así que las
     ofertas se migran solas al editarlas y las que nadie toca se siguen leyendo. El
     doble guardado existe solo para que **devolverse sea inofensivo** — si no, una
     oferta guardada con la forma nueva aparece sin prueba configurada bajo el código
@@ -452,9 +456,10 @@ Se da por terminado cuando se cumplen las dos condiciones:
        probablemente invalida el anterior.
 28. **El identificador de vacante del puerto es numérico.** Los dos proveedores
     conocidos lo usan así y la oferta ya lo guarda así; volverlo texto obligaría a
-    tocar configuración guardada, que va en otro paso. Se revisa cuando la
+    tocar configuración guardada, que va en otro paso. ~~Se revisa cuando la
     configuración de la oferta se vuelva neutra (decisión 7), que es el momento
-    natural, no antes.
+    natural, no antes.~~ **Revisada el 2026-09-12 con la 41: se queda numérico.** El campo
+    de la oferta no cambia, y PsicoAlianza usa números.
 29. **Lo que es de un proveedor y tiene que cruzar el puerto viaja en una bolsa
     opaca.** No solo la credencial: también los datos de la vacante que el puerto no
     necesita y el detalle del porqué una vacante no sirve. El puerto la transporta sin
@@ -955,6 +960,68 @@ Se da por terminado cuando se cumplen las dos condiciones:
     ⚠️ **Coordinar antes del brief:** Elvis y Henry Peña tocaron la semana del 2026-09-07 justo
     estas pantallas — el guardado de credenciales de EvaluaTest, el detalle de la oferta y el
     formulario de creación.
+41. **Lo guardado se extiende, no se duplica: campos nuevos al lado de los de siempre, una
+    migración única, y una sola copia de cada dato** (2026-09-12, decidido con el usuario tras
+    leer los siete lectores de la configuración de la oferta). Corrige la 7, retira la 19 y
+    cierra la 28 y B6.
+
+    **Qué se guarda.** En la empresa, una **lista de conexiones** (decisión 1): cada una con
+    identificador, nombre, proveedor y las credenciales que ese proveedor pida. En la oferta,
+    **dos campos más en el bloque de siempre**: `connectionId` (decisión 5) y `providerData`,
+    una bolsa para lo que otro proveedor necesite. Los campos actuales se quedan con su
+    nombre: `jobProfileId` es la vacante, `minIGIScore` el puntaje mínimo, y `jobProfileCode`,
+    `evaluationCode` y `selectedTests` quedan vacíos en una oferta de otro proveedor.
+
+    **Por qué así y no un bloque nuevo.** Se pesaron tres formas. *Dos bloques, escribiendo
+    los dos mientras se pueda volver atrás* (la 19): seguro, pero deja el mismo dato en dos
+    sitios, una limpieza pendiente y un riesgo de que alguien escriba uno sin el otro. *Solo
+    el bloque nuevo, leyendo el viejo si falta*: obliga a pasar por el ayudante a los siete
+    lectores del backend y al portal, o muestran datos desactualizados; y una oferta creada
+    tras el despliegue queda sin bloque viejo, así que al volver atrás el código anterior la
+    aprueba sin filtro. *Extender el bloque*: los siete lectores y el portal **no se tocan**
+    porque los campos que leen siguen ahí; no hay dos copias; no queda limpieza. El precio es
+    cosmético: una oferta de PsicoAlianza vivirá en un bloque llamado `evaluatestConfig` con
+    un `minIGIScore` que no es IGI. Solo lo ve quien abra la base a mano; la etapa lo lee
+    como *vacante* y *puntaje mínimo* a través del ayudante, y el reclutador ve *Puntaje
+    mínimo*.
+
+    **Migración única, hecha por una persona antes de desplegar**, con un script de consola
+    como los de las mediciones: a cada empresa con bloque de EvaluaTest se le crea su
+    conexión a partir de él; a cada oferta con la prueba activa se le rellena `connectionId`
+    con la única conexión de su empresa (decisión 2). Son 3 empresas y 69 ofertas; se
+    verifica contando. 🔴 **El backend nuevo da por hecho que las conexiones existen**: si se
+    despliega sin correr el script, ninguna empresa tiene conexión y la etapa se salta en
+    silencio (decisión 40). El orden es script, backend, portal.
+
+    **El bloque viejo de la empresa deja de ser fuente pero no se borra en este cambio**:
+    nadie lo lee, y dejarlo mantiene abierta la vuelta atrás. Se borra en una limpieza aparte
+    cuando la etapa esté estable en producción. ⚠️ Sí cambia de fuente **para todos sus
+    lectores**: el adaptador, la creación con IA, la sincronización del índice y el servicio
+    de empresas pasan a leer la lista por **una sola lectura**, porque una contraseña cambiada
+    en la lista no vuelve al bloque viejo.
+
+    **Contrato con el portal, hasta que el portal cambie.** El portal de hoy manda y lee el
+    bloque de EvaluaTest por la ruta de Mi compañía. El backend sigue aceptando ese envío
+    —lo escribe en la lista— y sigue sirviendo ese bloque **derivado de la lista**, para que
+    el portal actual no vea a la empresa "sin credenciales". La lista nueva se sirve **sin
+    contraseñas**: nombre, proveedor y si está configurada. Cuando el portal pase a la lista,
+    el modal pide la contraseña solo al cambiarla. ✅ **Adelantado al 8a en la opinión previa
+    (2026-09-13):** el backend conserva la contraseña guardada cuando llega vacía con correo
+    —hoy escribe nulo y rompe la conexión en silencio—, y con eso el bloque derivado ya se
+    sirve sin contraseña; la fuga de esta credencial queda cerrada en el 8a. De la misma ronda:
+    el guardado general de Mi compañía manda siempre el bloque, con nulos si no hay, así que
+    correo y contraseña vacíos quitan la conexión de la lista; la creación de empresa pasa por
+    la misma escritura; y la ruta de configuración arrastra `connectionId` y `providerData` al
+    reasignar el bloque entero.
+
+    **El puerto no cambia en la etapa 1.** Sus operaciones siguen recibiendo la empresa; el
+    adaptador resuelve *la conexión de EvaluaTest de esa empresa*, que con la decisión 2 es
+    una. Pasar la conexión concreta por el puerto es de la etapa 3, cuando pueda haber dos.
+    La oferta ya la guarda desde ahora para que ese día no haya que deducirla (5).
+
+    Se parte en dos briefs: **8a backend** (esquemas, lectura única de conexiones, ayudante de
+    la oferta, la ruta que guarda la conexión, el script) y **8b portal** (conexión con
+    nombre sin contraseña, señal "hay conexión", *Puntaje mínimo* — decisión 8).
 
 ## Falta de PsicoAlianza
 
@@ -983,7 +1050,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
 | B3  | Cambio de proveedor con ofertas vivas                | Hay gente a mitad de prueba cuando la empresa se cambia. Incluye las ofertas guardadas en la forma vieja, que no llevan su conexión: ver la nota de la decisión 5 |
 | B4  | De dónde se corta el indicativo del teléfono         | Se guarda con +57                                                                                                                                                                                                                        |
 | B5  | ¿La IA sigue sugiriendo vacante?                     | Depende de A4                                                                                                                                                                                                                            |
-| B6  | ~~Qué se hace con lo ya guardado~~ **CASI RESUELTO** (2026-09-11) | **Sin migración en los tres.** Campos del candidato (paso 6b): al leer, el nuevo y si está vacío el viejo; al escribir, siempre el nuevo — la compatibilidad caduca sola. Motivos de rechazo (paso 7): el portal y las métricas entienden viejo y nuevo **para siempre**, porque un rechazado no caduca. **Falta solo la configuración de la oferta**, que es del brief 8. **Esos dos pasos son el precedente para leer, no para escribir**: la oferta escribe las dos formas mientras se pueda volver atrás (decisión 19 y su aclaración del 2026-09-11) |
+| B6  | ~~Qué se hace con lo ya guardado~~ **RESUELTO** (2026-09-12) | Configuración de la oferta y conexión de la empresa: **se extiende lo guardado y se migra una vez**, ver la 41. Lo anterior sigue valiendo para los otros dos: **sin migración en los dos.** Campos del candidato (paso 6b): al leer, el nuevo y si está vacío el viejo; al escribir, siempre el nuevo — la compatibilidad caduca sola. Motivos de rechazo (paso 7): el portal y las métricas entienden viejo y nuevo **para siempre**, porque un rechazado no caduca. **Falta solo la configuración de la oferta**, que es del brief 8. **Esos dos pasos son el precedente para leer, no para escribir**: la oferta escribe las dos formas mientras se pueda volver atrás (decisión 19 y su aclaración del 2026-09-11) |
 | B7  | ~~Cómo autenticarse contra el reCAPTCHA v3 del login~~ **DECIDIDO** | Solucionador de pago con **SolveCaptcha**; el login humano queda descartado. Ver decisión 23. Queda por medir con qué puntaje mínimo pasa el sitio |
 | B8  | ~~¿El identificador de empresa hace falta para considerar válida una conexión?~~ **CERRADO: no afecta a nadie** | Medido en producción el 2026-09-10: **cero empresas** con correo y contraseña pero sin identificador. La divergencia entre las cuatro resoluciones existe en el código pero **no toca a ningún tenant**, así que se puede unificar con la regla estricta sin riesgo y **el recableado del embudo deja de estar bloqueado**. Sigue en pie la otra mitad: solo el orquestador arrastra el correo de pruebas, y la resolución canónica tiene que conservarlo o se rompe el desvío de QA (ya cubierto en el paso 3) |
 
@@ -1411,14 +1478,53 @@ backend o a la vez.
 Queda un comentario de una línea en el enum, junto al valor nuevo, como llevan todos los
 valores de ese enum. Se aceptó por coherencia con el archivo.
 
-### Estado a 2026-09-12
+### Paso 8a — ✅ HECHO (2026-09-13)
+
+La conexión de la empresa y la conexión de la oferta, solo backend. Brief en
+`brief-paso-8a-conexiones-backend.md`. La empresa gana la lista `psychometricConnections`
+(identificador, nombre, proveedor y una bolsa de credenciales con la contraseña cifrada); la
+oferta gana `connectionId` y `providerData` en el bloque de siempre. **Una lectura única de
+conexiones**, en la capa psicométrica, resuelve la de un proveedor con la contraseña
+descifrada y el correo de pruebas de la empresa, o falla como *sin conexión*; por ella pasan
+el adaptador —que dejó de inyectar el modelo de empresa—, la creación con IA, la sincronización
+del índice y el servicio de empresas. **El bloque viejo `evaluatestCredentials` queda en el
+esquema sin lectores ni escritores** (comprobado buscando en todo el código). El servicio de
+empresas traduce a la lista lo que el portal de hoy sigue mandando, con la regla de tres
+casos —vacío del todo quita la conexión; contraseña vacía con correo **conserva la guardada**;
+lo demás crea o actualiza—, la creación de empresa pasa por la misma función, y lo servido es
+el bloque derivado **sin contraseña** más la lista sin credenciales: **la fuga de esta
+credencial quedó cerrada aquí**. La ruta de configuración resuelve la conexión antes de
+comprobar la vacante, la guarda y la arrastra en cada guardado; un ayudante entrega al embudo
+la configuración en forma neutra y sus seis lecturas pasan por él. Nada visible.
+
+**Lo que salió de la opinión previa y valió la ronda:** la ruta reasignaba el bloque entero y
+habría borrado los campos nuevos en cada guardado; el guardado general de Mi compañía manda el
+bloque siempre, con nulos, y la creación de empresa lo copiaba tal cual; la respuesta al portal
+copia el documento entero y habría servido la lista cruda; y el adaptador podía soltar el
+modelo de empresa.
+
+**Verificado:** backend 102 suites y 912 pruebas (903 pasan, 9 omitidas; 23 nuevas), en dos
+corridas — en la primera una suite no pudo arrancar y en la segunda pasó entera, ruido del
+entorno de pruebas. Portal sin tocar. Queda un comentario viejo del servicio de empresas que
+dice que descifra las credenciales de EvaluaTest y ya no lo hace: se ajusta en el commit.
+
+🔴 **Antes de desplegar este backend hay que correr la migración de conexiones**, paso a paso
+en `before-deploy.md`. Sin ella, ninguna empresa tiene conexión y la etapa se salta en silencio.
+
+### Estado a 2026-09-13
 
 Rama `feat/integrate-psicoanalisis-provider` en los dos repositorios, con `develop`
-mergeado. Backend verde: 99 suites, 889 pruebas, 9 omitidas; portal con tipos limpios.
-Commiteado todo hasta el cambio del correo inventado. **Para cerrar la etapa 1 falta solo el
-brief 8, partido.**
+mergeado. Backend verde: 102 suites, 912 pruebas, 9 omitidas; portal con tipos limpios.
+El 8a está revisado y aprobado, pendiente de commit. **Para cerrar la etapa 1 falta solo el
+8b, el portal.**
 
 ### Lo que falta para cerrar la etapa 1
+
+🔴 **Todo lo que hay que hacer antes de desplegar la rama está en `before-deploy.md`**
+(creado el 2026-09-13): la migración de conexiones paso a paso, las variables que retirar, el
+orden portal-backend, el aviso al equipo y la rotación de credenciales. La rama se despliega
+entera al final, y ese archivo es la lista que se recorre ese día. Lo que quede anotado solo
+aquí no se va a hacer.
 
 Dos briefs, cada uno con su línea de parada, más tres cambios de comportamiento que van
 aparte porque **ninguno es un refactor invisible**. Los números son de brief, no de orden:
@@ -1427,7 +1533,8 @@ no se renumeran cuando uno se cierra.
 | # | Brief | Nota |
 | --- | --- | --- |
 | 7 | ✅ **Los motivos de rechazo con prefijo neutro** — HECHO, commiteado en los dos repositorios: `brief-paso-7-motivos-neutros.md` | Decisiones 13 y 16. **Toca los dos repositorios**: enum del backend, etiquetas y textos del portal |
-| 8 | **Las conexiones como lista con nombre** y la configuración neutra de la oferta con doble escritura | Decisiones 1, 5, 7, 19 y **28** —el identificador de vacante se revisa cuando la configuración se vuelve neutra, que es aquí—. **Aquí cae también la decisión 8** —sacar "IGI" de la interfaz y llamarlo "puntaje mínimo"—, porque es la misma pantalla que se toca. **Toca los dos repositorios**. Para lo ya guardado: B6 para leer y la 19 para escribir. ⚠️ **Hay que partirlo.** La configuración de la oferta no la usa solo la pantalla: en el backend la leen o la escriben, como mínimo, el embudo, el servicio de ofertas, la creación con IA, el agente de WhatsApp que crea ofertas, el borrador por WhatsApp y la creación desde administración (búsqueda de texto del 2026-09-11, que no descarta otros). La partición se propone después de leerlos, buscando que lean desde un único sitio que entienda las dos formas |
+| 8a | ✅ **Backend: la conexión de la empresa y la conexión de la oferta** — HECHO el 2026-09-13, `brief-paso-8a-conexiones-backend.md` | Decisiones 1, 2, 5, 7, 28 y **41**. Lista de conexiones en la empresa, `connectionId` y `providerData` en la oferta, lectura única de conexiones para sus cuatro lectores, ayudante de lectura de la oferta para la etapa, y el script de migración con su comprobación. Nada visible |
+| 8b | **Portal: conexión con nombre y puntaje mínimo** — `brief-paso-8b-conexiones-portal.md` (2026-09-13), pendiente de la opinión previa | Decisiones 8 y 41. Modal de conexión con nombre y sin contraseña de vuelta, señal "hay conexión", "IGI" → "Puntaje mínimo". **Visible a propósito** |
 
 ~~El proveedor falso y el resolvedor.~~ **Descartados de la etapa 1** por la decisión 38.
 El resolvedor pasa a la etapa 3.

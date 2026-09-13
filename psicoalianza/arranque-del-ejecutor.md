@@ -44,6 +44,10 @@ el árbol de trabajo limpio, no a mitad del cambio.
 🔴 **Si el paso cambia el flujo, el diff incluye la actualización de
 `flujo-actual-etapa-psicometrica.md`.** No es documentación aparte: es parte del paso.
 
+🔴 **Si el paso deja algo que hacer antes de desplegar** —una migración, una variable que
+retirar, un orden entre repositorios—, **va a `before-deploy.md`** en el mismo diff. La rama se
+despliega entera al final, y esa lista es lo único que se va a mirar ese día.
+
 Los briefs **apuntan** a la bitácora, nunca la repiten: dos copias de una decisión se
 desincronizan y nadie lo nota. Si ves una decisión explicada entera dentro de un brief,
 probablemente sobra ahí.

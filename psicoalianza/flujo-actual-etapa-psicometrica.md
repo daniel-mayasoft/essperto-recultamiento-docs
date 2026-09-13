@@ -2,7 +2,8 @@
 
 Cómo funciona la etapa **tal como está en el código** de la rama de trabajo, leído el
 2026-09-11 tras el paso 7 y el rescate, y actualizado el 2026-09-12 con el cambio de la cuenta
-compartida (decisiones 34 y 40) y el del correo inventado (decisión 33). No es historia ni
+compartida (decisiones 34 y 40) y el del correo inventado (decisión 33), y el 2026-09-13 con
+las conexiones de la empresa y la conexión de la oferta (paso 8a, decisión 41). No es historia ni
 justificación: **los porqués están en la bitácora**, y aquí solo se apunta el número de
 decisión. Cuenta qué le pasa a una persona en cada caso.
 
@@ -17,11 +18,16 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
 - **El puerto**: una capa que no conoce a ningún proveedor. Ofrece listar vacantes, comprobar
   que una vacante sirve, validar una conexión, **invitar** a un candidato y **consultar
   resultados en lote**. Hoy tiene una sola implementación: el adaptador de EvaluaTest.
-- **El adaptador de EvaluaTest**: resuelve las credenciales de la empresa —correo, contraseña e
-  identificador de empresa, los tres, o falla como **sin conexión**—, hace contra el cliente
-  los pasos que EvaluaTest exige y traduce sus estados a los neutros del puerto. Es **la única
-  regla de lectura de credenciales** de la etapa; el embudo ya no lee ninguna (decisiones 34 y
-  40).
+- **La lectura única de conexiones**: un servicio de la capa psicométrica que, dada una empresa
+  y un proveedor, devuelve **su conexión** —identificador, nombre, credenciales descifradas y el
+  correo de pruebas de la empresa— o falla como **sin conexión** si no existe o está
+  incompleta. Es **la única regla de lectura de credenciales del backend**: por ahí pasan el
+  adaptador, la creación con IA, la sincronización del índice y el servicio de empresas
+  (decisión 41). Lee la lista `psychometricConnections`; el bloque viejo `evaluatestCredentials`
+  sigue en la base y **nadie lo lee ni lo escribe**.
+- **El adaptador de EvaluaTest**: pide a la lectura única la conexión de EvaluaTest de la
+  empresa, hace contra el cliente los pasos que EvaluaTest exige y traduce sus estados a los
+  neutros del puerto. El embudo no lee ninguna credencial (decisiones 34 y 40).
 - **El cliente de EvaluaTest**: las peticiones HTTP. Exige credenciales en cada llamada; **ya
   no existe la cuenta compartida del entorno** (decisión 34).
 - **El cron**: cada 5 minutos consulta resultados por el puerto y decide el veredicto.
@@ -30,7 +36,15 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
 
 1. En *Mi compañía*, un administrador guarda correo y contraseña de EvaluaTest. El backend
    los valida por el puerto y guarda además el identificador de empresa que EvaluaTest
-   devuelve. La contraseña se guarda encriptada.
+   devuelve. **Lo guarda como una conexión con nombre** en la lista de la empresa —`id`,
+   `name` («EvaluaTest»), `provider` (`evaluatest`) y una bolsa `credentials` con correo,
+   contraseña cifrada e identificador— (decisiones 1 y 41). El portal de hoy no sabe de la
+   lista: sigue mandando el bloque de siempre, desde el modal y desde el guardado general de la
+   página, y el backend lo traduce con tres casos: correo y contraseña vacíos → se quita la
+   conexión; correo con contraseña vacía → **se conserva la contraseña guardada**; lo demás →
+   se crea o se actualiza. Y le sirve de vuelta el bloque **derivado de la lista, sin
+   contraseña** (el portal solo necesita saber que existe), más la lista con `id`, `name`,
+   `provider` y `configured`. La contraseña ya no sale del backend.
 2. Al crear o editar una oferta, el reclutador ve los controles de la prueba psicométrica
    **solo si la empresa tiene esas credenciales guardadas**. Si no, en su lugar ve un aviso
    neutro —*tu empresa no tiene un proveedor de pruebas psicométricas conectado; esta etapa se
@@ -44,9 +58,16 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
    proveedor y la ruta rechaza con un mensaje propio** —conéctalo en Mi compañía antes de
    activar la prueba—, distinto del «no se pudo verificar, reintenta» de un fallo pasajero
    (decisión 40). Apagar la prueba no exige conexión. Con conexión, guarda la configuración en
-   la oferta con la forma de EvaluaTest: vacante, nombre, dos códigos propios, puntaje mínimo
-   y pruebas adicionales (decisiones 7 y 19, brief 8). Cada vez que se abre la oferta, el
-   portal vuelve a comprobar la vacante y avisa si dejó de servir.
+   el bloque de siempre de la oferta —vacante, nombre, dos códigos propios, puntaje mínimo y
+   pruebas adicionales— **más `connectionId`, la conexión de la empresa con la que se activó,
+   y `providerData`, una bolsa para otro proveedor** (decisiones 5 y 41). Los dos se arrastran
+   en cada guardado: cambiar el puntaje o apagar la prueba no los borra. Cada vez que se abre la
+   oferta, el portal vuelve a comprobar la vacante y avisa si dejó de servir.
+
+   **Migración única, antes de desplegar este backend** (decisión 41): un script de consola
+   crea la conexión de EvaluaTest de cada empresa a partir de su bloque viejo y rellena
+   `connectionId` en las ofertas con la prueba activa. Sin él, ninguna empresa tiene conexión y
+   la etapa se salta en silencio para todas.
 4. **Una oferta con la prueba activa cuya empresa ya no tiene conexión** —solo puede pasar
    si se borraron las credenciales después, o si la oferta se creó desde administración, que
    copia la configuración sin comprobar nada— muestra en el detalle un aviso de advertencia
@@ -60,10 +81,19 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
 El candidato viene de las preguntas por WhatsApp. El bombeo del embudo lo pone en la etapa
 y llama al arranque.
 
+La etapa lee la configuración de la oferta por **un solo ayudante**, que devuelve la forma
+neutra —activa, conexión, vacante, nombre, puntaje mínimo y una bolsa con lo propio de
+EvaluaTest— desde el bloque de siempre; los demás lectores del backend siguen leyendo los
+campos a mano (decisión 41).
+
 **Si la oferta no tiene la prueba encendida**, la etapa se aprueba sola y sigue a la
 siguiente. Es lo primero que ocurre, antes de mirar nada más.
 
-**Si la tiene**, el arranque mira si la empresa está en modo demo (ver §7) y, si no:
+**Si la tiene**, el arranque mira si la empresa está en modo demo (ver §7) y, si no, deja un
+aviso en el registro cuando la oferta **no trae conexión guardada** —la creó administración,
+que copia la configuración tal cual— y sigue igual: la conexión se resuelve por empresa y
+proveedor, que con una sola por proveedor es la misma (decisiones 2 y 41). Nada decide todavía
+con `connectionId`; el puerto recibe la empresa. Después:
 
 1. Llama a **la invitación del puerto** con la vacante y su nombre, la empresa, nuestra
    referencia del candidato, su nombre y su correo **tal cual, con su nulo si no tiene**. Ya no
@@ -271,7 +301,8 @@ con credenciales usa las suyas para elegir vacante. La demo **se queda como est�
 | Qué | Dónde cae |
 | --- | --- |
 | Creación desde administración: copia la configuración de la prueba sin comprobar la conexión ni la vacante | Anotado, del equipo interno (decisión 40) |
-| Configuración de la oferta con forma de EvaluaTest, "IGI" en la interfaz, conexiones como lista | Brief 8 (decisiones 1, 5, 7, 8, 19, 28) |
+| "IGI" en la interfaz, y el portal leyendo la lista de conexiones en vez del bloque derivado | Brief 8b (decisiones 8 y 41) |
+| El bloque viejo `evaluatestCredentials` sigue en la base sin lectores ni escritores | Limpieza aparte (decisión 41) |
 | Puntaje ausente leído como cero | Etapa 3 (decisión 37) |
 | Tablero vacío indistinguible de petición fallida | Sin paso (decisión 36) |
 | El botón "Continuar proceso" se traga el fallo permanente | Sin paso (decisión 39) |
