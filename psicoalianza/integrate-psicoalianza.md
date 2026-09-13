@@ -568,6 +568,23 @@ Se da por terminado cuando se cumplen las dos condiciones:
     textos en español e inglés del frontend. Si no, al reclutador le sale el código
     crudo y las métricas lo cuentan como "otros".
 
+    **Concretado el 2026-09-12, brief `brief-correo-inventado.md`:** el motivo es
+    `psychometric_missing_email`, fijo; *sin correo* cubre nulo y en blanco; el candidato
+    **no recibe mensaje** —mismo trato que el fallo permanente de la 39, porque inventar uno
+    tocaría la conversación (31)—; y el visor le da **grupo propio**, *Psicométrica — sin
+    correo*, porque *no completó* diría que no hizo algo que nunca se le mandó. Medido: nadie
+    en vuelo con correo inventado y una persona de cada ~190 afectada, casi todas de la cuenta
+    de pruebas.
+
+    **Dónde vive la comprobación, decidido en la opinión previa (2026-09-12): en el adaptador,
+    no en el embudo.** Qué datos exige un proveedor lo sabe su adaptador —EvaluaTest el correo;
+    PsicoAlianza también el documento—, así que el correo de la invitación del puerto pasa a
+    poder faltar y el adaptador lanza un error propio de *falta un dato del candidato* después
+    de resolver la credencial y comprobar el nombre de la vacante. Ese orden resuelve solo el
+    caso de la empresa sin conexión, que aprueba aunque falte el correo (40), sin método nuevo
+    ni lectura extra. Supera la 32-e en lo que decía de que la operación siempre recibe correo:
+    eso valía mientras el correo se inventaba en el embudo.
+
     **Riesgo aceptado:** el documento llega como lo tecleó el candidato al postularse en
     el portal, sin forma de confirmarlo. Si está mal escrito, se descubre dos etapas
     después, en la validación documental. Se corre con ese riesgo a propósito (ver B1).
@@ -885,10 +902,55 @@ Se da por terminado cuando se cumplen las dos condiciones:
     toca los dos repositorios**. El portal no tiene pruebas: el cambio tiene que ser pequeño y
     se verifica leyendo.
 
-    **La pregunta de impedir encender la prueba casi se contesta sola:** en el portal ya es
-    imposible, porque sin credenciales no se muestra la sección. Queda revisar, al escribir el
-    brief, los otros caminos que crean ofertas —el agente de WhatsApp y la creación desde
-    administración— y decidir si el backend también la rechaza.
+    **Los textos, decididos el 2026-09-12.** Dos escenarios, cada uno con versión de
+    administrador (enlace a Mi compañía) y de miembro (sin enlace):
+
+    - *Empresa sin proveedor y oferta sin prueba* (informativo; al crear y en Filtros):
+      «Tu empresa no tiene un proveedor de pruebas psicométricas conectado. Esta etapa se
+      omitirá en esta oferta.» Admin: «Conectar un proveedor en Mi compañía →». Miembro:
+      «Pídele a un administrador que lo configure.»
+    - *Oferta con la prueba activa y empresa que perdió el proveedor* (advertencia; solo en
+      Filtros): «Esta oferta tiene la prueba psicométrica activada, pero tu empresa ya no
+      tiene un proveedor conectado. La etapa se está omitiendo.» Admin: «Reconectar el
+      proveedor en Mi compañía →». Miembro: «Avisa a un administrador de tu empresa.»
+
+    Se eligió decir el efecto sobre la oferta y no sobre el candidato, y darle al segundo
+    escenario aviso propio: con un solo texto, una oferta que lleva semanas dejando pasar
+    gente sin filtro se vería igual que una que nunca tuvo prueba. Sin "tenant", "EvaluaTest"
+    ni "credenciales": el texto sigue valiendo con otro proveedor. El enlace va a la página
+    de Mi compañía entera; aterrizar en la sección es otro cambio y queda fuera.
+
+    **Impedir encender la prueba, revisado camino por camino el 2026-09-12.** Ningún camino
+    comprueba hoy que la empresa tenga conexión; no hacía falta, porque la comprobación de la
+    vacante al guardar pasaba con la cuenta compartida. Al quitarla, esa comprobación falla
+    por credenciales y el reclutador leería «no se pudo verificar la vacante, reintenta» en
+    vez de la verdad. Por caminos: el **formulario** ya no llega, porque el portal oculta la
+    sección sin credenciales; la **creación con IA y el agente de WhatsApp** eligen la vacante
+    de la lista de la empresa, que sin credenciales está vacía; la **creación desde
+    administración** copia la configuración tal cual, sin comprobar nada, y es del equipo
+    interno. ✅ **Decidido el 2026-09-12: la ruta que guarda la configuración comprueba la
+    conexión** antes de mirar la vacante, y rechaza con mensaje claro. Es red de seguridad del
+    backend frente al portal: el aviso de este mismo cambio hace que la sección aparezca sin
+    conexión (solo con el aviso), y el brief 8 y el arreglo de las contraseñas van a cambiar
+    la señal con la que el portal decide mostrarla. Administración se queda fuera y anotada.
+    Brief: `brief-cuenta-compartida.md`.
+
+    **Lo que se rompe al quitar la cuenta compartida, levantado del código el 2026-09-12.**
+    El cliente la usa en ocho sitios con la misma regla —si le pasaron credenciales las usa,
+    si no las del entorno—. Llegan con credenciales vacías: el adaptador (selector, comprobación
+    de vacante, pruebas del formulario, invitación y consulta) cuando la empresa no tiene las
+    tres cosas, y la lectura laxa del embudo (pruebas adicionales del veredicto y enlace de
+    respaldo del arranque) cuando faltan correo o contraseña. La creación con IA, la
+    sincronización del índice y la validación de conexión **no** la usan. Además: **las
+    máquinas de desarrollo** prueban hoy contra EvaluaTest con la cuenta del entorno local sin
+    saberlo, y después del cambio necesitan una empresa con credenciales guardadas — avisar al
+    equipo, es un cambio de rutina; tres variables de entorno desaparecen (correo, contraseña,
+    identificador) y se quedan el correo de pruebas, el plazo y la base del enlace; y cuatro
+    pruebas de la capa afirman hoy que el respaldo existe y pasan a afirmar lo contrario.
+
+    ✅ **El caso del cron es teórico** (medido el 2026-09-12): una persona que ya esperara
+    resultado en una empresa sin credenciales quedaría, sin respaldo, en *no se pudo
+    consultar* hasta que el plazo la descartara. Hoy no hay nadie así — ver *Mediciones*.
 
     ⚠️ **Coordinar antes del brief:** Elvis y Henry Peña tocaron la semana del 2026-09-07 justo
     estas pantallas — el guardado de credenciales de EvaluaTest, el detalle de la oferta y el
@@ -1255,16 +1317,76 @@ Las dos que faltaban para desplegar, hechas en la base real con consultas de sol
 **Ninguno de los dos despliegues necesita aviso.** Las consultas siguen en la bitácora y en
 el brief del rescate por si hay que repetirlas.
 
-### Estado a 2026-09-11
+**Una más, el 2026-09-12, para el cambio de las decisiones 34 y 40:**
+
+| Qué | Resultado | Comprobación de que el cero es real |
+| --- | --- | --- |
+| Personas esperando resultado en ofertas de empresas sin credenciales de EvaluaTest | **0** | Sin el filtro de credenciales salen las 18, todas de Medicall Talento Humano, que las tiene. El cruce con las empresas funciona igual con el identificador tal cual y convertido |
+
+La consulta: las ofertas no canceladas, desenrollar candidatos, filtrar etapa psicométrica
+en espera externa, cruzar con `tenants` por `tenantId`, y quedarse con las empresas cuyas
+credenciales de EvaluaTest tengan vacío el correo, la contraseña cifrada o el identificador
+de empresa; agrupar por nombre de empresa.
+
+**Dos más, el 2026-09-12, para el cambio de la decisión 33** (el correo inventado). El correo
+del candidato nace en nulo y no se recorta, así que se contaron aparte el nulo y la cadena
+vacía: hoy el correo inventado solo cubre el nulo, y una cadena vacía iría tal cual al
+proveedor.
+
+| Qué | Resultado | Comprobación |
+| --- | --- | --- |
+| Personas esperando resultado ahora **sin correo** (las que tendrían un correo inventado en vuelo) | **0** de 52 | Las 52 salen igual sin cruzar con la colección de candidatos: el cruce no duplica. Eran 18 el día anterior; entraron 34 en un día |
+| Personas que han pasado por la etapa **sin correo**, en toda la base | **10 de 1.860** (0,5%) | 1 de Medicall Talento Humano (1.576 con correo) y 9 de Mayasoft Servicios Temporales (274 con correo). Ninguna con cadena vacía |
+
+**Lectura:** no hay nadie a mitad de prueba con correo inventado, así que el brief de la 33 no
+tiene que dejar a nadie fuera; y la decisión saca del proceso a una persona de cada ~190,
+casi todas de Mayasoft Servicios Temporales, que **es una cuenta propia de pruebas**
+(confirmado el 2026-09-12). El número real para clientes es **una persona en toda la
+historia**: el cambio se despliega sin aviso.
+
+Las consultas: la primera es la de arriba con el cruce a `candidates` por
+`candidates.candidate` y un `$switch` sobre `person.email` (nulo / vacío / con correo); la
+segunda igual pero filtrando a quien tiene `psychological_exam` en `stage.name` o en
+`stageHistory.name`, cruzando además con `tenants`, y agrupando por empresa y caso de correo.
+
+### Cuenta compartida — ✅ HECHO (2026-09-12)
+
+Las decisiones 34 y 40, en su propio cambio y en los dos repositorios. Brief en
+`brief-cuenta-compartida.md`. El cliente de EvaluaTest ya no tiene cuenta del entorno: las
+tres variables se fueron del cliente y del esquema, y las credenciales son obligatorias en
+todas sus firmas. El adaptador lanza un error propio de *sin conexión* cuando a la empresa le
+falta cualquiera de las tres cosas o no llega empresa, y absorbió las dos llamadas que el
+embudo hacía al cliente con su lectura laxa: las pruebas adicionales del veredicto y el enlace
+de respaldo del arranque, que conserva el atajo del código guardado. **El embudo ya no lee
+credenciales ni toca el cliente en la etapa.** Ante *sin conexión* el arranque aprueba la etapa
+y sigue —también en el reintento del cron a quien no tiene identificador—, y la ruta de
+configuración rechaza activar la prueba con mensaje propio. El portal muestra los dos avisos
+decididos con enlace a Mi compañía según permiso, espera a que cargue la empresa antes de
+decidir escenario y ya no pide las pruebas de la vacante sin saber que hay conexión.
+
+**Lo que salió de la opinión previa y valió la ronda:** la prueba del ciclo mixto se ponía en
+rojo a propósito —le daba a la empresa real credenciales en nulo y afirmaba la cuenta
+compartida— y quedó como excepción declarada a "si se pone en rojo, el cambio está mal"; el
+portal pedía las pruebas de la vacante antes de cargar la empresa, y dejaba un error en el
+registro del backend por cada apertura de una oferta en el escenario 2; y son cuatro los
+lectores de credenciales, no dos: la creación con IA y la sincronización del índice tienen su
+propia copia de la regla estricta, no usan la cuenta compartida y **quedaron fuera**, para el
+brief 8.
+
+**Verificado:** backend 98 suites y 866 pruebas (857 pasan, 9 omitidas; once nuevas) antes del
+merge de `develop` que entró encima —trajo la validación de ciudad y departamento, sin tocar la
+zona psicométrica— y 99 suites y 882 pruebas después; portal con tipos limpios.
+
+⚠️ **Para el despliegue:** retirar las tres variables de los entornos desplegados y de los
+archivos locales —parte de la rotación de la decisión 21—, avisar al equipo de que probar en
+local exige una empresa con credenciales guardadas, y portal antes que el backend o a la vez.
+
+### Estado a 2026-09-12
 
 Rama `feat/integrate-psicoanalisis-provider` en los dos repositorios, con `develop`
-mergeado. Backend verde: 98 suites, 855 pruebas, 9 omitidas (verificado tras commitear el
-paso 7 y mergear `develop`, que solo trajo cambios del servicio de correo; portal con tipos
-limpios; a `develop` solo le lleva un commit de merge **sin cambios de archivos**, así que no
-hay nada pendiente de traer). **Las dos preguntas que
-bloqueaban murieron el mismo día y las dos a favor** (B8 y la cuenta compartida, ver
-decisiones 34 y B8): el recableado del embudo está desbloqueado y el respaldo por entorno
-se puede quitar sin migrar a nadie.
+mergeado. Backend verde: 99 suites, 882 pruebas, 9 omitidas; portal con tipos limpios.
+Commiteado todo hasta el cambio de la cuenta compartida. Faltan para cerrar la etapa 1 el
+cambio de la decisión 33 y el brief 8, partido.
 
 ### Lo que falta para cerrar la etapa 1
 
@@ -1287,16 +1409,13 @@ del proceso y por eso no cabe dentro del 6a (✅ **HECHO** el 2026-09-11; brief:
 traduce, así que **no toca el frontend**); la decisión 33 (se elimina el correo
 inventado y el candidato sin datos se descarta) y las decisiones 34 y 40, que van juntas
 (se elimina el respaldo por entorno, y la empresa sin conexión propia se queda sin prueba
-psicotécnica, con aviso al reclutador y sin detener a ningún candidato). ⚠️ Ese cambio
-tiene que tocar también **el aviso de credenciales incompletas** del adaptador, que hoy
-dice que se usará la cuenta global (ver paso 3). Lo de impedir encender la prueba al guardar
-una oferta sin conexión ya casi está contestado (ver la 40).
-La mitad viva de la 35 **ya está cerrada** en el paso 5. Antes de escribir el brief de la 34
-y la 40, leer lo levantado en la 40 el 2026-09-11: dónde vive de verdad el respaldo, dónde va
-la comprobación de "sin conexión", por qué la demo no se toca, cómo es el aviso al reclutador
-y qué caminos de creación de ofertas quedan por revisar.
+psicotécnica, con aviso al reclutador y sin detener a ningún candidato) — ✅ **HECHO el
+2026-09-12**, commiteado en los dos repositorios; brief: `brief-cuenta-compartida.md`; el aviso
+de credenciales incompletas se fue con el respaldo, y la ruta de configuración rechaza activar
+la prueba sin conexión.
+La mitad viva de la 35 **ya está cerrada** en el paso 5.
 
-**Orden propuesto el 2026-09-11, sin confirmar:** el cambio de la 34 y la 40 va **antes** del
+**Orden propuesto el 2026-09-11:** el cambio de la 34 y la 40 fue **antes** del
 brief 8 —es más pequeño, y al dejar una sola regla de lectura de credenciales el brief 8 tiene
 menos lectores que tocar al convertir las conexiones en lista—; el de la 33 va a continuación,
 antes del brief 8, porque toca la misma zona del arranque que la 40 y no se mezcla con ella.
