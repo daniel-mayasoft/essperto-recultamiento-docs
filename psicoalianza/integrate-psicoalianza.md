@@ -1005,7 +1005,10 @@ Se da por terminado cuando se cumplen las dos condiciones:
     —lo escribe en la lista— y sigue sirviendo ese bloque **derivado de la lista**, para que
     el portal actual no vea a la empresa "sin credenciales". La lista nueva se sirve **sin
     contraseñas**: nombre, proveedor y si está configurada. Cuando el portal pase a la lista,
-    el modal pide la contraseña solo al cambiarla. ✅ **Adelantado al 8a en la opinión previa
+    ~~el modal pide la contraseña solo al cambiarla~~ el modal pide **siempre** la contraseña,
+    vacía, porque guardar valida contra EvaluaTest y sin contraseña no puede: renombrar la
+    conexión exige volver a teclearla, y se acepta (corregido en la opinión previa del 8b,
+    2026-09-13). ✅ **Adelantado al 8a en la opinión previa
     (2026-09-13):** el backend conserva la contraseña guardada cuando llega vacía con correo
     —hoy escribe nulo y rompe la conexión en silencio—, y con eso el bloque derivado ya se
     sirve sin contraseña; la fuga de esta credencial queda cerrada en el 8a. De la misma ronda:
@@ -1515,8 +1518,13 @@ en `before-deploy.md`. Sin ella, ninguna empresa tiene conexión y la etapa se s
 
 Rama `feat/integrate-psicoanalisis-provider` en los dos repositorios, con `develop`
 mergeado. Backend verde: 102 suites, 912 pruebas, 9 omitidas; portal con tipos limpios.
-El 8a está revisado y aprobado, pendiente de commit. **Para cerrar la etapa 1 falta solo el
-8b, el portal.**
+El 8a está commiteado. **Para cerrar la etapa 1 falta solo el 8b, el portal**, con el brief
+listo y la opinión previa contestada.
+
+🔴 **El orden de despliegue vigente es el de `before-deploy.md`: migración, backend, y portal
+inmediatamente después.** Las entradas del paso 7, la cuenta compartida y el correo inventado
+dicen «portal antes que backend, o a la vez»; eran ciertas para cada cambio suelto y quedan como
+registro, pero la rama se despliega entera y ese orden ya no vale.
 
 ### Lo que falta para cerrar la etapa 1
 

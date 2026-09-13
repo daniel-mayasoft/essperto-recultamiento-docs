@@ -11,7 +11,7 @@ diff de documentación. Lo que está en la bitácora y no aquí, no se va a hace
 | --- | --- | --- | --- |
 | 1 | Correr la migración de conexiones (abajo) | Usuario, en la consola de la base | ☐ |
 | 2 | Retirar las tres variables de la cuenta compartida de los entornos desplegados | Quien despliega | ☐ |
-| 3 | Desplegar en orden: **portal antes que backend, o a la vez** | Quien despliega | ☐ |
+| 3 | Desplegar en orden: **backend primero, portal inmediatamente después** (ver abajo) | Quien despliega | ☐ |
 | 4 | Avisar al equipo del cambio de rutina en local: probar contra EvaluaTest exige una empresa con credenciales guardadas, y las tres variables salen del archivo de entorno local | Usuario | ☐ |
 | 5 | Rotar las dos credenciales: PsicoAlianza (archivo de entorno local) y EvaluaTest (historial de git) | Equipo | ☐ |
 
@@ -112,3 +112,15 @@ Si los conteos no cuadran, no se despliega; se mira por qué.
 
 **Después del despliegue:** el bloque viejo `evaluatestCredentials` queda en la base sin uso.
 Se borra en una limpieza aparte, cuando la etapa lleve tiempo estable (decisión 41).
+
+## 3 · Por qué backend primero y portal justo después
+
+"A la vez" no existe: siempre hay unos minutos en que corre uno nuevo con el otro viejo, y cada
+desfase rompe algo distinto (levantado en la opinión previa del 8b, 2026-09-13):
+
+| Ventana | Qué se rompe mientras dura |
+| --- | --- |
+| **Portal nuevo con backend viejo** | No llega la lista de conexiones: **todas** las empresas ven "sin proveedor", las ofertas con la prueba activa muestran la advertencia falsa de que se está omitiendo, y el nombre que manda el modal se pierde sin error |
+| **Backend nuevo con portal viejo** | El 8a se diseñó para convivir con ese portal. Solo se ven en crudo, unos minutos, los motivos de rechazo nuevos (pasos 7 y 33) |
+
+La segunda es claramente menos mala. Con la migración (1) antes de los dos.
