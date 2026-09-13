@@ -3,7 +3,8 @@
 Cómo funciona la etapa **tal como está en el código** de la rama de trabajo, leído el
 2026-09-11 tras el paso 7 y el rescate, y actualizado el 2026-09-12 con el cambio de la cuenta
 compartida (decisiones 34 y 40) y el del correo inventado (decisión 33), y el 2026-09-13 con
-las conexiones de la empresa y la conexión de la oferta (paso 8a, decisión 41). No es historia ni
+las conexiones de la empresa y la conexión de la oferta (paso 8a, decisión 41) y con el portal
+leyendo la lista y "Puntaje mínimo" (paso 8b, decisiones 8 y 41). No es historia ni
 justificación: **los porqués están en la bitácora**, y aquí solo se apunta el número de
 decisión. Cuenta qué le pasa a una persona en cada caso.
 
@@ -34,25 +35,34 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
 
 ## 1 · La empresa se conecta y configura la oferta
 
-1. En *Mi compañía*, un administrador guarda correo y contraseña de EvaluaTest. El backend
-   los valida por el puerto y guarda además el identificador de empresa que EvaluaTest
-   devuelve. **Lo guarda como una conexión con nombre** en la lista de la empresa —`id`,
-   `name` («EvaluaTest»), `provider` (`evaluatest`) y una bolsa `credentials` con correo,
-   contraseña cifrada e identificador— (decisiones 1 y 41). El portal de hoy no sabe de la
-   lista: sigue mandando el bloque de siempre, desde el modal y desde el guardado general de la
-   página, y el backend lo traduce con tres casos: correo y contraseña vacíos → se quita la
-   conexión; correo con contraseña vacía → **se conserva la contraseña guardada**; lo demás →
-   se crea o se actualiza. Y le sirve de vuelta el bloque **derivado de la lista, sin
-   contraseña** (el portal solo necesita saber que existe), más la lista con `id`, `name`,
-   `provider` y `configured`. La contraseña ya no sale del backend.
+1. En *Mi compañía*, la sección de la prueba se titula *Conexión de pruebas psicométricas* y
+   muestra, si la conexión de EvaluaTest está configurada, **su nombre, el proveedor entre
+   paréntesis y el correo** —«EvaluaTest Medicall (EvaluaTest) — correo»—; si no, *sin proveedor
+   conectado*. El botón abre un modal con **nombre, correo y contraseña**: el nombre viene con el
+   de la conexión que haya, aunque esté incompleta, o con «EvaluaTest» si no hay ninguna; **la
+   contraseña viene siempre vacía y es obligatoria**, porque guardar valida contra EvaluaTest y
+   sin ella no puede — renombrar exige volver a teclearla (decisión 41). El portal valida
+   primero, recibe el identificador de empresa que EvaluaTest devuelve y solo entonces guarda,
+   mandando nombre, correo, contraseña e identificador. **El backend lo guarda como una conexión
+   con nombre** en la lista de la empresa —`id`, `name`, `provider` (`evaluatest`) y una bolsa
+   `credentials` con correo, contraseña cifrada e identificador— (decisiones 1 y 41). Un nombre
+   ausente o en blanco conserva el guardado, y si no hay, «EvaluaTest». **Ningún otro guardado de
+   la página manda ya la conexión**: solo el modal. El backend conserva su regla de tres casos
+   para ese bloque —correo y contraseña vacíos → se quita la conexión; correo con contraseña
+   vacía → se conserva la guardada; lo demás → se crea o se actualiza—, pero desde el portal ya
+   no se llega a quitar ni a mandar vacía: **no hay "desconectar"**. Sirve de vuelta el bloque
+   **derivado de la lista, sin contraseña** —de ahí sale el correo que se muestra— y la lista con
+   `id`, `name`, `provider` y `configured`. La contraseña no sale del backend.
 2. Al crear o editar una oferta, el reclutador ve los controles de la prueba psicométrica
-   **solo si la empresa tiene esas credenciales guardadas**. Si no, en su lugar ve un aviso
+   **solo si la conexión de EvaluaTest de la empresa está configurada** —correo, contraseña e
+   identificador de empresa—, y no basta con que haya alguna conexión: los controles llaman a
+   EvaluaTest. Si no, en su lugar ve un aviso
    neutro —*tu empresa no tiene un proveedor de pruebas psicométricas conectado; esta etapa se
    omitirá*— con un enlace a *Mi compañía* si tiene permiso para editar la empresa, y si no,
-   la indicación de pedírselo a un administrador (decisión 40). Con credenciales, elige una
-   vacante de la lista que el puerto devuelve, fija el puntaje mínimo (hoy etiquetado "IGI",
-   decisión 8 pendiente) y, opcionalmente, pruebas adicionales — estas últimas no pasan por el
-   puerto: son exclusivas de EvaluaTest (decisión 4).
+   la indicación de pedírselo a un administrador (decisión 40). Con conexión, elige una
+   vacante de la lista que el puerto devuelve, fija el **puntaje mínimo** (decisión 8; el campo
+   guardado sigue siendo `minIGIScore`) y, opcionalmente, pruebas adicionales — estas últimas no
+   pasan por el puerto: son exclusivas de EvaluaTest (decisión 4).
 3. Al guardar con la prueba activa, el backend comprueba por el puerto que la vacante sigue
    sirviendo. **Si la empresa no tiene conexión, la comprobación falla antes de tocar al
    proveedor y la ruta rechaza con un mensaje propio** —conéctalo en Mi compañía antes de
@@ -74,7 +84,7 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
    propio: *la prueba está activada, pero tu empresa ya no tiene proveedor; la etapa se está
    omitiendo*. Sin interruptor, sin botón de configurar y sin la alerta de estado de la
    vacante, que consultaría al proveedor sin conexión. El detalle tampoco pide las pruebas de
-   la vacante hasta saber que la empresa tiene credenciales.
+   la vacante hasta saber que la conexión de EvaluaTest de la empresa está configurada.
 
 ## 2 · El candidato entra a la etapa
 
@@ -288,10 +298,11 @@ con credenciales usa las suyas para elegir vacante. La demo **se queda como est�
   siempre**, las métricas unifican viejo y nuevo antes de contar, y el visor del embudo los
   agrupa en *Psicométrica — no completó* (vencimiento), *Psicométrica — reprobada* (puntaje,
   prueba adicional y descarte del proveedor) y *Psicométrica — sin correo* (`missing_email`,
-  con grupo propio porque nunca se le mandó nada). 🔴 Despliegue: **el portal antes que el
-  backend, o a la vez**.
-- **Ficha de la oferta**: la vacante elegida, el interruptor de la etapa, la alerta si la
-  vacante dejó de servir. **Sin conexión de la empresa**, en su lugar el aviso de §1 —el
+  con grupo propio porque nunca se le mandó nada). 🔴 Despliegue: el orden vigente es el de
+  `before-deploy.md`.
+- **Ficha de la oferta**: la vacante elegida, el interruptor de la etapa, el **puntaje mínimo**
+  —en ningún texto del portal ni del agente de WhatsApp aparece ya "IGI" (decisión 8)— y la
+  alerta si la vacante dejó de servir. **Sin conexión de la empresa**, en su lugar el aviso de §1 —el
   informativo si la oferta no tiene prueba, el de advertencia si la tiene activa y se está
   omitiendo—, con enlace a *Mi compañía* solo para quien puede editar la empresa (decisión 40).
 - **Lo que no ve**: nada de los campos del candidato de §6 (el portal no los lee).
@@ -301,7 +312,6 @@ con credenciales usa las suyas para elegir vacante. La demo **se queda como est�
 | Qué | Dónde cae |
 | --- | --- |
 | Creación desde administración: copia la configuración de la prueba sin comprobar la conexión ni la vacante | Anotado, del equipo interno (decisión 40) |
-| "IGI" en la interfaz, y el portal leyendo la lista de conexiones en vez del bloque derivado | Brief 8b (decisiones 8 y 41) |
 | El bloque viejo `evaluatestCredentials` sigue en la base sin lectores ni escritores | Limpieza aparte (decisión 41) |
 | Puntaje ausente leído como cero | Etapa 3 (decisión 37) |
 | Tablero vacío indistinguible de petición fallida | Sin paso (decisión 36) |

@@ -1514,12 +1514,85 @@ dice que descifra las credenciales de EvaluaTest y ya no lo hace: se ajusta en e
 🔴 **Antes de desplegar este backend hay que correr la migración de conexiones**, paso a paso
 en `before-deploy.md`. Sin ella, ninguna empresa tiene conexión y la etapa se salta en silencio.
 
-### Estado a 2026-09-13
+### Paso 8b — ✅ HECHO (2026-09-13)
 
-Rama `feat/integrate-psicoanalisis-provider` en los dos repositorios, con `develop`
-mergeado. Backend verde: 102 suites, 912 pruebas, 9 omitidas; portal con tipos limpios.
-El 8a está commiteado. **Para cerrar la etapa 1 falta solo el 8b, el portal**, con el brief
-listo y la opinión previa contestada.
+La conexión con nombre en el portal, y "Puntaje mínimo". Brief en
+`brief-paso-8b-conexiones-portal.md`. **Único paso visible de la etapa.** En el backend, la
+conexión acepta un nombre —vacío o en blanco conserva el guardado— e IGI sale de siete textos:
+tres que el agente de WhatsApp le muestra al reclutador, la plantilla del estado de la prueba en
+el borrador por WhatsApp y tres instrucciones al modelo; el campo `minIGIScore` y el parámetro
+de la herramienta no cambian. En el portal, la contraseña salió del tipo de la empresa; la señal
+de proveedor pasó a ser *la conexión de EvaluaTest está configurada*, en sus cuatro sitios del
+detalle y la creación; Mi compañía muestra nombre, proveedor y correo, y su modal pide nombre,
+correo y contraseña —esta siempre vacía y obligatoria, validando antes de guardar— con los
+textos en claves de idioma; ningún otro guardado de la página manda ya la conexión; y "Puntaje
+mínimo" reemplaza a IGI.
+
+**Lo que salió de la opinión previa y valió la ronda:** la contraseña del modal contradecía a la
+41 (se corrigió la 41); IGI estaba en más textos de los que decía el brief, y la plantilla del
+borrador se escapaba a una búsqueda que descartaba las líneas con el nombre del campo —es la
+trampa 3 del brief—; la señal tenía que ser la conexión *de EvaluaTest* y no "alguna", y en
+cuatro sitios, no dos; la sección de Mi compañía necesitaba dos fuentes (nombre de la lista,
+correo del bloque derivado); el nombre en blanco rompía el guardado; y "a la vez" no existe en
+un despliegue: el orden quedó en `before-deploy.md`.
+
+**Verificado:** backend 102 suites y 916 pruebas (907 pasan, 9 omitidas; cuatro nuevas); portal
+con tipos limpios.
+
+**Dos textos corregidos después, en un cambio pequeño del portal (2026-09-13):** el botón de la
+sección decía «Editar credenciales» —con una clave compartida con los modales de portales de
+empleo y antecedentes, que no se tocan— y pasó a clave propia, «Editar conexión»; y la
+descripción de la prueba al crear y en el detalle decía que la evaluación llega «por correo»,
+cuando el enlace llega por WhatsApp y el correo de EvaluaTest es solo respaldo.
+
+### Estado a 2026-09-13 — ✅ ETAPA 1 CERRADA
+
+Rama `feat/integrate-psicoanalisis-provider` en los dos repositorios, **al día con `develop`**
+(cero commits por detrás a la última consulta del remoto, 2026-09-13). Backend verde: 102
+suites, 916 pruebas, 9 omitidas; portal con tipos limpios. Commiteados todos los pasos de la
+etapa 1 (1 a 8b), el rescate, la cuenta compartida y el correo inventado; los dos textos del
+portal, pendientes de commit. **La rama no está desplegada**: se despliega entera, y lo que hay
+que hacer antes está en `before-deploy.md`.
+
+### Lo que hereda la etapa 3
+
+Todo lo decidido que cae ahí, para que no se pierda (regla de la hoja de ruta). Nada de esto
+está empezado.
+
+**El bloqueo:** el login de PsicoAlianza está detrás de reCAPTCHA v3 (*Riesgos*). Decidido
+resolverlo con SolveCaptcha (23), por HTTP y sin navegador (24), en su propio módulo con puerto
+y adaptador (25), cacheando la sesión de forma agresiva (26). **Falta medir con qué puntaje
+mínimo pasa el sitio**, subiendo desde abajo.
+
+**El adaptador de PsicoAlianza:** invitación en cuatro pasos (27); tipo de documento del
+candidato con CC por defecto (12); traducir el centinela `-2.0` a *sin puntaje* (37); y lo que
+el contrato todavía no sabe: umbral de aprobación y cómo se ve un reprobado (A1), si avisan por
+webhook (A9), qué credenciales pide la conexión (A10), cómo saber si una vacante sirve (A11), y
+si hay ambiente de pruebas (A12).
+
+**La capa, cuando haya dos proveedores:** el resolvedor que elige adaptador por conexión (38);
+pasar la conexión concreta por el puerto en vez de la empresa (41); que el cron pregunte al
+proveedor de la invitación, que el candidato ya guarda (6); la comprobación de vacante por
+proveedor (10); y qué ve una empresa demo en el selector cuando exista el resolvedor (sección
+*Abierto, para cuando exista el resolvedor*).
+
+**El portal y los lectores que la 41 dejó en EvaluaTest:** el selector de proveedor, que solo
+aparece con más de una conexión (3); esconder las pruebas adicionales a otro proveedor (4);
+generalizar la señal del portal, que hoy es *la conexión de EvaluaTest configurada*; y el
+precio de la 41 — el agente de WhatsApp, el borrador, la creación con IA y la lista de ofertas
+leen los campos de EvaluaTest del bloque de la oferta, y una oferta de otro proveedor los
+tendrá vacíos.
+
+**Preguntas de negocio abiertas:** cambio de proveedor con ofertas vivas, incluidas las que
+nunca guardaron conexión (B3 y la nota de la 5); de dónde se corta el indicativo del teléfono
+(B4); si la IA sigue sugiriendo vacante (B5).
+
+**Sin paso, y fuera de cualquier etapa:** el arreglo del cliente para distinguir *no pude
+preguntar* de *no hay nadie* (36); el botón «Continuar proceso» que se traga el fallo permanente
+(39); la limpieza del bloque viejo `evaluatestCredentials` cuando la etapa lleve tiempo estable
+en producción (41); las contraseñas de portales de empleo y antecedentes que el backend sigue
+sirviendo descifradas (deuda conocida del contexto del proyecto); y el comentario del barrido de
+flujos atascados que nombra un campo viejo del candidato (registro del 6b).
 
 🔴 **El orden de despliegue vigente es el de `before-deploy.md`: migración, backend, y portal
 inmediatamente después.** Las entradas del paso 7, la cuenta compartida y el correo inventado
@@ -1542,7 +1615,7 @@ no se renumeran cuando uno se cierra.
 | --- | --- | --- |
 | 7 | ✅ **Los motivos de rechazo con prefijo neutro** — HECHO, commiteado en los dos repositorios: `brief-paso-7-motivos-neutros.md` | Decisiones 13 y 16. **Toca los dos repositorios**: enum del backend, etiquetas y textos del portal |
 | 8a | ✅ **Backend: la conexión de la empresa y la conexión de la oferta** — HECHO el 2026-09-13, `brief-paso-8a-conexiones-backend.md` | Decisiones 1, 2, 5, 7, 28 y **41**. Lista de conexiones en la empresa, `connectionId` y `providerData` en la oferta, lectura única de conexiones para sus cuatro lectores, ayudante de lectura de la oferta para la etapa, y el script de migración con su comprobación. Nada visible |
-| 8b | **Portal: conexión con nombre y puntaje mínimo** — `brief-paso-8b-conexiones-portal.md` (2026-09-13), pendiente de la opinión previa | Decisiones 8 y 41. Modal de conexión con nombre y sin contraseña de vuelta, señal "hay conexión", "IGI" → "Puntaje mínimo". **Visible a propósito** |
+| 8b | ✅ **Portal: conexión con nombre y puntaje mínimo** — HECHO el 2026-09-13, `brief-paso-8b-conexiones-portal.md` | Decisiones 8 y 41. Modal de conexión con nombre y sin contraseña de vuelta, señal "hay conexión", "IGI" → "Puntaje mínimo". **Visible a propósito** |
 
 ~~El proveedor falso y el resolvedor.~~ **Descartados de la etapa 1** por la decisión 38.
 El resolvedor pasa a la etapa 3.
