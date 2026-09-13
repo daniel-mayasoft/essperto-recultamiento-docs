@@ -16,6 +16,9 @@ El candidato solo ve la conversación de WhatsApp. El portal es para el reclutad
 ⚠️ **Cada carpeta es su propio repositorio git, y la raíz del workspace no lo es.**
 Esta carpeta de documentación también es un repositorio aparte.
 
+Cómo levantarlo en una máquina de desarrollo —base en Docker, backend y portal en PowerShell—:
+`entorno-local.md`.
+
 ## Verificación
 
 - Backend: `npm run build` y `npm test`.

@@ -430,6 +430,22 @@ Se da por terminado cuando se cumplen las dos condiciones:
     **El puntaje mínimo es configuración, no constante.** Todavía no se sabe cuál
     acepta el sitio y habrá que subirlo a tientas.
 
+    ✅ **Precisada el 2026-09-13, al escribir el brief del paso 1 de la etapa 3, con el usuario.**
+    El módulo varía en dos ejes que no se tocan entre sí: **el proveedor** —quién resuelve, un
+    adaptador por servicio— y **el tipo de captcha** —qué se resuelve—. El tipo **viaja en cada
+    petición**, no se fija al construir el adaptador: un mismo servicio resuelve varios tipos, y un
+    mismo backend puede necesitar a la vez un v3 para PsicoAlianza y un v2 para un portal de
+    empleo. Solo se implementa el v3, y no hay variable para elegir proveedor mientras haya uno.
+    **El puntaje mínimo es del sitio, no del módulo**: viaja en la petición, y su valor se
+    configura del lado de PsicoAlianza (paso 2). La petición de v3 lleva además la dirección de la
+    página, que el servicio exige.
+
+    ⚠️ **`CAPTCHAS.md` contradice al servicio en dos puntos** (documentación oficial de
+    SolveCaptcha, consultada el 2026-09-13): el servicio pide preguntar cada 5 segundos, tras
+    esperar de 15 a 20 al principio, y allí se pregunta cada 2; y acepta puntajes de 0.3 a 0.9, así
+    que "subir desde abajo" empieza en 0.3. Se sigue al servicio. `CAPTCHAS.md` describe otro
+    proyecto y no se corrige desde aquí.
+
     ⚠️ ~~Es el primer puerto/adaptador del backend.~~ **Ya no** (2026-09-10): la capa
     psicométrica llegó primero y el precedente está sentado — puerto sin conocer al
     proveedor, adaptador envolviendo el cliente, token resuelto por alias a una sola
@@ -1550,8 +1566,9 @@ cuando el enlace llega por WhatsApp y el correo de EvaluaTest es solo respaldo.
 Rama `feat/integrate-psicoanalisis-provider` en los dos repositorios, **al día con `develop`**
 (cero commits por detrás a la última consulta del remoto, 2026-09-13). Backend verde: 102
 suites, 916 pruebas, 9 omitidas; portal con tipos limpios. Commiteados todos los pasos de la
-etapa 1 (1 a 8b), el rescate, la cuenta compartida y el correo inventado; los dos textos del
-portal, pendientes de commit. **La rama no está desplegada**: se despliega entera, y lo que hay
+etapa 1 (1 a 8b), el rescate, la cuenta compartida y el correo inventado, y también los dos
+textos del portal (corregido el 2026-09-13: esta línea los daba por pendientes de commit, y el
+último commit del portal los trae). **La rama no está desplegada**: se despliega entera, y lo que hay
 que hacer antes está en `before-deploy.md`.
 
 ### Lo que hereda la etapa 3
@@ -1603,7 +1620,8 @@ registro, pero la rama se despliega entera y ese orden ya no vale.
 
 🔴 **Todo lo que hay que hacer antes de desplegar la rama está en `before-deploy.md`**
 (creado el 2026-09-13): la migración de conexiones paso a paso, las variables que retirar, el
-orden portal-backend, el aviso al equipo y la rotación de credenciales. La rama se despliega
+orden de despliegue (migración, backend y portal; corregido el 2026-09-13, decía
+"portal-backend"), el aviso al equipo y la rotación de credenciales. La rama se despliega
 entera al final, y ese archivo es la lista que se recorre ese día. Lo que quede anotado solo
 aquí no se va a hacer.
 
@@ -1709,3 +1727,76 @@ Sigue abierto **rotar dos credenciales**, que necesitan acceso a las cuentas y n
 nadie de este frente: la contraseña de **PsicoAlianza** (ver *Riesgos*) y la credencial de
 **EvaluaTest** que sigue en el historial de git (decisión 21). Son los únicos riesgos de los
 anotados que empeoran con el tiempo.
+
+## Dónde va la etapa 3
+
+> Registro de avance de la etapa 3, abierto el 2026-09-13. Lo que hereda de la etapa 1 está en
+> *Lo que hereda la etapa 3*, más arriba; aquí va cómo se parte, lo que apareció al contrastar esa
+> lista con el código y con el contrato, y cada paso según se cierre.
+
+**Se prueba en local antes que en el servidor de pruebas.** Cómo levantar el entorno:
+`../entorno-local.md`. La etapa 1 sigue sin desplegar.
+
+### Cómo se parte
+
+Los números son de brief, no de orden, y no se renumeran. Del 1 al 3 son aditivos —nada los llama—
+y llevan brief corto y una ronda; del 4 en adelante tocan el embudo o se ven, y llevan el
+tratamiento completo. **Con el 5 cerrado se puede probar en local de punta a punta**; el 6 va
+después, porque en local la conexión y la configuración de la oferta se pueden escribir a mano.
+
+| # | Paso | Riesgo |
+| --- | --- | --- |
+| 1 | El módulo de captcha: puerto sin proveedor, adaptador de SolveCaptcha, solo reCAPTCHA v3 — brief `brief-etapa3-paso1-modulo-captcha.md`, **escrito, sin empezar** | Aditivo |
+| 2 | El cliente de PsicoAlianza: login con CSRF y captcha, sesión guardada con un solo login a la vez por conexión, sus peticiones y el registro sin contraseñas; la lectura única de conexiones reconoce la de PsicoAlianza; se mide el puntaje del captcha | Aditivo |
+| 3 | El adaptador de PsicoAlianza contra el puerto psicométrico. Puede partirse: listar y comprobar vacantes, después invitar y leer resultados | Aditivo |
+| 4 | El resolvedor de adaptador por conexión, y el cron preguntando al proveedor de la invitación (decisiones 6, 38 y 41). Puede partirse | Embudo |
+| 5 | Backend: guardar y validar la conexión de PsicoAlianza, el documento en la invitación y su motivo de rechazo | Embudo |
+| 6 | Portal: selector de proveedor, modal por proveedor, pruebas adicionales solo de EvaluaTest (decisiones 3 y 4) | Visible |
+
+**Antes del paso 1, fuera del código:** clave de SolveCaptcha y cuenta de PsicoAlianza para probar
+(confirmadas por el usuario el 2026-09-13). La clave va en el `.env`, y el usuario confirmó que la
+misma sirve para producción. **La conexión de PsicoAlianza no va en el `.env`**, ni siquiera en
+local: se guarda en la base como cualquier conexión (decisiones 34 y 40, y las reglas de credenciales
+del backend); cómo insertarla en local llega con el paso 2.
+
+### Lo que la lista de herencia no tenía (contrastado el 2026-09-13)
+
+Levantado leyendo el código y `psicoalianza-api.md`. Cada punto cae en el paso indicado.
+
+- **Dos plazos** (paso 3). PsicoAlianza fija la ventana de la prueba al invitar
+  (`dias_vencimiento_agendas`); nuestro cron descarta con su propio plazo (empresa > entorno > 2
+  días). Si no coinciden, o PsicoAlianza cierra antes y la persona espera un resultado imposible, o
+  descartamos a quien todavía podía presentarla. Hay que mandar nuestro plazo al invitar, y decidir
+  qué es una agenda *Expirada* en los estados neutros.
+- **Quién decide el aprobado** (paso 3). PsicoAlianza da veredicto propio (`recomendacion`) además
+  del puntaje agregado de varias pruebas; el embudo compara el puntaje con el mínimo de la oferta.
+  Falta decidir cuál manda, y qué pasa con una prueba terminada y otra vencida.
+- **Reinvitar** (paso 3). El cron reintenta cada 5 minutos una invitación que falló por algo
+  pasajero. En EvaluaTest registrar es *registra o recupera*; en PsicoAlianza no está capturado qué
+  pasa al invitar a quien ya está en la vacante.
+- **El desvío de correos de pruebas no sirve** (pasos 3 y 5). En PsicoAlianza un correo es de una
+  sola persona en toda la plataforma: redirigir a todos los candidatos de prueba a una dirección da
+  *ya fue tomado* desde el segundo.
+- **El documento** (pasos 3 y 5). La invitación del puerto ya prevé el número de documento, pero el
+  arranque no lo pasa (comprobado leyendo la única llamada). Nuestro tipo de documento es texto libre
+  y de PsicoAlianza solo se conoce el identificador de CC. Sin documento se descarta (decisión 33), y
+  un motivo nuevo toca el portal.
+- **El coste del login** (paso 2). Cada login pasa por el servicio de pago, tarda hasta unos dos
+  minutos y cuesta dinero. La sesión de EvaluaTest vive en memoria: se pierde en cada reinicio y
+  cada instancia hace la suya. Validar la conexión en Mi compañía también es un login. Falta saber
+  cuántas instancias del backend corren en los servidores.
+- **Llamadas fijas a EvaluaTest** (paso 4). El embudo llama al adaptador de EvaluaTest sin pasar
+  por el puerto en el enlace de respaldo del arranque y en las pruebas adicionales del veredicto; el
+  servicio de ofertas, en las pruebas de la vacante; y el arranque escribe siempre `evaluatest` como
+  proveedor del candidato. Falta comprobar si alguna de esas llamadas se alcanza con una oferta de
+  PsicoAlianza.
+- **Cuenta del solucionador** (antes del paso 1). `CAPTCHAS.md` pide decidir si se comparte cuenta
+  con el otro proyecto: compartir es compartir saldo.
+- **Contraseñas en el registro** (paso 2). Los clientes de la casa vuelcan peticiones enteras; el
+  de EvaluaTest tapa la contraseña del login a mano. El nuevo la tapa desde el principio, y la clave
+  del solucionador también.
+
+🔴 **Contradicción abierta entre las decisiones 27 y 31, se decide antes del brief del paso 3.** La
+27 dice que si el documento ya existe en PsicoAlianza con otro correo, se invita con el correo que
+devuelve la consulta. La 31 dice que en ese mismo caso se falla de forma visible. No pueden valer las
+dos.
