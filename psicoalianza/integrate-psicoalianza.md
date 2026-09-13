@@ -1381,12 +1381,42 @@ zona psicométrica— y 99 suites y 882 pruebas después; portal con tipos limpi
 archivos locales —parte de la rotación de la decisión 21—, avisar al equipo de que probar en
 local exige una empresa con credenciales guardadas, y portal antes que el backend o a la vez.
 
+### Correo inventado — ✅ HECHO (2026-09-12)
+
+La decisión 33, en su propio cambio y en los dos repositorios. Brief en
+`brief-correo-inventado.md`. El correo de la invitación del puerto pasa a poder faltar, y el
+adaptador de EvaluaTest —que es quien sabe qué datos exige su proveedor— lanza un error propio
+de *falta un dato del candidato* cuando no hay correo, nulo o en blanco, después de resolver la
+credencial y comprobar el nombre de la vacante y antes de tocar al proveedor. El arranque deja
+de inventar un correo y, ante ese error, descarta con `psychometric_missing_email`, sin
+mensaje, por el mismo bloque que atiende a la empresa sin conexión: las cinco puertas lo tratan
+igual y el demo no pasa por ahí. El portal lo traduce y le da grupo propio en el visor,
+*Psicométrica — sin correo*.
+
+**Lo que salió de la opinión previa y valió la ronda:** el brief se contradecía en el orden
+—pedía descartar antes de invitar y a la vez que la empresa sin conexión aprobara aunque
+faltara el correo, y *sin conexión* solo se sabe al invitar—; se resolvió moviendo la
+comprobación al adaptador, donde va la regla de qué exige cada proveedor, en vez de una lectura
+extra en el embudo. La red de seguridad del camino real pasaba gracias al correo inventado, y
+se conservó dándole correo al candidato del montaje por parámetro. El caso del brief contaba al
+revés qué recibe el candidato antes de la etapa: quien contesta preguntas no recibe nada tras
+la última. Y el visor gana grupo propio porque *no completó* le diría al reclutador que la
+persona no hizo algo que nunca se le mandó.
+
+**Verificado:** backend 99 suites y 889 pruebas (880 pasan, 9 omitidas; siete nuevas); portal
+con tipos limpios. Medido antes: nadie en vuelo con correo inventado y una persona de cada
+~190 afectada, casi todas de la cuenta de pruebas. Se despliega sin aviso; portal antes que
+backend o a la vez.
+
+Queda un comentario de una línea en el enum, junto al valor nuevo, como llevan todos los
+valores de ese enum. Se aceptó por coherencia con el archivo.
+
 ### Estado a 2026-09-12
 
 Rama `feat/integrate-psicoanalisis-provider` en los dos repositorios, con `develop`
-mergeado. Backend verde: 99 suites, 882 pruebas, 9 omitidas; portal con tipos limpios.
-Commiteado todo hasta el cambio de la cuenta compartida. Faltan para cerrar la etapa 1 el
-cambio de la decisión 33 y el brief 8, partido.
+mergeado. Backend verde: 99 suites, 889 pruebas, 9 omitidas; portal con tipos limpios.
+Commiteado todo hasta el cambio del correo inventado. **Para cerrar la etapa 1 falta solo el
+brief 8, partido.**
 
 ### Lo que falta para cerrar la etapa 1
 
@@ -1407,7 +1437,8 @@ la decisión 39 —los que hoy esperan un resultado que nunca van a recibir—, 
 del proceso y por eso no cabe dentro del 6a (✅ **HECHO** el 2026-09-11; brief:
 `brief-rescate-de-atascados.md`; reusa el motivo de arranque fallido, que el portal ya
 traduce, así que **no toca el frontend**); la decisión 33 (se elimina el correo
-inventado y el candidato sin datos se descarta) y las decisiones 34 y 40, que van juntas
+inventado y el candidato sin datos se descarta — ✅ **HECHO el 2026-09-12**, commiteado en
+los dos repositorios; brief: `brief-correo-inventado.md`) y las decisiones 34 y 40, que van juntas
 (se elimina el respaldo por entorno, y la empresa sin conexión propia se queda sin prueba
 psicotécnica, con aviso al reclutador y sin detener a ningún candidato) — ✅ **HECHO el
 2026-09-12**, commiteado en los dos repositorios; brief: `brief-cuenta-compartida.md`; el aviso
