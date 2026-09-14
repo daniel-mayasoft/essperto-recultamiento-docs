@@ -1229,7 +1229,8 @@ Se da por terminado cuando se cumplen las dos condiciones:
        🔴 **Lo que queda probado, y refuta una conclusión que circuló el mismo día: sin ventana SÍ se
        entra.** Seis éxitos en veinte intentos sin ventana. La lectura contraria —que el modo
        invisible delata al navegador y nunca pasa— se apoyaba en tres fallos seguidos, y con una tasa
-       de este orden eso ocurre **más de la mitad de las veces** por azar. **Antes de montar una
+       de este orden eso ocurre **una de cada tres veces** por azar (corregido el 2026-09-14: la primera
+       versión decía «más de la mitad», que vale con el 20% de la primera tanda, no con el 30% final). **Antes de montar una
        pantalla virtual en la imagen del servidor hay que medirlo con muestras comparables**, porque
        esa pieza no es gratis.
 
@@ -1244,6 +1245,27 @@ Se da por terminado cuando se cumplen las dos condiciones:
        con un 80% de confianza, y ocho para un 95%**, y como cada intento cuesta de 18 a 34 segundos,
        **conseguir una sesión cuesta del orden de uno a dos minutos**, no los veinte segundos de un
        intento suelto. El tope diario por conexión tiene que contar **intentos**, no sesiones.
+
+       🔴 **Pero el orden de los éxitos dice que ese cálculo no se puede usar tal cual** (anotado el
+       2026-09-14, al pedirlo el chat de mediciones). En qué intento entró cada tanda:
+
+       | Tanda | Secuencia | Entró en |
+       | --- | --- | --- |
+       | Perfil limpio | ✗✗✗✗✗ **✓✓** ✗✗✗ | **6 y 7** |
+       | Perfil persistente | ✗ **✓✓** ✗✗ **✓** ✗✗ **✓** ✗ | **2, 3, 6 y 9** |
+       | Perfil persistente (la abortada) | ✗ **✓** … | **2** |
+
+       Dos cosas saltan, y ninguna encaja con tiradas independientes:
+
+       - **El primer intento no entró nunca**, en ninguna de las tres tandas.
+       - **Los éxitos vienen pegados**: 6 y 7 en una, 2 y 3 en otra.
+
+       ⚠️ **Eso invalida el cálculo de «cinco intentos para el 80%»**, que da por hecho que cada
+       intento es independiente del anterior. Si la reputación va por rachas —del perfil, de la IP del
+       momento o de la hora—, la probabilidad real de entrar en N intentos no es esa. Con seis éxitos
+       en veinte no se puede modelar; **el brief del 2c debe reintentar por tiempo o por número con un
+       tope, y no apoyarse en esa cuenta de probabilidad**. Si alguien repite la medición, anotar
+       **siempre la secuencia**, no solo el total.
 
        🔴 **Dos trampas de la medición, para quien la repita.** La primera tanda con perfil **se
        saboteó sola**: en cuanto un intento entró, el perfil se quedó con la sesión y los siguientes
@@ -1322,7 +1344,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
 | A11 | ~~¿Cómo se sabe si una vacante sigue sirviendo?~~ **RESUELTO a medias** (2026-09-14) | Por el estado del proceso, y son **tres** los vistos, no dos: `2` Activo, `3` Completado y **`5` Suspendido** (este no estaba en el contrato). Usable es **solo el 2**; el 3 y el 5 no. 🔴 **Cualquier otro valor tiene que quedar como indeterminado**, no como usable: aparecerán más. Medido: de 113 vacantes, 18 activas, 89 completadas y 6 suspendidas |
 | A12 | ¿Ambiente de pruebas o desvío de correos?         | Sin eso, cada ensayo invita a una persona real                                   |
 | A13 | ~~Qué cookies emite el login con *permanecer conectado* marcado~~ **RESUELTO** | Emite `remember_web_<hash>` y estira la sesión a 5 días. Con esa cookie Laravel reautentica solo, sin login ni captcha, si se toca el portal cada 5 días. Ver *Confirmado* y decisión 26 |
-| A14 | Catálogo de tipos de documento (levantado el 2026-09-14) | Solo se conoce CC = `1`. Sin el catálogo, el paso 3 manda siempre CC y la decisión 12 (el tipo del candidato) no se puede cumplir. Se mide antes del paso 5, capturando el desplegable del formulario de invitar |
+| A14 | ~~Catálogo de tipos de documento~~ **RESUELTO** (2026-09-14) | Leído del atributo `value` de cada opción del desplegable del formulario de invitar, **no del orden de la lista**, que no coincide: CC `1`, TI `2`, PA `3`, CE `4`, OTRO `5`, PEP `6`. Detalle en el contrato. El paso 3 sigue mandando siempre CC; traducir nuestro tipo —texto libre— a este número es del **paso 5** (decisión 12) |
 
 ## Falta decidir
 
@@ -2361,9 +2383,14 @@ proveedor es el paso 4. **Nada lo llama todavía y el flujo de la etapa no cambi
    único probado en vivo. Probablemente da igual, porque ese token viaja en el formulario, pero nadie
    lo ha comprobado. **Si el paso 3 encuentra rechazos 419 con la sesión viva, es lo primero que hay
    que mirar.**
-2. **La forma del cuerpo de la invitación.** El contrato no dice cómo se codifica la lista de
-   participantes dentro del formulario, ni el campo que lleva un JSON como texto. Está escrito con la
-   forma más probable, aislado en un sitio, y solo se confirma invitando a una persona real.
+2. ~~**La forma del cuerpo de la invitación.**~~ ✅ **RESUELTO el 2026-09-14, capturando el payload
+   real del portal** (está en el contrato). Y el resultado es que **la forma que armó el paso 2 no es
+   la suya**: nosotros mandamos los participantes como campos sueltos con índice y tres claves; el
+   portal manda **un solo campo con el JSON dentro**, siete claves —las cuatro de teléfono en nulo— y
+   el tipo de documento **como texto**. ⚠️ **La nuestra funciona** —se invitó de verdad ese día y la
+   persona apareció en el tablero—, pero depende de que su backend acepte las dos formas. **Se alinea
+   con la del portal en el paso 3**, donde el brief ya lo pide. De la misma captura salió el texto
+   por defecto de su correo, que también estaba inventado.
 3. **Las tres formas supuestas de sesión muerta** (redirección, 401 y 419), de arriba.
 
 **Verificado**, corrido por el planificador sobre el conjunto del cambio: backend 106 suites y 951
@@ -2517,7 +2544,7 @@ corregido en el brief; aquí queda el porqué y lo que hereda el paso 5:
 | Los resultados se emparejan **por documento**, con el identificador de respaldo | Lo que el cron manda por candidato es la referencia, el identificador del proveedor y los dos correos. **El documento no viaja** | Emparejar **solo por el identificador de PsicoAlianza**, su llave global de la persona, que la invitación obtuvo buscándola por documento. Ninguna pieza compartida se toca. Si algún día se quiere el documento como segunda llave, es un campo opcional más en el pedido del cron: **paso 5, si hace falta** |
 | La vacante se comprueba distinguiendo completada de suspendida | La única petición de vacantes del cliente **filtra por activas**: una completada no aparece y no se distingue de una inexistente | El paso 3 **añade al cliente el listado sin filtro** (medido en el contrato: sin tamaño de página trae todas). No está → indeterminada; archivada → no usable |
 | «Todo lo demás son archivos nuevos» | El error *falta un dato del candidato* tiene el campo acotado a «correo» | Se **amplía** para nombrar «documento»: segunda pieza compartida, aditiva. ⚠️ **Hereda el paso 5:** el embudo convierte hoy ese error **siempre** en `psychometric_missing_email`; con un documento ausente diría lo que no es. Va junto al motivo nuevo que ya tenía anotado |
-| Nada sobre el tipo de documento | El cliente exige un identificador de tipo por invitado; el puerto no lo trae; la decisión 12 dice «el del candidato, CC por defecto», y de PsicoAlianza solo se conoce CC=1 | **Siempre CC** en el paso 3. Mandar el real es del **paso 5** y necesita medir el catálogo de tipos de PsicoAlianza — fila nueva **A14** en *Falta de PsicoAlianza* |
+| Nada sobre el tipo de documento | El cliente exige un identificador de tipo por invitado; el puerto no lo trae; la decisión 12 dice «el del candidato, CC por defecto», y de PsicoAlianza solo se conoce CC=1 | **Siempre CC** en el paso 3. Mandar el real es del **paso 5**; el catálogo de tipos de PsicoAlianza ya está medido — fila **A14** en *Falta de PsicoAlianza* |
 | Nada sobre el correo de pruebas de EvaluaTest que la lectura única entrega a cualquier proveedor («se decide en el paso 3») | Confirmado: lo entrega | **El adaptador de PsicoAlianza no lo lee**, con su prueba. Cerrado |
 
 **Tres líneas más que el brief no tenía**, sacadas del código: *sesión caducada* a mitad de una

@@ -155,7 +155,20 @@ conoce.
 | `informacion` | `{"medio_envio":{"valor":"correo"}}` | **El medio de envío se elige al invitar.** Único valor visto: `correo` |
 | `participantes[]` | ver abajo | Los candidatos a invitar |
 
-**Cada participante:** `tipo_documento_id` (`1`=CC), `documento`, `email`,
+**Catálogo de `tipo_documento_id`**, leído el 2026-09-14 del `value` de cada opción del
+desplegable del formulario de invitar. ⚠️ **El orden en que la lista los muestra no es su
+número**: leer el `value`, nunca contar posiciones.
+
+| `value` | Tipo |
+| --- | --- |
+| `1` | CC — Cédula de ciudadanía |
+| `2` | TI — Tarjeta de identidad (menor de edad) |
+| `3` | PA — Pasaporte |
+| `4` | CE — Cédula de extranjería |
+| `5` | OTRO |
+| `6` | PEP — Permiso especial de permanencia |
+
+**Cada participante:** `tipo_documento_id` (ver catálogo), `documento`, `email`,
 `indicativo_celular`, `celular`, `telefono`, `indicativo_telefono` (los de teléfono,
 opcionales, vistos en `null`).
 

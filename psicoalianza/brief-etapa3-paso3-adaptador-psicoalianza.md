@@ -122,13 +122,13 @@ indistinguible de cualquier otro proveedor.
    como texto, no como campos sueltos con índice. **Se alinea con la forma del portal** y se corrige
    el cliente del paso 2 en este mismo diff: el paso 2 dejó esa codificación aislada en una sola
    función justo para esto. Que la forma actual funcione hoy no la salva: depende de que su backend
-   siga aceptando las dos. **Se vuelve a comprobar invitando de verdad** al documento del usuario,
-   como en la tanda.
+   siga aceptando las dos. **Se vuelve a comprobar invitando de verdad, solo al documento y al correo
+   del usuario** (decidido por el usuario el 2026-09-14), como en la tanda: nunca a otra persona.
 
    **El tipo de documento va siempre como CC** en este paso (constante, en un solo sitio). La
    decisión 12 —el del candidato, CC solo por defecto— no cabe aquí: el contrato del puerto no trae
-   el tipo, nuestro tipo es texto libre y de PsicoAlianza solo se conoce el identificador de CC. Cae
-   en el paso 5, con una medición previa de su catálogo.
+   el tipo y nuestro tipo es texto libre. El catálogo de PsicoAlianza ya está medido (A14, y en el
+   contrato), pero traducir nuestro texto a su número cae en el paso 5.
 
    ✅ **El título y el cuerpo del correo que PsicoAlianza le manda al candidato: los de su propio
    portal, tal cual** (decidido por el usuario el 2026-09-14; están en el contrato). Fijos para

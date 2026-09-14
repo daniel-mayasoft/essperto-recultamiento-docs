@@ -94,7 +94,7 @@ bloqueo** tras unos treinta intentos en el día.
 
 - **Sin ventana SÍ se entra**: seis de veinte. Confirma lo que este documento ya decía y **descarta**
   la lectura contraria que circuló el mismo día a partir de tres fallos seguidos — con esta tasa, tres
-  fallos seguidos pasan más de la mitad de las veces.
+  fallos seguidos pasan **una de cada tres veces**.
 - **La tasa ronda el 30% por intento.** De ahí sale la política de reintentos: cinco intentos para
   entrar con un 80% de confianza, ocho para un 95%, y **de uno a dos minutos por sesión conseguida**.
 - **El perfil persistente abarata el login** (los tiempos caen a la mitad, porque la página llega
