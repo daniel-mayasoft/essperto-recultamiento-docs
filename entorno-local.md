@@ -274,6 +274,15 @@ caducada*, se repite esto.
 6. Reiniciar el backend: el `.env` se lee al arrancar. Al arrancar, el registro **advierte** de que
    la sesión manual está encendida.
 
+🔴 **Mientras uses la sesión pegada, no pulses «cerrar sesión» en PsicoAlianza.** Cerrar sesión la
+invalida **en el servidor**, así que mata también la del `.env` y hay que repetir todo esto. Cerrar
+la pestaña o el navegador no pasa nada; lo que mata es el botón. Pasó el 2026-09-14 a mitad de una
+tanda de pruebas.
+
+✅ **Lo que no la mata** (comprobado el 2026-09-14): que el backend la use. PsicoAlianza emite una
+cookie nueva en cada respuesta, pero **la anterior sigue valiendo**, así que la línea del `.env` no
+se gasta de una corrida a otra.
+
 🔴 **Esa línea es una credencial viva de la cuenta del cliente.** El `.env` está ignorado por git
 y ahí se queda; no va a ningún mensaje, captura de pantalla ni `.md`. Y **no va en ningún
 servidor**: la lista de antes del despliegue lo tiene como bloqueo.

@@ -489,7 +489,17 @@ Se da por terminado cuando se cumplen las dos condiciones:
     instancia, y datos propios del proveedor en una bolsa opaca. **Seguir ese patrón en
     vez de inventar otro.**
 26. **La sesión se cachea de forma agresiva y el login es raro.** Cada autenticación
-    cuesta dinero y hasta dos minutos de espera. Con la sesión durando 5 días al marcar
+    cuesta dinero y hasta dos minutos de espera.
+
+    ⚠️ **Los «dos minutos» eran del solucionador de pago y ya no valen** (corregido el 2026-09-14,
+    al preguntarlo el usuario). Ese número salía de que SolveCaptcha tardaba 16–17 segundos por
+    token y con reintentos se acercaba a dos minutos. Con el camino oficial —Chrome por proxy móvil,
+    decisión 43— el captcha lo ejecuta la propia página: arrancar el navegador, cargar el login por
+    red móvil, teclear, esperar la nota de Google y enviar son del orden de **quince a treinta
+    segundos por intento**. 🔴 **Sin cronometrar**: ese rango sale de sumar las esperas que el script
+    de la evidencia se impone, no de una medición, y no incluye los reintentos por captcha
+    rechazado. **Quien mida la tasa pendiente debe anotar también los tiempos.** Lo que no cambia es
+    el fondo de esta decisión: el login sigue siendo caro y raro, y la sesión se cachea. Con la sesión durando 5 días al marcar
     *permanecer conectado*, reautenticar en cada pasada del cron dispararía la
     factura y multiplicaría las probabilidades de que el proveedor lo note. Extiende la
     decisión 9 de token cacheado a la cookie de sesión.
@@ -1138,7 +1148,24 @@ Se da por terminado cuando se cumplen las dos condiciones:
     | **Módulo `proxy`** | Nuevo, al nivel de los demás módulos | Un puerto con una operación, *arrendar una IP*: recibe país, tipo de IP y adherencia (pegajosa con un identificador que **genera quien llama**, o rotativa); devuelve protocolo, host, puerto, usuario y contraseña como datos estructurados, más hasta cuándo vale. Un adaptador por proveedor —DataImpulse hoy—, que es solo cómo se codifican país y sesión en las credenciales. Errores propios: *sin configurar* (al arrendar, no al arrancar) y *petición no soportada* (antes de tocar nada). Sin selector de proveedor mientras haya uno: cambiarlo es un adaptador y una línea |
     | **Almacén de sesión** | En la conexión de la empresa, en la base | Las cookies (`ats_session`, `remember_web_<hash>`) cifradas como la contraseña, cuándo se acuñaron, cuándo se vieron vivas, y si hay un login en curso desde cuándo. No en memoria ni en el `.env`: sobrevive reinicios y todas las instancias comparten un login |
     | **Cliente dado una sesión** | Capa psicométrica, PsicoAlianza | HTTP con las cookies del almacén; CSRF fresco antes de cada envío; guarda las cookies reemitidas; si lo mandan al login, lanza *sesión caducada* y no insiste |
-    | **Acuñador de sesión** | Capa psicométrica, PsicoAlianza | Pide al puerto de proxy una IP móvil pegajosa con identificador nuevo; lanza Chrome sin ventana por esa IP, sin la marca de automatización, bloqueando imágenes, CSS y fuentes; va a `/login`, escribe, hace clic; clasifica el resultado —*entró*, *captcha rechazado*, *credenciales rechazadas*, *bloqueada*, *desconocido*— con captura en los fallos; guarda las cookies. Reintentos: rechazo de captcha → otro arriendo y repetir hasta N; bloqueo o credenciales → parar en seco |
+    | **Acuñador de sesión** | Capa psicométrica, PsicoAlianza | Pide al puerto de proxy una IP móvil pegajosa con identificador nuevo; lanza Chrome sin ventana por esa IP, sin la marca de automatización; va a `/login`, escribe, hace clic; clasifica el resultado —*entró*, *captcha rechazado*, *credenciales rechazadas*, *bloqueada*, *desconocido*— con captura en los fallos; guarda las cookies. Reintentos: rechazo de captcha → otro arriendo y repetir hasta N; bloqueo o credenciales → parar en seco |
+
+    🔴 **Corregido el 2026-09-14: el acuñador NO bloquea imágenes, CSS ni fuentes.** Esta decisión lo
+    pedía para gastar menos proxy, y la medición del otro chat (`proxy-login.md`) desmonta las dos
+    mitades de ese razonamiento:
+
+    - **No hace falta.** Un login gasta **~2,8 MB**, o sea unos 360–400 logins por gigabyte. Con la
+      cookie de cinco días son seis u ocho logins al mes: **~20 MB, centavos de centavo**. Lo que
+      manda el coste es la **frecuencia** de login, no el tamaño de cada uno.
+    - **Y puede romper el login.** El único intento con los recursos bloqueados **salió rechazado**.
+      ⚠️ Con la tasa sin medir eso no prueba que bloquear rompa —pudo ser el fallo aleatorio de
+      siempre—, pero basta para no meterlo en el diseño: se estaría arriesgando el login para
+      ahorrar céntimos.
+
+    **Si algún día hay que achicar** —muchas cuentas, o sesiones que mueran seguido—, lo que el otro
+    chat propone es más seguro: **no cargar la página de trabajo después de entrar**, porque las
+    cookies llegan ya en la respuesta del envío del formulario. Se ahorra sin tocar nada de lo que
+    el captcha mira, y es **después** de autenticar.
     | **Fuente manual** | La de la 42 | Red de emergencia y local: pegar cookies a mano |
 
     **Lo que le pasa a una candidata.** El cron consulta su resultado por HTTP. Si la sesión
@@ -1170,12 +1197,29 @@ Se da por terminado cuando se cumplen las dos condiciones:
        el servidor— y el único que, de haber salido mal, habría obligado a que el backend saliera por
        el proxy en **todas** las peticiones, con el gasto disparado.
     2. 🔴 **La tasa sin ventana**, N de N, para escribir la política de reintentos con un número.
-       **Sigue abierta a 2026-09-13.** Lo que hay son datos sueltos de las corridas del día —el
-       primer intento sin ventana entró, y al acuñar para la prueba cruzada una corrida falló y otra
-       entró a la primera—, y **eso no es una tasa**: son intentos sueltos, que es justo el error que
-       costó la mañana con el solucionador. Falta lo sistemático: cinco entradas de N intentos
-       repartidas en el día, **anotando por qué falla cada uno** —captcha rechazado o el proxy que no
-       responde—, porque de esa distinción sale el diseño del reintento.
+       ✅ **Primera medida sistemática, hecha por el planificador el 2026-09-14** (script propio, diez
+       intentos seguidos con veinticinco segundos entre ellos, rotando la IP pegajosa en cada uno):
+
+       | Variante | Entraron | Tiempo medio |
+       | --- | --- | --- |
+       | Proxy móvil, sin ventana, **perfil de Chrome limpio en cada intento** | **2 de 10** | 34 s por intento; 54 s los que entraron |
+       | Sin proxy, sin ventana, IP residencial | 0 de 3 | 11 s |
+
+       **Los ocho fallos fueron todos rechazo del captcha**: ninguno de red, ninguno de credenciales
+       y **ninguna señal de bloqueo de la cuenta** tras trece logins fallidos en el día.
+
+       ⚠️ **Ese 2 de 10 NO es la tasa del diseño, y por eso no se puede usar todavía para dimensionar
+       los reintentos.** Los scripts del otro chat —los que sí entraban— **reutilizan la carpeta de
+       perfil de Chrome entre intentos**, y el de esta medición la estrena en cada uno. Si Google
+       puntúa la reputación acumulada del navegador —que es justo lo que dice el riesgo del
+       2026-09-09, «un navegador recién nacido, sin historial ni cookies propias»—, las dos tandas no
+       miden lo mismo. **Se está midiendo la misma tanda con perfil persistente para comparar**, que
+       es la única variable que cambia.
+
+       ⏱️ **Y un detalle de los tiempos que engaña**: los intentos que entran tardan **más** (54 s
+       frente a 34 s), y no porque el captcha tarde, sino porque al entrar se carga la página de
+       trabajo, que es pesada. No cargarla —lo que propone `proxy-login.md` para ahorrar ancho de
+       banda— **también acorta el login**.
 
     **Riesgo aceptado a sabiendas:** es la apuesta de la 23 con más maquinaria —entrar al
     sitio del proveedor por IP móvil para pasar su protección contra robots, con la cuenta de
@@ -1183,11 +1227,57 @@ Se da por terminado cuando se cumplen las dos condiciones:
     sin hacerse lo más barato: **preguntarle a PsicoAlianza** si tienen usuario de integración o
     pueden eximir una IP; si contestan que sí, el acuñador y el proxy sobran.
 
+44. **Validar la conexión de PsicoAlianza no hace login. Lo que se le enseña al reclutador es el
+    estado de la sesión** (2026-09-14, decidido con el usuario). Es un cambio de comportamiento
+    respecto a EvaluaTest y por eso es decisión de producto, no de código.
+
+    **Cómo es hoy con EvaluaTest, leído del código:** al guardar la conexión en Mi compañía, el
+    portal hace **primero** un login real; si falla, muestra error y **no guarda nada**; si va bien,
+    guarda, y de paso se queda con el identificador de empresa que ese login descubre. Se dispara
+    solo al pulsar guardar en ese modal —configurar, cambiar contraseña o **renombrar la conexión**,
+    que obliga a reteclear la contraseña (41)—, así que es raro y con EvaluaTest tarda un segundo.
+
+    **Por qué con PsicoAlianza no sirve.** Validar allí es acuñar una sesión: Chrome, proxy móvil y
+    captcha. Tres motivos, en orden de peso:
+
+    1. 🔴 **El mensaje acusaría a quien no tiene la culpa.** Si el captcha rechaza, el reclutador lee
+       *credenciales inválidas* con su contraseña bien escrita, la vuelve a teclear, vuelve a fallar
+       y concluye que la cuenta está rota. Es el fallo silencioso de siempre: el error señala la
+       causa equivocada.
+    2. **Ataría el paso 3 al acuñador** (2c), que espera la medición de la tasa, y bloquearía justo
+       lo que se quería desbloquear al aparcar el proxy.
+    3. **La espera**, de quince a treinta segundos con el formulario colgado (ver la corrección de
+       tiempos en la 26). Es el motivo más débil de los tres.
+
+    **Qué se hace en su lugar**, y sale de una asimetría medida el 2026-09-14: **comprobar una sesión
+    es barato —menos de un segundo— y conseguirla es lo caro.** Así que la pantalla puede comprobarla
+    cuantas veces haga falta:
+
+    | Lo que pasa | Lo que ve el reclutador |
+    | --- | --- |
+    | Hay cookie y responde | **Conectado** |
+    | Se está comprobando | Un indicador de carga, un segundo |
+    | No hay, o ya no sirve | **Sin conexión**, con el aviso de que la etapa se está omitiendo (decisión 40) y **un botón explícito para conectar** |
+
+    Ese botón es el único sitio donde se acuña, con su espera **pedida a propósito** en vez de un
+    formulario bloqueado, y si falla puede decir la verdad —*no se pudo conectar, reintenta*— sin
+    acusar a las credenciales.
+
+    🔴 **Sesión y credenciales no son lo mismo, y la etiqueta no puede confundirlas.** Puede haber
+    sesión viva con una contraseña que ya no sirve —la pegó alguien a mano, o se guardó hace días— y
+    al revés: credenciales perfectas y ninguna sesión porque el captcha no pasó. Por eso la etiqueta
+    dice *conectado*, que es lo que se sabe, y no *credenciales válidas*, que no se sabe.
+
+    **Dónde cae cada parte:** en el **paso 3**, una línea — la validación del adaptador **no llama a
+    nadie** y da por buena la conexión que tenga correo y contraseña. **Toda la pantalla es del paso
+    5**: la etiqueta, los tres estados, el botón y la operación que pregunta por el estado de la
+    sesión, que hoy no existe en el puerto.
+
 ## Falta de PsicoAlianza
 
 | #   | Qué                                               | Por qué importa                                                                  |
 | --- | ------------------------------------------------- | -------------------------------------------------------------------------------- |
-| A1  | Escala del puntaje (casi) | Notas reales vistas `84.6`/`85.0`, ambas `"Recomendado"` → escala ~0–100, más alto mejor, como la base. **Ojo:** `-2.0` es centinela de "sin puntaje", no una nota. Falta el umbral exacto de aprobación y ver un reprobado |
+| A1  | ~~Escala del puntaje y cómo se ve un reprobado~~ **RESUELTO** (2026-09-14) | Escala ~0–100, más alto mejor; `-2.0` es centinela de "sin puntaje" y **se sustituye por la nota real al terminar**. ✅ **Reprobado visto**, presentando una prueba a propósito lejos del perfil: `recomendacion` **`1`** = «No recomendado», con ajuste `43.25`, frente al `3` = «Recomendado» de las notas altas. Ver *Tanda de comprobaciones*, bloque D. **Sigue sin verse el `2`**, y el umbral exacto con el que PsicoAlianza corta tampoco se conoce — no hace falta: el veredicto lo damos nosotros con el puntaje mínimo de la oferta |
 | A2  | ~~Login: qué pide, qué devuelve, duración del token~~ **RESUELTO** | Formulario Laravel, sesión por cookie (5 días con *permanecer conectado*), reCAPTCHA v3 validado en servidor. Ver *Confirmado*, *Riesgos* y B7 |
 | A3  | ~~¿El listado paginará algún día?~~ **RESUELTO** | Ya pagina (`length` por defecto 10). Un `length` alto trae todas; si no, hay que recorrer páginas o se pierden vacantes sin error |
 | A4  | ~~Campos de cada vacante del listado~~ **RESUELTO** | `id`, `nombre`, estado, empresa, contadores y `pruebas[]` embebidas. Ver *Confirmado*. Falta decidir B5 (si la IA sugiere) |
@@ -1197,7 +1287,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
 | A8  | ~~¿Hay estado "en progreso"?~~ **RESUELTO** | Sí, por prueba (`agendas[].estado`): 1 Agendada, 3 Finalizada, 4 Expirada. El veredicto vive en `agendas[].recomendacion`, no en la etapa del candidato. Ver API doc |
 | A9  | ¿Avisan por webhook?                              | Si avisan, este proveedor no necesita cron                                       |
 | A10 | Credenciales que pide la conexión                 | Define el formulario de ajustes                                                  |
-| A11 | ¿Cómo se sabe si una vacante sigue sirviendo?     |                                                                                  |
+| A11 | ~~¿Cómo se sabe si una vacante sigue sirviendo?~~ **RESUELTO a medias** (2026-09-14) | Por el estado del proceso, y son **tres** los vistos, no dos: `2` Activo, `3` Completado y **`5` Suspendido** (este no estaba en el contrato). Usable es **solo el 2**; el 3 y el 5 no. 🔴 **Cualquier otro valor tiene que quedar como indeterminado**, no como usable: aparecerán más. Medido: de 113 vacantes, 18 activas, 89 completadas y 6 suspendidas |
 | A12 | ¿Ambiente de pruebas o desvío de correos?         | Sin eso, cada ensayo invita a una persona real                                   |
 | A13 | ~~Qué cookies emite el login con *permanecer conectado* marcado~~ **RESUELTO** | Emite `remember_web_<hash>` y estira la sesión a 5 días. Con esa cookie Laravel reautentica solo, sin login ni captcha, si se toca el portal cada 5 días. Ver *Confirmado* y decisión 26 |
 
@@ -1921,9 +2011,17 @@ Levantado leyendo el código y `psicoalianza-api.md`. Cada punto cae en el paso 
   días). Si no coinciden, o PsicoAlianza cierra antes y la persona espera un resultado imposible, o
   descartamos a quien todavía podía presentarla. Hay que mandar nuestro plazo al invitar, y decidir
   qué es una agenda *Expirada* en los estados neutros.
-- **Quién decide el aprobado** (paso 3). PsicoAlianza da veredicto propio (`recomendacion`) además
-  del puntaje agregado de varias pruebas; el embudo compara el puntaje con el mínimo de la oferta.
-  Falta decidir cuál manda, y qué pasa con una prueba terminada y otra vencida.
+- ~~**Quién decide el aprobado** (paso 3).~~ ✅ **DECIDIDO con el usuario el 2026-09-13/14.** Manda
+  **nuestro puntaje mínimo de la oferta**, como con EvaluaTest: el adaptador entrega el índice de
+  talento como puntaje y la regla del embudo no cambia. El veredicto propio de PsicoAlianza
+  (`recomendacion`, con `1` = «No recomendado» y `3` = «Recomendado») **se guarda en la bolsa del
+  proveedor** por si algún día se quiere, pero no decide.
+
+  ✅ **Y una persona con varias pruebas, una terminada y otra vencida, cuenta como NO completada**
+  (decidido el 2026-09-14). PsicoAlianza da un veredicto **por prueba**, no por persona, así que hay
+  que juntarlas: solo se da por terminada a quien tenga **todas** sus pruebas finalizadas. Aprobar
+  con media evaluación es peor que esperar, y a quien no las termine ya lo saca el vencimiento con
+  su propio mensaje.
 - **Reinvitar** (paso 3). El cron reintenta cada 5 minutos una invitación que falló por algo
   pasajero. En EvaluaTest registrar es *registra o recupera*; en PsicoAlianza no está capturado qué
   pasa al invitar a quien ya está en la vacante.
@@ -1959,10 +2057,16 @@ Levantado leyendo el código y `psicoalianza-api.md`. Cada punto cae en el paso 
   de EvaluaTest tapa la contraseña del login a mano. El nuevo la tapa desde el principio, y la clave
   del solucionador también.
 
-🔴 **Contradicción abierta entre las decisiones 27 y 31, se decide antes del brief del paso 3.** La
+~~🔴 **Contradicción abierta entre las decisiones 27 y 31, se decide antes del brief del paso 3.** La
 27 dice que si el documento ya existe en PsicoAlianza con otro correo, se invita con el correo que
 devuelve la consulta. La 31 dice que en ese mismo caso se falla de forma visible. No pueden valer las
-dos.
+dos.~~
+
+✅ **DISUELTA por medición el 2026-09-14** (ver *Tanda de comprobaciones*, hallazgo 6): el caso que
+las enfrentaba **no existe**. Si el documento ya está registrado, PsicoAlianza **ignora en silencio
+el correo que le mandes**: responde que invitó, no duplica y deja el correo original. Así que no hay
+nada que rechazar (31) y la 27 acierta por otro motivo — se invita con el correo que devuelve la
+consulta **para guardar el que esa persona tiene de verdad allá**, no para evitar un error.
 
 ### Medición del captcha — ❌ RECHAZADO (2026-09-13)
 
@@ -2100,6 +2204,7 @@ Hecha por el usuario en otro chat, con un script desechable fuera de los reposit
 | Variante | Resultado |
 | --- | --- |
 | Chrome automatizado, IP de casa (el 2026-09-09) | Rechazado |
+| Chrome automatizado **sin ventana y sin proxy**, IP de casa (medido por el planificador el 2026-09-14) | **0 de 3.** Confirma con número lo del 2026-09-09 y **descarta que baste una IP residencial**: el proxy móvil hace falta. Tiempo medio, 11 s por intento — arrancar el navegador 0,4 s, cargar el login 4,3 s, teclear 2,4 s, enviar y esperar 3,6 s |
 | SolveCaptcha, cualquier variante (esta mañana) | 1 de 85 |
 | Chrome automatizado por **proxy residencial rotativo** | 0 de 3 |
 | Chrome automatizado por **proxy móvil colombiano** (DataImpulse, sesión pegajosa), con ventana | **Entra** — ⚠️ N de N por anotar |
@@ -2136,7 +2241,7 @@ del reporte del usuario:
 | Éxito | La URL sale de `/login` (se vio `/procesos`) | Cookies: `ats_session`, `remember_web_<hash>`, `XSRF-TOKEN` |
 | Rechazo | Sigue en `/login` con «No hemos podido verificar que eres una persona» | Rotar `__sid` y repetir |
 | Bloqueo | Texto con «demasiados intentos» o «bloquead» | **Parar en seco**: es la cuenta de gerencia del cliente |
-| Coste | Unos 2 USD por GB de tráfico móvil | Bloquear imágenes, CSS y fuentes durante el login |
+| Coste | Unos 2 USD por GB de tráfico móvil. ✅ **Medido el 2026-09-13**: **~2,8 MB por login**, unos 360–400 logins por GB → con seis u ocho logins al mes, **centavos de centavo** | ~~Bloquear imágenes, CSS y fuentes~~ **No**: no hace falta y el único intento bloqueado salió rechazado (ver la corrección en la decisión 43) |
 
 **Lectura:** lo que PsicoAlianza —o Google para su clave— castiga es **la IP**, no el navegador ni
 el endurecimiento. Corrige el riesgo del 2026-09-09 que decía "no volver por esta vía".
@@ -2238,3 +2343,151 @@ revisión contó 24 pruebas nuevas leyendo *940 passed* como si fuera el total, 
 **Cómo se prueba contra PsicoAlianza de verdad**, para el paso 3: hacen falta las dos cosas, la
 conexión insertada a mano en la base local y la sesión pegada en el `.env` con el interruptor
 encendido. Los dos instructivos están en `../entorno-local.md`.
+
+### Tanda de comprobaciones para el paso 3 (2026-09-14)
+
+Lo que el brief del paso 3 no puede suponer y hay que preguntarle a PsicoAlianza ejecutando. Se
+corre con un script desechable fuera de los repositorios que **monta el cliente ya compilado del
+paso 2** con un almacén de mentira: así, además de contestar, comprueba el código que va a
+producción. Va por bloques, y se para entre uno y otro.
+
+#### Bloque A · solo lectura — ✅ HECHO
+
+**Primera vez que el cliente del paso 2 habla con PsicoAlianza de verdad, y funciona.**
+
+| Qué | Resultado |
+| --- | --- |
+| ¿La sesión sigue viva? | La página de login redirige (302) y el cliente lo lee como **viva** |
+| Listado de vacantes activas | **18**, con el sobre desenvuelto y sin mandar tamaño de página |
+| El correo de un documento que no existe | Responde que **no lo conoce**, como dice el contrato |
+
+🔴 **Hallazgo 1: hay un tercer estado de vacante, y el contrato solo tenía dos.** De **113**
+vacantes: **18 activas (2)**, **89 completadas (3)** y **6 suspendidas (5)**. El estado 5 no estaba
+documentado. **Toca a A11 —cuándo una vacante deja de servir—: el adaptador tiene que tratar
+completada y suspendida como no usable**, y dejar *indeterminado* para cualquier estado que
+aparezca y no conozca. Confirmado de paso que una vacante completada sigue marcada como no
+archivada, como decía el contrato.
+
+🔴 **Hallazgo 2: PsicoAlianza reemite la cookie de sesión en todas las respuestas.** El cliente pidió
+guardar cookies nuevas en **las tres** peticiones que hizo. *(Inferencia, no observada: su framework
+cifra esa cookie con un valor aleatorio en cada respuesta, así que el texto cambia siempre aunque la
+sesión sea la misma.)*
+
+**La consecuencia es de diseño y hay que resolverla antes de que la sesión viva en la base:** tal
+como está, **cada petición provocaría una escritura cifrada** en el documento de la empresa, y el
+cron hace varias por pasada cada cinco minutos. Hoy no se nota porque la sesión pegada a mano vive
+en memoria (decisión 42), así que **no bloquea el paso 3**, pero sí hay que decidirlo antes del 2c.
+Las salidas posibles, sin elegir todavía: guardar solo cada cierto tiempo, guardar solo cuando
+cambie algo que no sea el cifrado, o no guardar la cookie corta y quedarse solo con la de
+*permanecer conectado*, que es la que de verdad reautentica (medición cruzada de IP).
+
+#### Bloques B y C · invitar de verdad — ✅ HECHO (2026-09-14)
+
+Se invitó al documento del propio usuario, con su correo, a una vacante activa. **Nueve peticiones,
+todas por el cliente del paso 2.** Lo que contestó PsicoAlianza:
+
+| Qué | Resultado |
+| --- | --- |
+| **La forma del cuerpo de la invitación** | ✅ **Correcta**: 201 y *agregados: 1* a la primera. **Cierra el supuesto que dejó el paso 2** |
+| **El plazo** | 🔴 **Se respeta**: mandamos 2 días y la agenda quedó cerrando **exactamente 2 días después**. Confirma el mecanismo de los dos plazos: el que mandamos manda |
+| **El candidato recién invitado** | Puntaje `-2.0` (el centinela de *sin nota*), agenda en estado 1 *Agendada*, recomendación `0`, ajuste `null` |
+| **El enlace personal** | ✅ Se obtiene con el identificador que trae el tablero |
+| **Ningún 419 en las nueve peticiones** | El supuesto de la cookie que el cliente descarta **no molesta** — no es prueba definitiva, pero es buena señal |
+
+🔴 **Hallazgo 3: la cookie reemitida NO invalida la anterior.** Se probó a propósito: tras una
+petición, la cookie tal como está en el `.env` **sigue sirviendo**. Cierra la trampa 3 del brief del
+paso 2, que estaba marcada como sin verificar. *(La sesión que se murió a mitad de la primera tanda
+fue porque el usuario pulsó «cerrar sesión» en el navegador, no por la rotación.)*
+
+🔴 **Hallazgo 4: el contador de participantes del listado miente.** El listado daba **0
+participantes** para esa vacante y su tablero traía **uno real**, con una prueba agendada y vencida
+desde hace meses. **Ese contador no sirve para decidir nada**; hay que mirar el tablero.
+
+🔴 **Hallazgo 5: reinvitar no duplica, pero responde como si hubiera invitado.** Se invitó dos veces
+al mismo documento en la misma vacante: la segunda respondió **201 y *agregados: 1*** igual que la
+primera, y el tablero **siguió con una sola fila** para ese documento. **El número que devuelve la
+invitación no dice si realmente se invitó a alguien**, así que el paso 3 no puede confiar en él:
+para saberlo hay que buscar a la persona en el tablero, que además es un paso que ya está en la
+decisión 27. Como reinvitar es inofensivo, **el reintento del cron es seguro**.
+
+✅ **Y tampoco le escribe al candidato** (comprobado el 2026-09-14): de las **tres** invitaciones al
+mismo documento llegó **un solo correo**. Era el riesgo de verdad —el cron reintenta cada cinco
+minutos y podría haber llenado el buzón de una persona real—, y no existe.
+
+🔴 **Hallazgo 6, y resuelve la contradicción 27/31 de una forma que nadie había previsto:
+PsicoAlianza ignora el correo cuando el documento ya existe.** Se invitó el mismo documento con un
+correo distinto: respondió **201**, no dio error, no duplicó, y al volver a consultar, **el correo
+registrado seguía siendo el original**. No hay *«ya fue tomado»* por documento — ese error del
+contrato aparece cuando el **correo** pertenece a otra persona, que es el caso inverso.
+
+🔴 **Corregido el 2026-09-14, al leer la ficha completa tras el bloque D: el correo NO se descarta —
+se guarda en otro sitio.** La frase anterior («el correo que mandamos se descarta en silencio») era
+**falsa**, y se escribió mirando una sola fuente. Hay **dos correos distintos para la misma persona**,
+y cada consulta devuelve uno:
+
+| Dónde se mira | Qué devuelve |
+| --- | --- |
+| La consulta previa por documento | El correo **original** con el que se registró la persona |
+| La ficha del participante en el tablero | El **último** correo que se mandó al invitar |
+
+O sea que la tercera invitación **sí cambió algo**: el correo de la ficha, no el del registro. Y la
+consulta previa siguió devolviendo el viejo, que es lo que despistó.
+
+✅ **Y cuál de los dos recibe el correo, comprobado el 2026-09-14: el registrado.** La invitación
+llegó a la dirección que devuelve la consulta por documento, **no** a la que se mandó en la última
+invitación. Así que el correo de la ficha del participante es **decorativo**: se guarda, se le
+enseña al reclutador del cliente en su portal, y no se usa para nada.
+
+**Consecuencia para el paso 3, y es la importante:** en PsicoAlianza **el correo no sirve como llave
+para reencontrar a una persona** —hay dos y no coinciden—, así que el emparejamiento va **por
+documento**, como ya decía la decisión 27.
+
+🔴 **Y la 27 acierta, ahora por un motivo firme: hay que invitar con el correo que devuelve la
+consulta.** No para evitar un error, sino por dos cosas medidas: es **el único que la persona va a
+recibir**, y mandar otro **ensucia su ficha** con una dirección que el reclutador del cliente verá y
+que no sirve para nada. Del *correo de registro* que guarda el candidato (decisión 15, 32-d) se
+anota ese mismo, el registrado, sabiendo que **no se usa para emparejar**.
+
+⚠️ **Lo que esto no rompe:** que la invitación le llegue a una dirección distinta de la que tenemos
+guardada del candidato da igual, porque **el enlace se le manda por WhatsApp** (B2) y el correo de
+PsicoAlianza es solo un respaldo.
+
+#### Bloque D · presentar y reprobar — ✅ HECHO (2026-09-14). **Cierra A1**
+
+El usuario presentó la prueba respondiendo a propósito lejos del perfil del cargo. Así se ve un
+reprobado, que es lo que llevaba abierto desde la etapa 2:
+
+| Campo | Antes de presentar | Después |
+| --- | --- | --- |
+| `estado` de la agenda | 1 *Agendada* | **3 *Finalizada*** |
+| `recomendacion` | `0` | **`1`** |
+| `estado_recomendacion` | «Pruebas pendientes» | **«No recomendado»** |
+| `ajuste` | `null` | **`43.25`** |
+| `indice_talento` | `-2.0` (centinela) | **`"43.3"`** |
+| `fecha_procesamiento` | `null` | La hora en que se calificó |
+
+🔴 **`recomendacion: 1` es «No recomendado».** El contrato solo tenía `0` pendiente y `3`
+recomendado; **el 1 no estaba**. Sigue sin verse el `2`, que probablemente sea una banda intermedia.
+**El adaptador no puede tratar «lo que no sea 3» como reprobado**: tiene que reconocer el 1 y dejar
+lo desconocido como indeterminado, o una banda nueva descartaría gente sin que nadie lo decidiera.
+
+**Lo demás que confirma esta ficha:**
+
+- ✅ **El centinela `-2.0` se sustituye por la nota real al terminar**, tal como suponía la decisión
+  37. Con una sola prueba, el índice del candidato es el ajuste de esa prueba redondeado a un
+  decimal — con varias habrá que ver cómo pondera.
+- ✅ **La etapa del candidato sigue en `9` «En pruebas»** aunque la prueba esté finalizada y no
+  recomendada. Confirma el contrato: **la etapa no sirve para decidir nada**, el veredicto vive en la
+  agenda.
+- **El ajuste es contra un perfil con nombre** (aquí, uno «operativo»), que la agenda trae en un
+  campo propio. Es lo que explica que un DISC pueda «reprobar»: no hay respuestas malas, hay
+  distancia al perfil del cargo.
+- ⚠️ **La ficha del participante trae datos personales que nosotros nunca mandamos** —nombre y
+  apellidos, fecha de nacimiento, dirección, teléfonos, ciudad—, porque la persona ya existía en la
+  plataforma. **El cliente no debe volcar esa ficha al registro**, que es justo la deuda conocida del
+  proyecto con los clientes externos.
+
+⚠️ **Lo que esta tanda dejó en la cuenta del cliente**: una persona de prueba invitada a una vacante
+activa —que además tenía un participante real dentro, porque el contador decía cero— y hasta tres
+correos de invitación a la misma dirección. Conviene sacarla del proceso a mano cuando el bloque D
+termine.
