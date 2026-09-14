@@ -1122,7 +1122,8 @@ Se da por terminado cuando se cumplen las dos condiciones:
     adaptador** (2026-09-13, decidido con el usuario tras la prueba con proxy móvil). Es el
     **camino oficial**. Revierte a medias la 24, descarta la 25 y confirma la 26.
 
-    **Lo que la prueba demostró (script en el traspaso del 2026-09-13):** el mismo Chrome
+    **Lo que la prueba demostró (script en `evidencia/login-por-proxy-movil.mjs`; detalle en
+    *Medición con proxy*):** el mismo Chrome
     automatizado que el sitio rechazaba desde IP de casa y desde proxy residencial rotativo
     (3 de 3 rechazos) **entra saliendo por una IP móvil colombiana** (DataImpulse, sesión
     pegajosa, con y sin ventana). La propia página ejecuta el captcha; el script solo escribe
@@ -2094,6 +2095,31 @@ escribe correo y contraseña con pausas, hace clic; la propia página ejecuta el
 *Permanecer conectado* viene marcado por defecto, así que el login deja `ats_session`,
 `remember_web_<hash>` (5 días, como dice la ayuda del propio sitio: «hasta 5 días sin caducar por
 inactividad») y `XSRF-TOKEN`.
+
+**Los scripts están guardados en `evidencia/`**, sin secretos (leen el `.env` del backend):
+`login-por-proxy-movil.mjs` es el que entró —la copia es la versión con ventana; la corrida sin
+ventana solo cambió esa bandera a `true`—, `login-sin-proxy.mjs` la versión que el sitio rechaza,
+y `medicion-solvecaptcha.mjs` el de la mañana. Son evidencia, no código de producción: el 2b y el
+2c se escriben desde cero dentro del backend, con identificadores en inglés y sin comentarios.
+
+**Lo que el brief del 2b y del 2c necesitan saber del proxy y de Chrome**, sacado del script y
+del reporte del usuario:
+
+| Qué | Valor | Nota |
+| --- | --- | --- |
+| Proveedor | DataImpulse, plan móvil | Contratado por el usuario |
+| Gateway | `gw.dataimpulse.com`, puerto **823** HTTP o **824** SOCKS5 | Se usó HTTP |
+| Usuario del proxy | `<login>__cr.co__sid.<número>` | `__cr.co` = Colombia; `__sid.<número>` = sesión pegajosa: la misma IP mientras se repita el número. **Un número nuevo por intento**, generado por quien llama |
+| Contraseña del proxy | La de la cuenta, sin sufijos | Va por autenticación de proxy, no en la URL |
+| IP de salida vista | Comcel/Claro, marcada como móvil | Comprobada pidiendo la IP pública antes del login |
+| Chrome | `puppeteer-core` @23 manejando el Chrome instalado, no el Chromium empaquetado | En el servidor cambia: Chromium en la imagen (43) |
+| Banderas | `--proxy-server=http://<gateway>:<puerto>` y `--disable-blink-features=AutomationControlled` (quita `navigator.webdriver`) | Sin ventana con `headless: true` |
+| Autenticación del proxy | `page.authenticate` con usuario y contraseña | |
+| Flujo | `/login`, esperar `#email`, `#password` y `#enviar_inicio_sesion`; escribir con pausas; clic; la página ejecuta el captcha y envía | *Permanecer conectado* ya viene marcado |
+| Éxito | La URL sale de `/login` (se vio `/procesos`) | Cookies: `ats_session`, `remember_web_<hash>`, `XSRF-TOKEN` |
+| Rechazo | Sigue en `/login` con «No hemos podido verificar que eres una persona» | Rotar `__sid` y repetir |
+| Bloqueo | Texto con «demasiados intentos» o «bloquead» | **Parar en seco**: es la cuenta de gerencia del cliente |
+| Coste | Unos 2 USD por GB de tráfico móvil | Bloquear imágenes, CSS y fuentes durante el login |
 
 **Lectura:** lo que PsicoAlianza —o Google para su clave— castiga es **la IP**, no el navegador ni
 el endurecimiento. Corrige el riesgo del 2026-09-09 que decía "no volver por esta vía".
