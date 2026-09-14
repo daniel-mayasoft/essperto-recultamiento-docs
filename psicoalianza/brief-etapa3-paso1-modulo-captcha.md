@@ -67,31 +67,37 @@ psicométrica: seguirlo, no inventar otro (decisión 25).
    - *sin configurar* — falta la clave del servicio. Es permanente: reintentar no lo arregla.
    - *petición no soportada* — este proveedor no sabe resolver ese tipo, o un dato está fuera de lo
      que el servicio acepta (el puntaje, abajo). También permanente, y se lanza **antes** de llamar.
-   - *no se pudo resolver* — el servicio respondió error, la respuesta no se entiende, o se agotó el
-     tiempo. Pasajero. Lleva el motivo y el texto del servicio en el mensaje.
+   - *no se pudo resolver* — con **dos campos propios**, no solo texto en el mensaje (decisión 39:
+     un texto dura hasta que alguien lo reescribe): **la causa** —tiempo agotado, error del servicio
+     o respuesta ilegible— y **el código que devolvió el servicio**, si lo hubo. Quien llama decide
+     con ellos: un tiempo agotado se reintenta; un saldo en cero o una clave rechazada, no. Este
+     paso **no clasifica** los códigos, porque su lista no está publicada: los entrega.
 6. **El adaptador de SolveCaptcha**, que implementa el puerto. El contrato está verificado en la
    documentación oficial del servicio el 2026-09-13:
 
    | Qué | Cómo |
    | --- | --- |
-   | Encargar | `in.php` con `key`, `method=userrecaptcha`, `version=v3`, `googlekey` (clave del sitio), `pageurl`, `action`, `min_score` y `json=1`. Devuelve el identificador de la tarea |
+   | Encargar | `in.php` **por POST** —así la clave no viaja en la dirección en este paso— con `key`, `method=userrecaptcha`, `version=v3`, `googlekey` (clave del sitio), `pageurl`, `action`, `min_score` y `json=1`. Devuelve el identificador de la tarea |
    | Preguntar | `res.php` con `key`, `action=get`, `id` y `json=1` |
    | Todavía no | El servicio responde `CAPCHA_NOT_READY` (así, con esa ortografía) |
    | Listo | `status` 1 y el token en `request` |
-   | Ritmo | Esperar de 15 a 20 segundos antes de la primera pregunta, y después cada 5 |
-   | Puntaje | El servicio acepta de **0.3 a 0.9** |
+   | Ritmo | Esperar **15 segundos** antes de la primera pregunta (la página de v3 dice de 10 a 15; la general, de 15 a 20) y después cada 5 |
+   | Puntaje | Escala de **0.1 a 0.9** según la página de v3; **0.4 por defecto** si no se manda; y el servicio avisa de que **hoy es casi imposible conseguir más de 0.3** |
 
-   ⚠️ **Sin verificar, y hay que confirmarlo en la opinión previa con la fuente**: la forma exacta en
+   ⚠️ **No publicado** (revisadas las tres páginas oficiales en la opinión previa del 2026-09-13): la forma exacta en
    JSON de *todavía no* y de un error, y la lista de códigos de error. **El diseño no puede
    depender de ellas**: *todavía no* se reconoce por ese texto venga donde venga, y cualquier otra
    respuesta que no sea `status` 1 es *no se pudo resolver*, con el texto del servicio dentro.
 
    **Tiempo total, alrededor de dos minutos**, como constante del adaptador, no como variable de
-   entorno. Un puntaje fuera de 0.3 a 0.9 es *petición no soportada*, sin llamar: el adaptador no lo
-   corrige en silencio.
+   entorno. El puntaje **se manda siempre** —si falta, el servicio usa 0.4 sin avisar—, y uno fuera de 0.1 a
+   0.9 es *petición no soportada*, sin llamar: el adaptador no lo corrige en silencio.
 7. **Dos variables de entorno**, declaradas en el esquema con su validación:
-   - `SOLVECAPTCHA_BASE_URL`, con la dirección oficial por defecto —no es un secreto, y sigue la
-     forma de `OPENAI_BASE_URL`—.
+   - `SOLVECAPTCHA_BASE_URL`, con la forma de `OPENAI_BASE_URL`: admite vacío y trae la dirección
+     oficial por defecto. ⚠️ Una línea vacía en el `.env` llega como texto vacío, no como el valor
+     por defecto; por eso todos los lectores de `OPENAI_BASE_URL` repiten la dirección oficial como
+     respaldo, y **el adaptador hace lo mismo**. Quitar el *admite vacío* rompería el arranque de
+     quien tenga la línea vacía.
    - `SOLVECAPTCHA_API_KEY`, **opcional y sin valor por defecto**. 🔴 **No obligatoria**: si lo
      fuera, el día que se mezcle la rama no arrancarían ni el servidor de pruebas ni el backend
      local de nadie que no la tenga. Sin clave, falla **al pedir un token**, con *sin configurar*,
@@ -127,10 +133,13 @@ compilación.
 
 **3. `CAPTCHAS.md` describe otra implementación, y en dos puntos va contra el servicio.** Allí se
 pregunta cada 2 segundos, y el servicio pide 5. Y allí el puntaje por defecto es 0.3, cuando es un
-dato de cada petición. Sus tres errores conocidos tampoco se copian.
+dato de cada petición. **Y la primera versión de este brief también se equivocó**: dio de 0.3 a 0.9,
+que no es el rango de v3. Sus tres errores conocidos tampoco se copian.
 
 **4. Una petición HTTP sin tope puede colgarse para siempre.** El tiempo total de dos minutos no
-sirve si una sola petición nunca responde. Cada petición lleva su propio límite de tiempo.
+sirve si una sola petición nunca responde. Cada petición lleva su propio límite de tiempo, **armado
+con un temporizador normal que cancela la petición**: el límite nativo de Node no lo controlan los
+relojes simulados de Jest, y su prueba no se podría escribir.
 
 **5. Una variante nueva de la petición no puede pasar en silencio.** Si mañana alguien añade v2 al
 tipo y no al adaptador, eso tiene que ser **un error de compilación o un *no soportada* explícito**,
@@ -156,7 +165,9 @@ Las de `arranque-del-ejecutor.md`. Las que más se han incumplido en este frente
 - **Comentarios: ninguno nuevo en archivos de código.**
 - **Los identificadores van en inglés**, incluidos los de los `.spec` y los parámetros de callbacks.
 - **Ningún secreto en ningún archivo**, tampoco en una prueba: la clave de las pruebas es un texto
-  inventado y evidente.
+  inventado y evidente, y **elegido para no disparar el chequeo de secretos** del `CLAUDE.md` del
+  backend, que marca `token` o `api_key` seguidos de un texto de seis caracteres o más. Un falso
+  positivo en cada commit acaba haciendo que se ignore.
 - **La solución más pequeña que resuelve el caso.**
 - **No commitear.** Los archivos nuevos se añaden al índice, con `add`.
 - **Documentación en el mismo diff** (el flujo de la etapa psicométrica no cambia):
@@ -176,8 +187,15 @@ Las de `arranque-del-ejecutor.md`. Las que más se han incumplido en este frente
 - **Error al encargar** y **error al preguntar** → *no se pudo resolver*, con el texto del servicio.
 - **Tiempo agotado** → *no se pudo resolver*, diciendo que fue el tiempo.
 - **Sin clave** → *sin configurar*, **sin llamar a `fetch`**.
-- **Puntaje fuera de 0.3 a 0.9** → *petición no soportada*, **sin llamar a `fetch`**.
-- **El registro no contiene la clave ni el token** en ningún caso, tampoco en los de error.
+- **Puntaje fuera de 0.1 a 0.9** → *petición no soportada*, **sin llamar a `fetch`**; dentro del
+  rango, **se manda siempre**.
+- **El error *no se pudo resolver* trae su causa y el código del servicio** en sus campos.
+- **Una petición que nunca responde se corta** por su límite, y cuenta como *no se pudo resolver*
+  por tiempo.
+- **El módulo, montado solo, entrega el puerto por su token** y es el adaptador de SolveCaptcha:
+  como nadie lo importa, es lo único que comprueba el cableado antes del paso 2.
+- **El registro no contiene la clave ni el token** en ningún caso, tampoco en los de error. Hay
+  precedente de espiar el registro en la prueba de paridad de EvaluaTest.
 
 ⚠️ Una prueba que pasa a la primera merece desconfianza: control negativo, y borrarlo después,
 limpiando la caché.

@@ -6,6 +6,63 @@ y el portal en PowerShell**. Leído del código el 2026-09-13.
 **Estado:** este documento existe; el archivo de Docker y los dos `.env` **todavía no**. Se
 crean siguiendo los pasos de abajo.
 
+⚠️ **En revisión (2026-09-13):** el plan cambia de "base local vacía" a **"base local con una
+copia de la de test"**. La sección "Copia de la base de test" ya está al día; el resto del
+documento todavía describe el plan viejo y se reescribe al terminar los pasos.
+
+## Copia de la base de test
+
+**Por qué una copia y no conectarse a la de test:** el backend tiene tareas automáticas sin
+interruptor (tiempos de espera, rescates, consulta de resultados). Un backend local contra la
+base de test trabajaría sobre los mismos candidatos que el del servidor, y además con otra
+versión: test corre `develop`.
+
+### Paso 1 · Sacar la copia en el servidor (desde MobaXterm)
+
+Todo es **solo lectura** para la base de test. Se hace en la sesión SSH del servidor. Si el
+usuario no puede usar Docker directamente, cada `docker` va con `sudo` delante.
+
+**1a · Espacio en disco.** La copia comprimida ocupa bastante menos que la base, pero se escribe
+dos veces (dentro del contenedor y en el servidor):
+
+```bash
+df -h / ~
+```
+
+**1b · Versión y tamaño.** Pide la contraseña de Mongo (`MONGO_INITDB_ROOT_PASSWORD` en el
+compose de test); escrita en el aviso, no queda en el historial de la terminal:
+
+```bash
+docker exec -it selessia-mongodb mongosh --quiet -u mayaAdmin -p --authenticationDatabase admin \
+  --eval "const s = db.getSiblingDB('esscoti').stats(1024*1024); print('version', db.version()); print('datos MB', s.dataSize); print('disco MB', s.storageSize)"
+```
+
+**Anotar la versión**: la imagen de Docker local tiene que ser esa misma (test usa
+`mongo:latest`, sin fijar).
+
+**1c · Sacar la copia**, solo la base `esscoti` (la del orquestador no hace falta):
+
+```bash
+docker exec -it selessia-mongodb mongodump -u mayaAdmin --authenticationDatabase admin \
+  --db esscoti --gzip --archive=/tmp/esscoti-test.archive.gz
+```
+
+Pide la contraseña. Al final dice cuántos documentos copió de cada colección. Test sigue
+funcionando mientras tanto; la copia no es de un instante exacto, y para desarrollo da igual.
+
+**1d · Sacarla del contenedor al servidor y borrarla del contenedor:**
+
+```bash
+docker cp selessia-mongodb:/tmp/esscoti-test.archive.gz ~/esscoti-test.archive.gz
+ls -lh ~/esscoti-test.archive.gz
+docker exec selessia-mongodb rm /tmp/esscoti-test.archive.gz
+```
+
+**1e · Bajarla** con el explorador de archivos de MobaXterm (panel lateral de la sesión SSH), a
+una carpeta **fuera de los tres repositorios**. Una vez bajada y con el mismo tamaño que dio
+`ls -lh`, borrarla del servidor con `rm ~/esscoti-test.archive.gz`: son datos personales de
+candidatos.
+
 | Pieza | Dónde corre | Dirección |
 | --- | --- | --- |
 | MongoDB | Contenedor de Docker | `localhost:27017`, solo desde esta máquina |

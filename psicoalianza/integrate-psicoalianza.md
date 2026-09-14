@@ -440,11 +440,18 @@ Se da por terminado cuando se cumplen las dos condiciones:
     configura del lado de PsicoAlianza (paso 2). La petición de v3 lleva además la dirección de la
     página, que el servicio exige.
 
-    ⚠️ **`CAPTCHAS.md` contradice al servicio en dos puntos** (documentación oficial de
-    SolveCaptcha, consultada el 2026-09-13): el servicio pide preguntar cada 5 segundos, tras
-    esperar de 15 a 20 al principio, y allí se pregunta cada 2; y acepta puntajes de 0.3 a 0.9, así
-    que "subir desde abajo" empieza en 0.3. Se sigue al servicio. `CAPTCHAS.md` describe otro
-    proyecto y no se corrige desde aquí.
+    ⚠️ **`CAPTCHAS.md` contradice al servicio** (documentación oficial de SolveCaptcha, consultada
+    el 2026-09-13): el servicio pide preguntar cada 5 segundos tras una espera inicial —la página de
+    v3 dice de 10 a 15, la general de 15 a 20; se toman 15—, y allí se pregunta cada 2. Se sigue al
+    servicio. `CAPTCHAS.md` describe otro proyecto y no se corrige desde aquí.
+
+    🔴 **Corregido en la opinión previa del paso 1 (2026-09-13): el puntaje.** Esta nota decía que el
+    servicio acepta de 0.3 a 0.9; ese rango no es el de v3. La página de v3 da una escala de 0.1 a
+    0.9, **0.4 por defecto** si no se manda, y avisa de que **hoy es casi imposible conseguir un
+    token por encima de 0.3**. Eso toca a la decisión 23 más que al módulo: "subir desde abajo" casi
+    no tiene recorrido. **Si PsicoAlianza rechaza los tokens de 0.3, pagar más no lo arregla y la
+    apuesta del solucionador de pago se cae.** La medición del paso 2 decide si la etapa sigue por
+    este camino, y va antes que cualquier otra cosa de ese paso.
 
     ⚠️ ~~Es el primer puerto/adaptador del backend.~~ **Ya no** (2026-09-10): la capa
     psicométrica llegó primero y el precedente está sentado — puerto sin conocer al
@@ -1746,7 +1753,7 @@ después, porque en local la conexión y la configuración de la oferta se puede
 
 | # | Paso | Riesgo |
 | --- | --- | --- |
-| 1 | El módulo de captcha: puerto sin proveedor, adaptador de SolveCaptcha, solo reCAPTCHA v3 — brief `brief-etapa3-paso1-modulo-captcha.md`, **escrito, sin empezar** | Aditivo |
+| 1 | El módulo de captcha: puerto sin proveedor, adaptador de SolveCaptcha, solo reCAPTCHA v3 — brief `brief-etapa3-paso1-modulo-captcha.md`, **escrito, en espera: la medición del captcha (abajo) falló** | Aditivo |
 | 2 | El cliente de PsicoAlianza: login con CSRF y captcha, sesión guardada con un solo login a la vez por conexión, sus peticiones y el registro sin contraseñas; la lectura única de conexiones reconoce la de PsicoAlianza; se mide el puntaje del captcha | Aditivo |
 | 3 | El adaptador de PsicoAlianza contra el puerto psicométrico. Puede partirse: listar y comprobar vacantes, después invitar y leer resultados | Aditivo |
 | 4 | El resolvedor de adaptador por conexión, y el cron preguntando al proveedor de la invitación (decisiones 6, 38 y 41). Puede partirse | Embudo |
@@ -1800,3 +1807,110 @@ Levantado leyendo el código y `psicoalianza-api.md`. Cada punto cae en el paso 
 27 dice que si el documento ya existe en PsicoAlianza con otro correo, se invita con el correo que
 devuelve la consulta. La 31 dice que en ese mismo caso se falla de forma visible. No pueden valer las
 dos.
+
+### Medición del captcha — ❌ RECHAZADO (2026-09-13)
+
+Decidido con el usuario medir **antes** de programar nada de la etapa: un script desechable, fuera
+de los repositorios, que entra exactamente como entraría el backend (decisión 24). Pide la página
+de login, lee de ella la clave del sitio, le pide a SolveCaptcha un token v3 con la acción `submit`,
+pide el CSRF fresco como hace la página, envía el formulario con "permanecer conectado" y comprueba
+si la sesión quedó viva. La mecánica leída de la página coincide con *Confirmado de PsicoAlianza*.
+
+| Puntaje pedido | Intentos | Token entregado | Resultado |
+| --- | --- | --- | --- |
+| 0.3 | 4 | Sí, en 16–17 s | Los 4 rechazados: «No hemos podido verificar que eres una persona» |
+| 0.7 | 2 | Sí, en 16–17 s | Los 2 rechazados, mismo mensaje |
+| 0.9 | 2 | Sí, en 16–17 s | Los 2 rechazados, mismo mensaje |
+| 0.3, **con navegador** | 3 | Sí, en 16–17 s | Los 3 rechazados, mismo mensaje |
+| 0.7 y 0.9, **con navegador** | 2 + 2 | Sí, en 17–22 s | Los 4 rechazados, mismo mensaje |
+
+La última fila repite la forma de robot-manager, a petición del usuario: Chrome real con la página
+de login cargada, correo y contraseña tecleados, y el propio código de la página enviando el
+formulario, con el token de SolveCaptcha entregado en lugar del de Google. **Mismo resultado que por
+HTTP: lo que falla es el token, no la forma de enviarlo.** Coste total de los quince intentos: unos
+dos centavos de dólar.
+
+⚠️ **Exploración en curso, pedida por el usuario: la lectura de abajo está en revisión.** En la demo
+de reCAPTCHA v3 de 2Captcha, cuya verificación devuelve lo que responde Google, dos tokens de
+SolveCaptcha sacaron **0.9 (pedido 0.3) y 0.7 (pedido 0.9)**, con el dominio y la acción correctos.
+O sea: el servicio **sí** consigue notas altas, y la nota pedida no manda sobre la obtenida. Que
+PsicoAlianza rechace por nota baja deja de ser la explicación segura: puede que Google califique
+distinto en cada sitio —esa demo la resuelven sin parar— o que PsicoAlianza compruebe algo más que
+la nota.
+
+✅ **Primer login por HTTP conseguido (2026-09-13), con tokens Enterprise.** Dos pruebas más lo
+aclararon:
+
+- En la **demo neutral de Google** (`recaptcha-demo.appspot.com`), tres tokens normales de
+  SolveCaptcha sacaron **0.9** los tres, pedidos 0.3, 0.9 y 0.3. El servicio no tiene un problema de
+  nota.
+- En PsicoAlianza, pidiendo el token con **`enterprise=1`** —la variante Enterprise de SolveCaptcha—,
+  **un intento de dos entró**: redirección a `/inicio`, sesión viva y la cookie `remember_web_<hash>`
+  de *permanecer conectado*. El otro fue rechazado con el mensaje de siempre. Con `userAgent` y sin
+  Enterprise, 2 de 2 rechazados.
+
+~~**Lectura provisional:** la clave se verifica como Enterprise y los tokens normales no le
+sirven.~~ **No se sostuvo, corregido el mismo día:** diez intentos más con `enterprise=1` —seis
+solos y cuatro con `userAgent`— dieron **0 de 10**. Enterprise va **1 de 12**; los tokens normales,
+**0 de 17**. Un éxito en doce no distingue a Enterprise de la suerte.
+
+**Lo que sí queda probado:** PsicoAlianza **puede** aceptar un token de SolveCaptcha por HTTP, y ese
+login deja la cookie de *permanecer conectado*. Y tras unos treinta logins rechazados en el mismo
+día, la cuenta **no se bloqueó**: el rechazo sigue siendo el del captcha. Eso abre una vía que no
+depende de acertar la variante: **reintentar hasta entrar una vez, y vivir de la cookie** (decisión
+26), si esa cookie reautentica sola.
+
+**Medido a continuación, 2026-09-13: esa vía tampoco se sostiene con estos números.** Veinte intentos
+seguidos con `enterprise=1` y veinte con tokens normales, parando al primer éxito: **0 de 40**. El
+acumulado del día queda así:
+
+| Variante | Éxitos |
+| --- | --- |
+| Tokens normales, HTTP y Chrome, cualquier puntaje, con y sin `userAgent` | **0 de 37** |
+| `enterprise=1`, con y sin `userAgent` | **1 de 32** |
+| Tokens normales en la demo neutral de Google | 0.9 de nota los 3 |
+
+Con un éxito en 69 intentos, entrar costaría de media decenas de intentos y hasta media hora, sin
+garantía; y la prueba de si la cookie de *permanecer conectado* reautentica sola **no llegó a
+correr**, porque no hubo login. La cuenta sigue sin bloquearse tras unos setenta rechazos.
+
+**Lectura:** los tokens de SolveCaptcha son buenos donde se puede medir, y PsicoAlianza los rechaza
+casi siempre. Qué comprueba de más no se puede ver desde fuera. Queda para decidir con el usuario.
+
+**Última hipótesis probada, 2026-09-13: pasarle a SolveCaptcha las cookies de sesión de la página y
+el user agent** —para que resuelva como un navegador con sesión abierta en el sitio, no como uno
+recién nacido—, junto con `enterprise=1`. **0 de 8.** Con esto, el acumulado del día por variante es
+concluyente:
+
+| Variante de SolveCaptcha | Éxitos |
+| --- | --- |
+| Token normal (HTTP y Chrome, puntajes 0.3/0.7/0.9, con y sin `userAgent`) | 0 de 37 |
+| `enterprise=1` (con y sin `userAgent`) | 1 de 40 |
+| `enterprise=1` + cookies de sesión + `userAgent` | 0 de 8 |
+| **Total** | **1 de 85** |
+
+**Veredicto: SolveCaptcha no resuelve el reCAPTCHA v3 de PsicoAlianza de forma fiable.** Se cubrió
+todo lo que el servicio ofrece por configuración; el único éxito en 85 es indistinguible del azar.
+Quedan sin probar dos cosas que no se pueden medir en una sesión: **resolver con un proxy
+residencial** pasado a SolveCaptcha (hace falta un proxy; su documentación no confirma proxy para
+v3) y **pedir a soporte de SolveCaptcha que ajuste su solucionador para este sitekey** (días). La
+decisión de fondo —qué camino toma la autenticación de PsicoAlianza— queda con el usuario; las
+opciones y su probabilidad, arriba en *Cómo seguir* del traspaso, no en el código.
+
+**Lo que se sabe:**
+
+- **El rechazo es del captcha, no de las credenciales**: el mensaje es el del captcha, y PsicoAlianza
+  rechaza por captcha antes de mirar el usuario. Las credenciales no llegaron a comprobarse.
+- **El servicio tarda lo mismo pida el puntaje que pida**: 16–17 segundos con 0.3 y con 0.9. Pedir
+  más no le cuesta más trabajo, lo que encaja con su propio aviso de que por encima de 0.3 casi no
+  entrega: **el puntaje pedido no es una garantía**.
+- **Encaja con lo del 2026-09-09** (*Riesgos*): un navegador automatizado desde IP residencial
+  también fue rechazado. PsicoAlianza exige un puntaje que ni ese navegador ni este servicio
+  alcanzan.
+
+**Lo que no se sabe:** qué puntaje exige PsicoAlianza —Google no lo dice al que envía— ni si otro
+servicio de pago lo alcanzaría.
+
+🔴 **Consecuencia: la decisión 23 no funciona como está.** Con SolveCaptcha no se entra a
+PsicoAlianza por HTTP. El paso 1 queda en espera y los pasos 2 a 6 no arrancan hasta decidir cómo se
+autentica el sistema. La decisión es del usuario y queda pendiente.
