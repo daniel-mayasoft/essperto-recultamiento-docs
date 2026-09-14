@@ -864,6 +864,11 @@ Se da por terminado cuando se cumplen las dos condiciones:
     mensaje**. Es lo que ya les pasa a los candidatos de cualquier otra etapa que falla al
     arrancar.
 
+    ✅ **Ampliada el 2026-09-14 para PsicoAlianza** (opinión previa del paso 3, decidido por el
+    usuario): califican también **el plazo ausente o no entero** y **la persona que no aparece en el
+    tablero tras invitarla**. Los dos cumplen lo mismo que el nombre de vacante: reintentar no los
+    arregla, y como pasajeros dejaban a la persona atascada. Lo de abajo sigue valiendo para EvaluaTest.
+
     🔴 **Solo el nombre de vacante ausente califica.** El otro aborto del adaptador —sin
     código de evaluación— **no** lleva el tipo permanente: la consulta que trae ese código
     **devuelve exactamente lo mismo cuando la vacante no tiene código que cuando el
@@ -2043,8 +2048,8 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 2b | El módulo `proxy`: puerto de *arrendar una IP*, adaptador de DataImpulse, errores propios, sin selector (decisión 43). Nada lo llama hasta el 2c | Aditivo |
 | 2c | El acuñador de sesión: Chrome sin ventana por el puerto de proxy, clasificador, reintentos, candado y tope, aviso a soporte; Chromium en la imagen del backend (decisión 43). **Espera las dos mediciones y el dato de la imagen** | Aditivo en código; **la imagen no** |
 | 3 | El adaptador de PsicoAlianza contra el puerto psicométrico. Puede partirse: listar y comprobar vacantes, después invitar y leer resultados | Aditivo |
-| 4 | El resolvedor de adaptador por conexión, y el cron preguntando al proveedor de la invitación (decisiones 6, 38 y 41). Puede partirse | Embudo |
-| 5 | Backend: guardar y validar la conexión de PsicoAlianza, el documento en la invitación y su motivo de rechazo | Embudo |
+| 4 | El resolvedor de adaptador por conexión, y el cron preguntando al proveedor de la invitación (decisiones 6, 38 y 41). Puede partirse. 🔴 **No puede mandar ninguna empresa a PsicoAlianza antes de que el 5 esté hecho**: sin plazo ni documento, cada candidato sale descartado (opinión previa del paso 3) | Embudo |
+| 5 | Backend: guardar y validar la conexión de PsicoAlianza, **el documento y el plazo en la invitación**, su motivo de rechazo, el tipo de documento real (A14), y no aceptar plazos con decimales en una empresa con PsicoAlianza | Embudo |
 | 6 | Portal: selector de proveedor, modal por proveedor, pruebas adicionales solo de EvaluaTest (decisiones 3 y 4) | Visible |
 
 **Antes del paso 2, fuera del código:** cuenta de PsicoAlianza para probar y **una sesión de esa
@@ -2465,7 +2470,9 @@ las tres formas **supuestas** de sesión muerta que heredó el paso 3 del paso 2
 ✅ **DECIDIDO por el usuario el 2026-09-14: se adopta.** En la base se guarda **solo la cookie de
 *permanecer conectado***, escrita al acuñar; la corta vive en memoria y, si se pierde o vence, la de
 5 días reautentica. Con la de 5 días vencida, la petición falla como *sesión caducada* y toca acuñar.
-**Sin decidir todavía**: si va en un cambio pequeño propio antes del 2c o dentro de su brief.
+✅ **Y va en un cambio pequeño propio, antes del 2c** (decidido por el usuario el mismo día): toca el
+almacén de sesión del paso 2, que está cerrado, y así el 2c lo encuentra resuelto. Su brief lo
+escribe este planificador, después de proponerlo entero.
 
 #### Bloques B y C · invitar de verdad — ✅ HECHO (2026-09-14)
 
@@ -2525,8 +2532,11 @@ invitación. Así que el correo de la ficha del participante es **decorativo**: 
 enseña al reclutador del cliente en su portal, y no se usa para nada.
 
 **Consecuencia para el paso 3, y es la importante:** en PsicoAlianza **el correo no sirve como llave
-para reencontrar a una persona** —hay dos y no coinciden—, así que el emparejamiento va **por
-documento**, como ya decía la decisión 27.
+para reencontrar a una persona** —hay dos y no coinciden—, así que ~~el emparejamiento va **por
+documento**, como ya decía la decisión 27~~. **Corregido el 2026-09-14** (levantado por el ejecutor
+del paso 3): **al invitar** se busca a la persona por documento, como dice la 27; **al consultar
+resultados** se empareja **solo por el identificador** que esa búsqueda obtuvo, porque el documento
+no viaja en la consulta del cron (ver *Contraste del brief del paso 3 contra el código*).
 
 🔴 **Y la 27 acierta, ahora por un motivo firme: hay que invitar con el correo que devuelve la
 consulta.** No para evitar un error, sino por dos cosas medidas: es **el único que la persona va a
@@ -2585,6 +2595,25 @@ siete claves, tipo como texto), aunque la forma actual funcionó el 14. Motivo: 
 el portal de ellos usa de verdad, el paso 2 la dejó aislada en una función para poder corregirla de
 un toque, y se vuelve a comprobar con una invitación real al documento del usuario, que el reporte
 del paso 3 tiene que traer.
+
+### Opinión previa del paso 3 (2026-09-14)
+
+Once puntos del ejecutor, verificados contra el código por el planificador, y dos de ellos cerrados
+con mediciones de solo lectura ese mismo día. Todo está incorporado al brief.
+
+| Punto | Qué se hizo |
+| --- | --- |
+| La tanda seguía diciendo «emparejar por documento» | Corregido en la tanda |
+| No estaba medido que el listado sin filtros trajera las archivadas | ✅ **Medido**: sin el parámetro de archivadas llegan 118, 5 archivadas. En el contrato |
+| Qué puntaje llega de alguien con pruebas en otra vacante | ✅ **Medido, sin riesgo**: cada agenda trae su vacante y en los 118 tableros todas son de la del tablero; el índice de talento es **de la participación** (58 de 62 personas en varias vacantes tienen uno distinto en cada una). **El contrato decía que era de la persona y estaba mal**; corregido |
+| Una vacante activa sin pruebas pasaba por usable | Aceptado: no usable, con el motivo que ya usa EvaluaTest. Hoy ninguna está así |
+| El plazo puede tener decimales y PsicoAlianza usa días enteros | **Decidido por el usuario**: el adaptador lo trata como error permanente, y no aceptar decimales en la configuración de una empresa con PsicoAlianza va a los pasos 5 y 6. Medido en producción: **ninguna empresa tiene plazo propio**, todas usan el del entorno |
+| Nadie tenía asignado que el embudo pase el plazo | **Asignado al paso 5**, junto al documento. Y el 4 no puede mandar ninguna empresa a PsicoAlianza antes del 5 |
+| Quien no aparece en el tablero tras invitar se quedaba atascado para siempre | **Decidido por el usuario**: error permanente, comparando el documento sin espacios. **Amplía la decisión 39** |
+| Los motivos de «no usable» llegan tal cual al portal, con la bolsa entera | Aceptado: motivos con nombre fijo y bolsa casi vacía. El texto que ve el reclutador, paso 6 |
+| Sesión caducada en la consulta acaba como *no se pudo consultar* | Correcto hoy. **Hereda el 2c**: el reintento tras acuñar va dentro del adaptador o del cliente, no en el cron |
+| El WhatsApp enseña nuestro correo enmascarado y PsicoAlianza avisa a otro | **Hereda el paso 4/5**, junto a las instrucciones de EvaluaTest del mismo mensaje |
+| Cambios sin commitear en la documentación | Eran del planificador; no se mezclan con el diff del paso |
 
 #### Bloque D · presentar y reprobar — ✅ HECHO (2026-09-14). **Cierra A1**
 

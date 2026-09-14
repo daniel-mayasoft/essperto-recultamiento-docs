@@ -47,7 +47,7 @@ Lista los procesos (vacantes) de la empresa. Formato DataTables.
 
 | Parámetro | Valor | Efecto |
 | --- | --- | --- |
-| `activo` | `true` | Procesos no archivados — **incluye Activo Y Completado** (112 procesos) |
+| `activo` | `true` | Procesos no archivados — **incluye Activo Y Completado** (112 procesos). ✅ **Sin el parámetro `activo`, el listado trae también los archivados** (medido el 2026-09-14: 118 = 113 no archivados + 5 con `activo: false`; con `activo=false`, solo esos 5, y uno de ellos en estado Activo). Para comprobar una vacante cualquiera, omitir `activo` y `estado_id` |
 | `estado_id` | `2` | **Filtra a solo Activo** (17). Sin él, el listado trae también vacantes ya completadas. Para "vacantes a las que se puede invitar", va `activo=true` + `estado_id=2` |
 | `orden` | `recientes` | Orden por fecha |
 | `nombre` | texto | Filtro de búsqueda por nombre |
@@ -102,7 +102,7 @@ datos de la empresa dueña.
 | `tipo_documento` | `{id, nombre, abreviatura}` | `1` = CC |
 | `email` | string | Correo del candidato |
 | `nombres` / `apellidos` / `telefono` | string \| null | Suelen venir vacíos: PsicoAlianza no los exige para invitar |
-| `indice_talento` | string decimal | **El puntaje agregado** del candidato (pondera sus pruebas). `-2.0` es centinela de "aún sin puntaje"; un positivo es real (`84.6`, `85.0`). El cron no debe leer `-2.0` como nota |
+| `indice_talento` | string decimal | **El puntaje agregado de esa participación** (pondera sus pruebas **en esta vacante**). ✅ **Es por vacante, no de la persona** (medido el 2026-09-14: de 62 personas presentes en dos o más tableros, 58 tienen un índice distinto en cada uno, y en uno siguen en `-2.0` mientras en otro ya tienen nota). `-2.0` es centinela de "aún sin puntaje"; un positivo es real (`84.6`, `85.0`). El cron no debe leer `-2.0` como nota |
 | `estado_id` | number | Estado del candidato (visto `1`) |
 | `etapas_usuarios[].etapa` | `{id, nombre, orden}` | Etapa del candidato. **Se queda en `9` "En pruebas" aunque la prueba esté finalizada y recomendada** — no avanza sola. El aprobado/rechazado NO se lee de aquí |
 | `agendas[]` | array | Una por prueba citada — ver abajo. **Aquí vive el resultado real** |
@@ -112,6 +112,7 @@ datos de la empresa dueña.
 | Campo | Nota |
 | --- | --- |
 | `prueba` | `{id, nombre, slug, procesos_pruebas[]}` con su `perfil` y `porcentaje` (peso de la prueba en el agregado) |
+| `proceso_id` | ✅ **La vacante de la agenda.** Medido el 2026-09-14 sobre los 118 tableros: las 2.121 agendas traen `proceso_id` y **todas son de la vacante del tablero**. El tablero de una vacante no mezcla pruebas que la persona tenga en otras. Trae además `id`, `estado_id`, `evaluado_id`, `prueba_id`, `perfil_id`, `perfil` y `digitacion_valida` |
 | `estado` | `{id, nombre}`. Visto: `1` = Agendada, `3` = Finalizada, `4` = Expirada |
 | `ajuste` | number \| null. La **nota fina** de esa prueba (`84.63`, `85.04`); `null` mientras no termine |
 | `estado_recomendacion` | string. Visto: `"Pruebas pendientes"` (sin terminar), `"Recomendado"` (terminada) |

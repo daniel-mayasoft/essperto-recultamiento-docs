@@ -13,6 +13,10 @@ otros `.md`.** Toca solo el backend.
 > resultados por documento y distinguir una vacante completada de una suspendida— y se corrigieron;
 > lo que cambió está marcado como «corregido el 2026-09-14» en su sitio, y el detalle en la bitácora,
 > *Contraste del brief contra el código*.
+>
+> **Incorpora la opinión previa del ejecutor del 2026-09-14**, verificada contra el código y con dos
+> mediciones de solo lectura hechas ese mismo día. Lo que cambió está marcado como «opinión previa» en
+> su sitio; el detalle, en la bitácora, *Opinión previa del paso 3*.
 
 ## Antes de escribir una sola línea
 
@@ -78,21 +82,42 @@ indistinguible de cualquier otro proveedor.
    🔴 **Corregido el 2026-09-14 contra el código: la única petición de vacantes del cliente del paso
    2 trae solo las activas** —filtra por estado—, así que con ella una vacante completada o suspendida
    **no aparece** y no se distingue de una que no existe. **Este paso añade al cliente una petición
-   hermana sin el filtro de estado**, medida en el contrato: omitir el tamaño de página trae todas
-   las vacantes de la cuenta en una sola respuesta, archivadas incluidas. El adaptador busca ahí la
-   vacante por su identificador:
+   hermana sin el filtro de estado y sin el de archivadas**: omitir el tamaño de página trae todas
+   las vacantes en una sola respuesta, y ✅ **omitir el parámetro de archivadas trae también las
+   archivadas** (medido el 2026-09-14 en la opinión previa: 118 vacantes, 5 de ellas archivadas; está
+   en el contrato). El adaptador busca ahí la vacante por su identificador:
 
-   | Lo que encuentra | Qué devuelve |
-   | --- | --- |
-   | No está en la lista | **Indeterminado** |
-   | Está, pero archivada (`activo` en falso) | **No usable**, con su motivo |
-   | Estado Activo (2) | **Usable** |
-   | Estado Completado (3) | **No usable**, con su motivo |
-   | Estado Suspendido (5) | **No usable**, con su motivo |
-   | 🔴 Cualquier otro estado | **Indeterminado**, nunca usable |
+   | Lo que encuentra | Qué devuelve | Motivo |
+   | --- | --- | --- |
+   | No está en la lista | **Indeterminado** | `not_found` |
+   | La petición falla | **Indeterminado** | `lookup_failed`, el que ya usa EvaluaTest |
+   | Está, pero archivada (`activo` en falso) | **No usable** | `process_archived` |
+   | Estado Completado (3) | **No usable** | `process_completed` |
+   | Estado Suspendido (5) | **No usable** | `process_suspended` |
+   | Estado Activo (2) **con la lista de pruebas vacía** | **No usable** | `no_tests`, el que ya usa EvaluaTest |
+   | Estado Activo (2) con pruebas | **Usable** | — |
+   | 🔴 Cualquier otro estado | **Indeterminado**, nunca usable | `undetermined_status` |
 
    Lo último es lo que importa: aparecerán más estados, y tratar «lo que no conozco» como usable deja
    invitar a una vacante muerta. El listado del punto 2 sigue usando la petición de activas.
+
+   🔴 **Archivada se comprueba antes que el estado** (segunda ronda de la opinión previa): la medición
+   encontró **una vacante archivada en estado Activo**, y mirando primero el estado saldría usable.
+
+   🔴 **«La petición falla» no incluye *sin conexión***: la ruta que activa la prueba distingue los dos
+   por la excepción —sin conexión rechaza con «conéctalo en Mi compañía» (decisión 40); lo demás, con
+   «no se pudo verificar, reintenta»—. La captura del adaptador envuelve **solo la petición al
+   cliente**, y *sin conexión* sale como excepción, igual que en EvaluaTest.
+
+   **Opinión previa, aceptada:** la activa sin pruebas es no usable, como en EvaluaTest. Si no, la
+   persona invitada aparecería sin agendas, contaría como *sigue en ello* y la sacaría nuestro
+   vencimiento con un mensaje falso. Medido: hoy ninguna de las 118 está así; la guarda es barata.
+
+   🔴 **Los motivos son contrato con el portal**: el servicio de ofertas le pasa al portal el motivo
+   tal cual **y copia en la respuesta todo lo que vaya en la bolsa**. Por eso los nombres de la tabla
+   se fijan aquí y no se cambian, y **la bolsa de esta comprobación va casi vacía** —el estado de
+   PsicoAlianza, como mucho—, nunca la vacante entera con sus pruebas. Qué texto muestra el portal
+   con cada motivo es del paso 6.
 
 4. **Validar la conexión: no llama a nadie** (decisión 44). Da por buena la conexión que tenga correo
    y contraseña. **No hace login**, porque hacerlo aquí exigiría acuñar una sesión y un fallo del
@@ -113,8 +138,26 @@ indistinguible de cualquier otro proveedor.
    2. **Invitar**, con nuestro plazo (punto 6).
    3. 🔴 **Buscar a la persona en el tablero por documento**, para quedarse con el identificador que
       PsicoAlianza le da. **No es opcional**: la invitación responde que agregó a alguien **aunque no
-      lo haya agregado** (medido reinvitando), así que su respuesta no prueba nada.
+      lo haya agregado** (medido reinvitando), así que su respuesta no prueba nada. **Se compara el
+      documento sin espacios a los lados.**
    4. **Pedir el enlace personal** con ese identificador, una sola vez, y devolverlo.
+
+   🔴 **Si la persona no aparece en el tablero tras invitarla, es el error permanente** (opinión previa,
+   decidido por el usuario el 2026-09-14; amplía la decisión 39). Como fallo pasajero se quedaba
+   atascada para siempre: el reintento del cron termina antes de mirar el plazo, así que se la
+   reinvitaría cada cinco minutos sin darle nunca su enlace, ocupando plaza. Como permanente, **al
+   entrar a la etapa** el mecanismo de arranque fallido la reintenta tres veces —lo que absorbe un
+   retraso de PsicoAlianza en mostrarla—, avisa a soporte y la descarta. ⚠️ **Por la puerta del cron
+   no hay tres intentos** (segunda ronda de la opinión previa): a quien quedó aparcado sin
+   identificador —por ejemplo tras una sesión caducada— el cron lo descarta **al primer** error
+   permanente. **Se acepta así**: el retraso nunca se ha visto —la tanda vio aparecer a la persona al
+   instante—, y a quien llega por esa puerta normalmente ya se le invitó una vez, así que ya está en el
+   tablero. Esperar y releer el tablero sería una guarda para un caso no observado. **Nunca se
+   devuelve un identificador inventado.**
+
+   **El correo de registro que se devuelve es el que se usó al invitar**: el de PsicoAlianza si la
+   consulta lo conocía, el nuestro si no. El embudo lo guarda solo si difiere del nuestro, y no se
+   usa para emparejar (punto 7).
 
    🔴 **Antes de tocar la invitación, mira el contrato: el payload real del portal se capturó el
    2026-09-14 y desmiente cómo la armó el paso 2.** Los participantes viajan en **un solo campo con
@@ -147,7 +190,8 @@ indistinguible de cualquier otro proveedor.
    ⚠️ **El documento todavía no llega**: el arranque no lo pasa (comprobado en la etapa 1). Eso se
    arregla en el paso 5; aquí solo hay que aceptarlo del contrato y fallar limpio si no viene.
 
-   🔴 **Lo que falla a mitad de los cuatro pasos es pasajero, salvo lo ya dicho.** *Sesión caducada*
+   🔴 **Lo que falla a mitad de los cuatro pasos es pasajero, salvo lo ya dicho** —el nombre de
+   vacante, el plazo y la persona que no aparece—. *Sesión caducada*
    —también *sin sesión*— se deja salir como error normal: el cron reintenta cada cinco minutos y,
    cuando exista el acuñador, se resuelve solo. **No es permanente** aunque hoy reintentar no la
    arregle: la decisión 39 reserva ese tipo al nombre de vacante ausente, y marcar la sesión como
@@ -166,6 +210,18 @@ indistinguible de cualquier otro proveedor.
    adaptador **aborta con el error permanente** en vez de dejar que PsicoAlianza use su valor por
    defecto: lo contrario desalinearía los dos relojes **en silencio**, que es el peor de los dos
    fallos. El adaptador de EvaluaTest **lo ignora**: allá no hay ventana que fijar.
+
+   🔴 **Un plazo que no sea un número entero de días también es el error permanente** (opinión previa,
+   decidido por el usuario el 2026-09-14). El plazo sale de la configuración de la empresa o del
+   entorno, que hoy admiten medios días, y PsicoAlianza solo trabaja con días enteros: redondear hacia
+   arriba deja la prueba abierta cuando ya descartamos, y hacia abajo la cierra antes de lo anunciado.
+   Medido en producción: **ninguna empresa tiene hoy un plazo propio**, así que no afecta a nadie. No
+   aceptar decimales en la configuración de una empresa con PsicoAlianza es de los pasos 5 y 6; esta
+   guarda cubre lo que esa validación no ve, como la variable de entorno.
+
+   ⚠️ **Hoy el embudo no pasa el plazo** —ni el documento—. **Los dos se pasan en el paso 5**, y el
+   resolvedor del paso 4 no puede mandar ninguna empresa a este adaptador antes: cada candidato
+   saldría descartado.
 
 7. **Consultar resultados**, en lote por vacante (decisión 22). Trae el tablero una vez y empareja.
 
@@ -189,6 +245,16 @@ indistinguible de cualquier otro proveedor.
    | Alguna sin terminar — agendada o vencida | *sigue en ello* | — |
    | Aparece **sin ninguna agenda**, o con una en un estado que no se conoce | *sigue en ello* | — |
    | La petición falló o la sesión no sirve | *no se pudo consultar*, **para todos los pedidos** | — |
+
+   ✅ **El tablero de una vacante es solo de esa vacante** (medido el 2026-09-14 en la opinión previa,
+   sobre los 118 tableros): cada agenda trae su vacante y todas son de la del tablero, y el índice de
+   talento es **de la participación**, no de la persona —de 62 personas en varias vacantes, 58 tienen
+   un índice distinto en cada una—. Alguien que ya presentó pruebas en otra vacante no llega como
+   terminado con una nota vieja. El contrato decía «agregado del candidato» y ya está corregido.
+
+   ⚠️ **Sesión caducada en la consulta cuenta como *no se pudo consultar***, que es lo correcto hoy.
+   Cuando exista el acuñador, el reintento tras acuñar tendrá que ir dentro del adaptador o del
+   cliente, porque desde el cron no se ve. Queda anotado para el 2c; **aquí no se hace**.
 
    **Este adaptador nunca devuelve *rechazado por el proveedor***: PsicoAlianza no descarta a nadie
    por su cuenta —su veredicto se guarda y no decide (punto 8)—. Y un estado de agenda que no sea
@@ -225,7 +291,11 @@ indistinguible de cualquier otro proveedor.
 - **No se toca el embudo, ni el cron, ni EvaluaTest, ni el portal.**
 - **No se toca la sesión**: ni acuñarla, ni Chrome, ni proxy. El adaptador usa el cliente y ya.
 - **No se implementa el estado de sesión** que verá el reclutador: es del paso 5 (decisión 44).
-- **No se hace que el arranque pase el documento**: paso 5.
+- **No se hace que el arranque pase el documento ni el plazo**: paso 5.
+- **No se valida que el plazo sea entero** en la configuración de la empresa: pasos 5 y 6. Aquí solo
+  la guarda del adaptador.
+- **No se escribe el texto que el portal muestra** con los motivos nuevos de la vacante: paso 6.
+- **No se reintenta la consulta tras una sesión caducada**: es del 2c.
 - **No se manda el tipo de documento real ni se mide su catálogo**: siempre CC. Paso 5.
 - **No se añade el documento a la consulta de resultados** del puerto: el identificador basta.
 - **No se toca el texto de WhatsApp** que hoy manda el embudo, aunque sus instrucciones sean de
@@ -296,15 +366,21 @@ Con el cliente simulado —dobles, no peticiones—, como la prueba de paridad d
 
 - **Invitar hace los cuatro pasos en orden**, y usa **el correo que devuelve la consulta** cuando el
   documento ya existe, no el que le pasaron.
-- **Invitar manda nuestro plazo**, y **aborta con el error permanente si no se lo dieron**.
+- **Invitar manda nuestro plazo**, y **aborta con el error permanente si no se lo dieron o si no es
+  un número entero de días**, sin tocar al proveedor.
 - **Invitar manda el título y el cuerpo del portal**, y el tipo de documento **CC**.
 - **Sin conexión**, **sin nombre de vacante**, **sin correo** y **sin documento**: cada uno con su
   error propio, **sin tocar al proveedor**, y en ese orden. El de correo y el de documento **nombran
   el campo que falta**.
 - **Sin conexión se aborta aunque el almacén tenga sesión** (trampa 8).
 - **Sesión caducada a mitad de la invitación** → sale como error normal, **no** como permanente.
-- **Si la persona no aparece en el tablero tras invitar**, la invitación falla en vez de devolver un
-  identificador inventado.
+- **Si la persona no aparece en el tablero tras invitar** → **el error permanente**, nunca un
+  identificador inventado. Y **la encuentra aunque el documento del tablero traiga espacios a los
+  lados**.
+- **El correo de registro devuelto** es el de PsicoAlianza cuando la consulta lo conocía, y el nuestro
+  cuando no.
+- **Una persona que en otra vacante ya terminó** no cuenta como terminada en esta: el tablero de la
+  vacante pedida es el único que se lee.
 - **Los estados neutros**, uno por prueba: todas finalizadas, alguna agendada, **alguna vencida**,
   **sin agendas**, **una agenda en un estado desconocido**, y no aparece. Ninguna devuelve
   *rechazado por el proveedor*.
@@ -313,9 +389,13 @@ Con el cliente simulado —dobles, no peticiones—, como la prueba de paridad d
   para uno.
 - **El emparejamiento va por el identificador** aunque ninguno de los dos correos del pedido
   coincida con el del tablero; y **no empareja por correo** aunque coincida y el identificador no.
-- **La vacante**: activa usable; completada, suspendida y **archivada** no usables; **un estado
-  inventado, indeterminado**; **una que no está en la lista, indeterminada**. Y la comprobación usa
-  **el listado sin filtro**, no el de activas.
+- **La vacante**: activa con pruebas usable; completada, suspendida, archivada y **activa sin
+  pruebas** no usables; **un estado inventado, indeterminado**; **una que no está en la lista,
+  indeterminada**; **una petición que falla, indeterminada** — cada una **con su motivo exacto** de la
+  tabla. Y la comprobación usa **el listado sin filtros**, no el de activas.
+- **La bolsa de la comprobación de vacante no trae la vacante entera** ni sus pruebas.
+- **Una vacante archivada en estado Activo** → no usable, con el motivo de archivada.
+- **La comprobación de vacante sin conexión** deja salir *sin conexión*, **no** devuelve indeterminado.
 - **Validar la conexión no llama al cliente.**
 - **El correo de pruebas de la empresa no se lee**: una conexión que lo trae se comporta igual que
   una que no.
