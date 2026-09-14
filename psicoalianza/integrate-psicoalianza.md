@@ -1887,7 +1887,7 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | # | Paso | Riesgo |
 | --- | --- | --- |
 | 1 | ~~El módulo de captcha~~ **Descartado** (decisiones 25 y 43): no hay solucionador. El brief `brief-etapa3-paso1-modulo-captcha.md` queda como registro de la forma que el 2b copia | — |
-| 2 | El cliente de PsicoAlianza **dado una sesión viva**: el almacén de sesión en la conexión de la empresa, la fuente manual del `.env` (decisión 42), el CSRF de las peticiones, las peticiones del contrato, *sesión caducada* como error propio y el registro sin cookies ni contraseñas; la lectura única de conexiones reconoce la de PsicoAlianza | Aditivo |
+| 2 | El cliente de PsicoAlianza **dado una sesión viva**: el almacén de sesión en la conexión de la empresa, la fuente manual del `.env` (decisión 42), el CSRF de las peticiones, las peticiones del contrato, *sesión caducada* como error propio y el registro sin cookies ni contraseñas; la lectura única de conexiones reconoce la de PsicoAlianza — brief `brief-etapa3-paso2-cliente-psicoalianza.md`, **escrito el 2026-09-13** | Aditivo |
 | 2b | El módulo `proxy`: puerto de *arrendar una IP*, adaptador de DataImpulse, errores propios, sin selector (decisión 43). Nada lo llama hasta el 2c | Aditivo |
 | 2c | El acuñador de sesión: Chrome sin ventana por el puerto de proxy, clasificador, reintentos, candado y tope, aviso a soporte; Chromium en la imagen del backend (decisión 43). **Espera las dos mediciones y el dato de la imagen** | Aditivo en código; **la imagen no** |
 | 3 | El adaptador de PsicoAlianza contra el puerto psicométrico. Puede partirse: listar y comprobar vacantes, después invitar y leer resultados | Aditivo |
@@ -1923,6 +1923,16 @@ Levantado leyendo el código y `psicoalianza-api.md`. Cada punto cae en el paso 
 - **El desvío de correos de pruebas no sirve** (pasos 3 y 5). En PsicoAlianza un correo es de una
   sola persona en toda la plataforma: redirigir a todos los candidatos de prueba a una dirección da
   *ya fue tomado* desde el segundo.
+
+  ⚠️ **Y la lectura única lo entrega igual** (levantado en la opinión previa del paso 2, 2026-09-13):
+  devuelve el correo de pruebas **de EvaluaTest** para cualquier proveedor, sin mirar cuál es. Una
+  conexión de PsicoAlianza sale con ese campo relleno y no debe usarse. No se toca en el paso 2
+  —cambiarlo afecta a EvaluaTest—: se decide en el paso 3.
+- **Al guardar la conexión desde el portal hay que conservar la sesión** (paso 5; encontrado el
+  2026-09-13 verificando la opinión previa del paso 2). La ruta que guarda una conexión **reconstruye
+  el objeto con los campos que conoce** y descarta el resto: hoy solo toca la de EvaluaTest, así que
+  no rompe nada, pero el día que guarde la de PsicoAlianza, **renombrar la conexión tiraría la sesión
+  acuñada** y el acuñador gastaría un login de proxy móvil para nada.
 - **El documento** (pasos 3 y 5). La invitación del puerto ya prevé el número de documento, pero el
   arranque no lo pasa (comprobado leyendo la única llamada). Nuestro tipo de documento es texto libre
   y de PsicoAlianza solo se conoce el identificador de CC. Sin documento se descarta (decisión 33), y

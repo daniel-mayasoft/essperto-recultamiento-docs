@@ -255,11 +255,15 @@ caducada*, se repite esto.
 4. Pegarlos en el `.env` del backend, en **una línea**, con la forma exacta con que el navegador
    manda la cabecera `Cookie`: nombre, `=`, valor, y `; ` entre las dos:
 
-   `PSICOALIANZA_SESSION_COOKIE=ats_session=<valor>; remember_web_<hash>=<valor>`
+   `PSICOALIANZA_MANUAL_SESSION_COOKIES=ats_session=<valor>; remember_web_<hash>=<valor>`
 
    Sin comillas, sin espacios alrededor del `=` de la variable. `XSRF-TOKEN` no hace falta: el
    backend la renueva solo antes de cada envío.
-5. Reiniciar el backend: el `.env` se lee al arrancar.
+5. **Encender el interruptor**, en otra línea: `PSICOALIANZA_MANUAL_SESSION_ENABLED=true`. 🔴 **Hacen
+   falta las dos cosas**: con las cookies pegadas y el interruptor apagado, no se usan. Es a
+   propósito — así una línea olvidada en el `.env` de un servidor no hace nada.
+6. Reiniciar el backend: el `.env` se lee al arrancar. Al arrancar, el registro **advierte** de que
+   la sesión manual está encendida.
 
 🔴 **Esa línea es una credencial viva de la cuenta del cliente.** El `.env` está ignorado por git
 y ahí se queda; no va a ningún mensaje, captura de pantalla ni `.md`. Y **no va en ningún
