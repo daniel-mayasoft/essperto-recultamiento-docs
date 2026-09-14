@@ -52,7 +52,9 @@ EvaluaTest que envuelve su cliente, y los tipos del contrato. El arranque de la 
 cron de resultados del orquestador pasan por ahí. **Las credenciales de un proveedor se leen
 desde un solo sitio**, la lectura única de conexiones de esa misma carpeta: cualquier código
 nuevo que necesite una credencial la pide ahí, nunca al documento de la empresa. **El modo
-demo es la excepción a propósito**: sigue siendo un condicional dentro del embudo. Cómo
+demo es la excepción a propósito**: sigue siendo un condicional dentro del embudo. En su
+subcarpeta `psicoalianza/` hay un **cliente de PsicoAlianza que trabaja con una sesión ya abierta**
+—no hace login— y un almacén que guarda esa sesión en la conexión de la empresa. Cómo
 funciona la etapa hoy, de punta a punta, está en
 `psicoalianza/flujo-actual-etapa-psicometrica.md`; el detalle de cada decisión y el porqué, en
 `psicoalianza/integrate-psicoalianza.md`; y lo que hay que hacer antes de desplegar la rama, en

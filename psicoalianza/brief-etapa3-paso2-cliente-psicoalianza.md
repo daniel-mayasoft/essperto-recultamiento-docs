@@ -104,8 +104,9 @@ el acuñador (2c), lo único que cambia es quién llena el almacén.
    mientras dure el proceso**, y solo para esa fuente. Al reiniciar se vuelven a leer del `.env`.
 
    **Cuándo se escribe *visto vivo por última vez*:** solo cuando la comprobación explícita de
-   sesión sale bien, o cuando cambian las cookies. **Nunca en cada petición**: el cron hace varias
-   por pasada cada cinco minutos, y serían escrituras continuas sobre el documento de la empresa.
+   sesión responde *viva*, o cuando cambian las cookies. **Nunca en cada petición**: el cron hace
+   varias por pasada cada cinco minutos, y serían escrituras continuas sobre el documento de la
+   empresa. Esa comprobación es, de hecho, el único momento en que ese campo se escribe.
 
 3. **La lectura única reconoce a PsicoAlianza.** Hay que añadir su entrada a las dos tablas que hoy
    solo tienen EvaluaTest: la de nombres para los mensajes y la de **campos obligatorios de la
@@ -144,7 +145,7 @@ el acuñador (2c), lo único que cambia es quién llena el almacén.
 
    | Operación | Para qué servirá (paso 3) |
    | --- | --- |
-   | Comprobar que la sesión sigue viva | Saber si hay que acuñar otra |
+   | Comprobar que la sesión sigue viva — **devuelve *viva* o *muerta*, y no lanza nunca** | Saber si hay que acuñar otra |
    | Pedir un CSRF fresco | Va antes de **cada** envío |
    | Listar vacantes activas | El selector del reclutador |
    | Consultar el correo de un documento | Obligatorio antes de invitar |
@@ -179,12 +180,19 @@ el acuñador (2c), lo único que cambia es quién llena el almacén.
 
    | Forma | Estado |
    | --- | --- |
-   | Redirección a la página de login | **Observada**, pero solo pidiendo `/login`, no un endpoint de datos |
-   | El formulario de login servido con 200 | **Observada** en la evidencia del rechazo de captcha, también sobre `/login` |
+   | El formulario de login servido con 200 | **Observada**, en la evidencia del rechazo de captcha — pero sobre la **página de login**, no sobre un endpoint de datos |
+   | Redirección a la página de login | **Supuesta** |
    | 401 | **Supuesta**: es lo que su framework responde por defecto a una petición marcada como de la propia página, que es justo la cabecera que manda el cliente |
    | 419 | **Supuesta**: es el código de su framework para *el token antifalsificación no vale*, que es lo típico de un envío con la sesión muerta |
 
-   **Cada una con su prueba**, y en el reporte va cuál es observada y cuál supuesta. Para ver la
+   ⚠️ **Ojo con la redirección, porque lo observado es la inversa** (corregido en la segunda ronda de
+   la opinión previa; la tabla la daba por observada y no lo está): lo que se ha visto es que **con
+   la sesión viva**, pedir la página de login **lleva al inicio**, porque su framework echa del
+   login a quien ya entró. Que una página protegida mande al login **sin** sesión no lo ha visto
+   nadie: los scripts de la evidencia siempre piden el login directamente. La prueba se escribe
+   igual; en el reporte va como supuesta.
+
+   **Cada una con su prueba**, y en el reporte va cuál es observada y cuál supuesta. Para ver una
    redirección hay que pedir **sin seguir redirecciones**; si no, la petición acaba en 200 con el
    HTML del login y las dos primeras formas se vuelven la misma.
 
@@ -192,6 +200,13 @@ el acuñador (2c), lo único que cambia es quién llena el almacén.
    antifalsificación se armó mal. Tratarlo como *sesión caducada* haría que el acuñador gastara un
    login —dinero y proxy— por un fallo que no es de sesión. Se acepta en este paso porque el tope
    diario de logins de la decisión 43 lo contiene, y queda anotado para el 2c.
+
+   🔴 **La comprobación de sesión viva es la excepción: no lanza nunca.** Su trabajo es justamente
+   contestar si la sesión sirve, así que devuelve *viva* o *muerta* —redirige al inicio, o sirve el
+   formulario— y quien la use en el 2c no tiene que atrapar una excepción para leer una respuesta
+   normal. **Solo las operaciones de datos lanzan** *sesión caducada*. Sigue el precedente del puerto
+   psicométrico, donde comprobar si una vacante sirve y validar una conexión devuelven un estado y
+   tampoco lanzan.
 
    🔴 **El cliente no reintenta ni intenta arreglarlo.** No hay login que rehacer aquí.
 
@@ -325,8 +340,10 @@ Nest—, simulando `fetch`:
   puestas, **no** se usan; con el interruptor encendido y sin cookies, tampoco.
 - **Con las dos, gana la pegada** sobre la guardada en la conexión.
 - **Sin ninguna** → *sin sesión*, **sin llamar a `fetch`**.
-- **Las cuatro formas de sesión muerta** → *sesión caducada*, una prueba cada una: redirección al
-  login, formulario con 200, 401 y 419. Y **no se reintenta** en ninguna.
+- **Las cuatro formas de sesión muerta** → *sesión caducada*, una prueba cada una: formulario con
+  200, redirección al login, 401 y 419. Y **no se reintenta** en ninguna.
+- **La comprobación de sesión no lanza**: con la sesión muerta devuelve *muerta*, y con la viva
+  devuelve *viva* y **es lo único que escribe** *visto vivo por última vez*.
 - **Las cookies reemitidas se guardan**, cifradas, cuando la sesión viene de la conexión; y **no se
   escriben en la base** cuando viene del `.env`.
 - **La sesión se escribe sin reasignar la lista de conexiones**: una empresa con dos conexiones

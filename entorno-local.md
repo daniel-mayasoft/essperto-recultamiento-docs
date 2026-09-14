@@ -173,6 +173,15 @@ El resto tiene valor por defecto y no hace falta tocarlo.
   del 2c; este documento se actualiza en esos diffs. Sin estas variables el backend arranca y
   falla solo al acuñar.
 
+Las tres variables de PsicoAlianza (paso 2 de la etapa 3). Ninguna es obligatoria: sin ellas el
+backend arranca igual.
+
+| Variable | Valor local | Nota |
+| --- | --- | --- |
+| `PSICOALIANZA_BASE_URL` | vacía | Usa la oficial, `https://ats.psicoalianza.com` |
+| `PSICOALIANZA_MANUAL_SESSION_ENABLED` | `true` solo mientras pegues una sesión | Apagada por defecto. Encendida, **todas las empresas** de tu base hablan con PsicoAlianza por esa sesión |
+| `PSICOALIANZA_MANUAL_SESSION_COOKIES` | Las cookies de tu navegador | Ver *La sesión de PsicoAlianza, a mano* |
+
 **SolveCaptcha:** ya no hace falta (decisión 25 descartada).
 
 ## 3 · El `.env` del portal
@@ -269,6 +278,45 @@ caducada*, se repite esto.
 y ahí se queda; no va a ningún mensaje, captura de pantalla ni `.md`. Y **no va en ningún
 servidor**: la lista de antes del despliegue lo tiene como bloqueo.
 
+## La conexión de PsicoAlianza, a mano (hasta el paso 5 de la etapa 3)
+
+El portal todavía no sabe guardarla, así que en local se inserta en la base. Es la cuenta de
+PsicoAlianza de la empresa: correo y contraseña, **la contraseña cifrada con tu `SECRET_KEY`
+local**. Una contraseña cifrada en otra máquina no se descifra aquí.
+
+1. Compilar el backend una vez (`npm run build`), porque el cifrado se toma de lo compilado.
+2. Cifrar la contraseña, desde `esscoti-backend`. `Read-Host` la pide sin que quede en el
+   historial de PowerShell:
+
+   ```powershell
+   $env:PA_PASSWORD = Read-Host "Contraseña de PsicoAlianza"
+   node -r dotenv/config -e "console.log(require('./dist/shared/crypto.util').encrypt(process.env.PA_PASSWORD, process.env.SECRET_KEY))"
+   Remove-Item Env:PA_PASSWORD
+   ```
+
+   Sale una tira de cuatro bloques separados por `:`. Esa tira es la contraseña cifrada.
+3. Insertarla en tu empresa local, en `mongosh` contra `esscoti_local`. Solo añade si la empresa
+   todavía no tiene conexión de PsicoAlianza:
+
+   ```js
+   db.tenants.updateOne(
+     { _id: ObjectId("<id de tu empresa>"), "psychometricConnections.provider": { $ne: "psicoalianza" } },
+     { $push: { psychometricConnections: {
+       id: new ObjectId().toHexString(),
+       name: "PsicoAlianza",
+       provider: "psicoalianza",
+       credentials: { email: "<correo de la cuenta>", encryptedPassword: "<la tira del paso 2>" }
+     } } }
+   )
+   ```
+
+   Esperado: `modifiedCount: 1`. Con `0`, o el identificador no es el de tu empresa o ya tenía
+   conexión.
+
+**Para probar el cliente contra PsicoAlianza de verdad** hacen falta las dos cosas: esta conexión
+en la base y la sesión pegada en el `.env` con el interruptor encendido. El cliente todavía no
+guarda sesiones propias: sin la pegada responde *sin sesión*.
+
 ## Lo que este entorno todavía no cubre
 
 - **Probar la etapa psicométrica de punta a punta.** El candidato habla por WhatsApp, y aquí
@@ -279,6 +327,6 @@ servidor**: la lista de antes del despliegue lo tiene como bloqueo.
   real distinto por candidato**: allá un correo pertenece a una sola persona en toda la
   plataforma, así que el desvío de correos de pruebas de EvaluaTest no sirve.
 - **La conexión de PsicoAlianza de la empresa local** se guarda en la base, cifrada con la
-  `SECRET_KEY` local, como en producción. Cómo insertarla se añade aquí cuando el backend sepa
-  leerla (brief 2 de la etapa 3). **No va en el `.env`**: en el `.env` va solo la sesión (arriba),
-  que es otra cosa — la conexión dice *qué cuenta usa esta empresa*; la sesión, *ya estoy dentro*.
+  `SECRET_KEY` local, como en producción: ver *La conexión de PsicoAlianza, a mano*, arriba.
+  **No va en el `.env`**: en el `.env` va solo la sesión, que es otra cosa — la conexión dice
+  *qué cuenta usa esta empresa*; la sesión, *ya estoy dentro*.

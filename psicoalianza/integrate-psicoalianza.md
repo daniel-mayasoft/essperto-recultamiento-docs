@@ -1887,7 +1887,7 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | # | Paso | Riesgo |
 | --- | --- | --- |
 | 1 | ~~El módulo de captcha~~ **Descartado** (decisiones 25 y 43): no hay solucionador. El brief `brief-etapa3-paso1-modulo-captcha.md` queda como registro de la forma que el 2b copia | — |
-| 2 | El cliente de PsicoAlianza **dado una sesión viva**: el almacén de sesión en la conexión de la empresa, la fuente manual del `.env` (decisión 42), el CSRF de las peticiones, las peticiones del contrato, *sesión caducada* como error propio y el registro sin cookies ni contraseñas; la lectura única de conexiones reconoce la de PsicoAlianza — brief `brief-etapa3-paso2-cliente-psicoalianza.md`, **escrito el 2026-09-13** | Aditivo |
+| 2 | ✅ **HECHO el 2026-09-13.** El cliente de PsicoAlianza **dado una sesión viva**: el almacén de sesión en la conexión de la empresa, la fuente manual del `.env` (decisión 42), el CSRF de las peticiones, las peticiones del contrato, *sesión caducada* como error propio y el registro sin cookies ni contraseñas; la lectura única de conexiones reconoce la de PsicoAlianza — brief `brief-etapa3-paso2-cliente-psicoalianza.md` | Aditivo |
 | 2b | El módulo `proxy`: puerto de *arrendar una IP*, adaptador de DataImpulse, errores propios, sin selector (decisión 43). Nada lo llama hasta el 2c | Aditivo |
 | 2c | El acuñador de sesión: Chrome sin ventana por el puerto de proxy, clasificador, reintentos, candado y tope, aviso a soporte; Chromium en la imagen del backend (decisión 43). **Espera las dos mediciones y el dato de la imagen** | Aditivo en código; **la imagen no** |
 | 3 | El adaptador de PsicoAlianza contra el puerto psicométrico. Puede partirse: listar y comprobar vacantes, después invitar y leer resultados | Aditivo |
@@ -2139,3 +2139,66 @@ la tasa exacta. Las dos están en la decisión 43 como condición del brief del 
 
 ✅ **Decidido el 2026-09-13, y cierra el bloqueo: el proxy móvil es el camino oficial** (decisión
 43), todo en el backend. El login humano (42) queda como red de emergencia y para local.
+
+### Paso 2 — ✅ HECHO (2026-09-13)
+
+El cliente de PsicoAlianza con la sesión ya abierta, solo backend. Brief en
+`brief-etapa3-paso2-cliente-psicoalianza.md`. En su subcarpeta de la capa psicométrica quedaron el
+**almacén de sesión** —cookies cifradas en un campo propio de la conexión de la empresa, con sus
+fechas—, el **cliente** con las siete peticiones del contrato, y *sesión caducada* como error propio
+con su motivo. La sesión sale del `.env` **solo con las dos condiciones** (interruptor encendido y
+cookies pegadas, decisión 42) y, si no, de la conexión; sin ninguna, *sin sesión*. La lectura única
+reconoce a PsicoAlianza en sus dos tablas, con correo y contraseña como campos obligatorios. Las dos
+piezas quedan registradas en el módulo de ofertas **sin enlazarse al puerto psicométrico**: elegir
+proveedor es el paso 4. **Nada lo llama todavía y el flujo de la etapa no cambia.**
+
+**Lo que salió de las dos rondas de opinión previa y valió su precio:**
+
+- **El brief daba por observada una respuesta que nadie vio.** Decía que sin sesión PsicoAlianza
+  sirve el formulario de login, y de ahí deducía una sola forma de detectarlo. Se reconocen **cuatro**
+  —formulario con 200, redirección al login, 401 y 419—, y solo la primera está observada, además
+  sobre la página de login y no sobre un endpoint de datos. Las otras tres son supuestos del
+  comportamiento por defecto de su framework.
+- **La escritura de la sesión podía perderse contra el guardado de Mi compañía**, que lee la lista
+  entera de conexiones y la reescribe entera. El almacén actualiza **solo el campo de sesión de esa
+  conexión, localizándola por su identificador**. Comprobado además que ese guardado no borra la
+  conexión de PsicoAlianza: solo reconstruye la de EvaluaTest.
+- **El campo de sesión hay que declararlo en el esquema** o Mongo lo descarta al guardar **sin ningún
+  error**: la sesión parecería guardada y no estaría.
+- **La comprobación de sesión viva no lanza**: devuelve *viva* o *muerta*, porque su trabajo es
+  contestar esa pregunta. Solo las operaciones de datos lanzan. Es además el único momento en que se
+  escribe *visto vivo por última vez*: hacerlo en cada petición serían escrituras continuas sobre el
+  documento de la empresa, varias por pasada del cron.
+- **Las cookies de la sesión pegada no se escriben en la base**, o esa empresa quedaría con una
+  sesión que se usaría en cuanto alguien apague el interruptor. Viven en memoria mientras dure el
+  proceso.
+- **El registro deja fuera la parte de parámetros de la ruta**: la consulta del correo lleva **el
+  número de documento de la candidata** dentro de la dirección.
+- **El interruptor manual vale para todas las empresas a la vez**, así que el arranque lo anuncia
+  como advertencia.
+- **Faltaba el cableado, y era omisión del brief.** Sin registrar las piezas, nada garantizaba que
+  Nest supiera construirlas y el paso 3 lo habría descubierto con un arranque que se niega.
+
+🔴 **Tres supuestos que hereda el paso 3, y el primero no estaba en ningún sitio hasta ahora:**
+
+1. **El cliente descarta la cookie del token antifalsificación** al guardar las reemitidas, y no la
+   vuelve a mandar. El script de la evidencia **sí la mandaba**, así que es una divergencia con lo
+   único probado en vivo. Probablemente da igual, porque ese token viaja en el formulario, pero nadie
+   lo ha comprobado. **Si el paso 3 encuentra rechazos 419 con la sesión viva, es lo primero que hay
+   que mirar.**
+2. **La forma del cuerpo de la invitación.** El contrato no dice cómo se codifica la lista de
+   participantes dentro del formulario, ni el campo que lleva un JSON como texto. Está escrito con la
+   forma más probable, aislado en un sitio, y solo se confirma invitando a una persona real.
+3. **Las tres formas supuestas de sesión muerta** (redirección, 401 y 419), de arriba.
+
+**Verificado**, corrido por el planificador sobre el conjunto del cambio: backend 106 suites y 951
+pruebas (942 pasan, 9 omitidas; **35 nuevas** desde las 916 del cierre de la etapa 1). Portal sin
+tocar. Control negativo corrido en cinco puntos —el interruptor ignorado, el 419 quitado, el
+documento en el registro, PsicoAlianza fuera de la tabla de campos obligatorios y la escritura sin
+localizar la conexión—, más el del cableado. ⚠️ **Una corrección del planificador**: en la primera
+revisión contó 24 pruebas nuevas leyendo *940 passed* como si fuera el total, cuando el total era
+949. Es el fallo contra el que avisa este documento — leer una salida sin mirarla entera.
+
+**Cómo se prueba contra PsicoAlianza de verdad**, para el paso 3: hacen falta las dos cosas, la
+conexión insertada a mano en la base local y la sesión pegada en el `.env` con el interruptor
+encendido. Los dos instructivos están en `../entorno-local.md`.

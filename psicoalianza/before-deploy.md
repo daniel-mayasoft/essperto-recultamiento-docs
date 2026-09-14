@@ -17,6 +17,7 @@ diff de documentación. Lo que está en la bitácora y no aquí, no se va a hace
 | 6 | 🔴 **Bloqueo de la etapa 3**: PsicoAlianza no se despliega a ningún servidor sin el acuñador de sesión (paso 2c, decisión 43) y su aviso a soporte. Con la sesión pegada a mano (decisión 42) no: muere a los 5 días sin avisar y, con la decisión 36, dos días sin sesión descartan candidatos reales por vencimiento | Usuario | ☐ |
 | 7 | **La imagen del backend cambia** (decisión 43): Chromium dentro, de 300 a 500 MB más, y en el minuto del login la instancia puede doblar su memoria. Antes del brief del 2c: cómo se construye la imagen hoy, límite de memoria del contenedor y cuántas instancias corren. Antes de desplegar: probar la imagen nueva en el servidor de pruebas | Usuario y quien despliega | ☐ |
 | 8 | Configurar en los servidores las variables del proxy (`PROXY_HOST`, `PROXY_PORT`, `PROXY_LOGIN`, `PROXY_PASS`, protocolo) antes de que una empresa use PsicoAlianza. Sin ellas el backend arranca; falla al acuñar | Quien despliega | ☐ |
+| 9 | Configurar en los servidores las variables de PsicoAlianza antes de que una empresa la use: `PSICOALIANZA_BASE_URL` si no es la oficial, y comprobar que **`PSICOALIANZA_MANUAL_SESSION_ENABLED` no está encendida** ni hay cookies pegadas (paso 2 de la etapa 3). No bloquea desplegar ese paso solo | Quien despliega | ☐ |
 
 ## 1 · La migración de conexiones (paso 8a, decisión 41)
 
