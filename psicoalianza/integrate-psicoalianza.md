@@ -138,6 +138,13 @@ Se da por terminado cuando se cumplen las dos condiciones:
   token emitido (2318 caracteres), respuesta 302 y el mismo mensaje de rechazo. **No
   hay que volver a intentarlo por esta vía**; el puntaje depende de reputación
   acumulada, que un proceso automatizado no puede sostener.
+
+  ⚠️ **Corregido el 2026-09-13: la variable que mandaba era la IP, no el navegador.** El
+  mismo Chrome automatizado, sin ventana, **entra a la primera saliendo por una IP móvil
+  colombiana** (proxy DataImpulse; ver la medición y la decisión 43). Por IP residencial
+  rotativa, 3 de 3 rechazos; por la IP de casa, rechazado el 2026-09-09. La conclusión
+  "no volver por esta vía" valía para el endurecimiento del navegador, que en efecto no
+  aporta; la vía del navegador sí sirve con la IP correcta.
 - **El solucionador de pago es una apuesta contra el v3, no una solución cerrada.**
   Falla en silencio, tiene costo recurrente, y si el proveedor lo detecta quien queda
   expuesta es la cuenta del cliente. Se asume a sabiendas en la decisión 23.
@@ -404,6 +411,15 @@ Se da por terminado cuando se cumplen las dos condiciones:
     que detectar. Ver `CAPTCHAS.md`, que además lista tres errores de esa
     implementación que no hay que copiar.
 
+    ⚠️ **Esa razón describe cómo usa 2Captcha el otro proyecto, no lo que el servicio
+    ofrece** (anotado el 2026-09-13): 2Captcha también entrega tokens de v3 por API. No
+    cambia el veredicto de la medición, pero sí la lista de alternativas si se vuelve a
+    intentar un solucionador.
+
+    🔴 **Superada en la práctica el 2026-09-13**: SolveCaptcha no entra (ver *Medición del
+    captcha*), y el login humano con sesión reutilizada que aquí se descartaba es lo que se
+    usa **provisionalmente y solo en local** — decisión 42.
+
     Se asumen los riesgos anotados arriba. Lo que falta antes de darlo por bueno es
     **con qué puntaje mínimo pasa el sitio**: se prueba subiendo desde abajo, y cada
     escalón es más caro y más lento.
@@ -416,7 +432,21 @@ Se da por terminado cuando se cumplen las dos condiciones:
     Se descarta meter Puppeteer en el backend: el proyecto declara que los robots de
     navegador son procesos externos que no corren aquí, y la imagen es Alpine, el peor
     sitio para alojar Chromium.
-25. **El captcha vive en su propio módulo, con puerto y adaptador**, al nivel de los
+
+    🔴 **Revertida a medias el 2026-09-13 (decisión 43).** La mitad del *sin navegador* cae:
+    el login **sí** necesita un navegador real saliendo por IP móvil, porque el solucionador
+    no entra, y ese navegador **corre en el backend**, a sabiendas de lo que esta decisión
+    decía de Alpine. La mitad del *por HTTP* se queda, y es la que importa: el navegador
+    **solo acuña la sesión**, menos de un minuto cada varios días; todo el trabajo contra
+    PsicoAlianza sigue siendo HTTP con cookies. Robot-manager fue referencia, no destino.
+25. ~~**El captcha vive en su propio módulo, con puerto y adaptador**~~ **DESCARTADA el
+    2026-09-13 (decisión 43)**: no hay módulo de captcha, porque no hay solucionador. El
+    captcha lo resuelve la propia página de PsicoAlianza dentro de un Chrome real; lo que
+    hace falta como infraestructura es el **proxy**, y ese sí sigue exactamente esta forma
+    —módulo propio, puerto sin proveedor, un adaptador por servicio, sin selector mientras
+    haya uno—. El brief `brief-etapa3-paso1-modulo-captcha.md` se conserva como registro de
+    la forma; su precisión de abajo sobre los dos ejes vale igual para el proxy. El texto
+    original: **El captcha vive en su propio módulo, con puerto y adaptador**, al nivel de los
     demás módulos del backend. El puerto pide lo mínimo —un token para una clave de
     sitio, una acción y un puntaje mínimo— y cada servicio trae su adaptador:
     SolveCaptcha ahora, 2Captcha el día que haga falta. La mecánica de cada uno (uno
@@ -1048,6 +1078,102 @@ Se da por terminado cuando se cumplen las dos condiciones:
     Se parte en dos briefs: **8a backend** (esquemas, lectura única de conexiones, ayudante de
     la oferta, la ruta que guarda la conexión, el script) y **8b portal** (conexión con
     nombre sin contraseña, señal "hay conexión", *Puntaje mínimo* — decisión 8).
+42. **Mientras no haya forma de entrar sola, la sesión de PsicoAlianza se consigue a mano y se
+    pega en el `.env` local. Es temporal y solo para desarrollo** (2026-09-13, decidido por el
+    usuario tras la medición del captcha). Reabre la mitad de la 23 que descartaba el login
+    humano: se descartó cuando había alternativa, y hoy no la hay.
+
+    **Qué se hace.** Quien desarrolla entra a PsicoAlianza en su navegador con *permanecer
+    conectado*, copia las cookies de la sesión y las pega en una variable del `.env` del backend
+    local (cómo, en `../entorno-local.md`). El cliente de PsicoAlianza las manda tal cual en cada
+    petición y **no intenta ningún login**: ni contraseña, ni captcha, ni CSRF de login. Cuando la
+    sesión caduque —5 días, ver A13— se vuelve a entrar y a pegar.
+
+    **Por qué así.** Para no parar la etapa: de los seis pasos, solo la obtención de la sesión
+    depende del captcha. El cliente, el adaptador, el resolvedor, la conexión y el portal se
+    escriben y se prueban en local igual con una sesión pegada que con una conseguida sola. El
+    día que exista una forma de obtenerla —respuesta de PsicoAlianza, otro solucionador, o lo que
+    se decida— se cambia **solo la pieza que consigue la sesión**. Por eso el cliente se escribe
+    desde ya como *dado una sesión viva*, con la fuente de la sesión separada (paso 2).
+
+    **Qué no cambia.** La conexión de la empresa sigue en la base, como cualquier conexión (34,
+    40 y 41): es la que dice qué proveedor usa cada empresa y con qué cuenta. En el `.env` va
+    **solo la sesión**, leída desde un único sitio y con un nombre que diga lo que es. No es la
+    cuenta compartida que se acaba de quitar: no elige proveedor ni sustituye a la conexión, solo
+    evita el login.
+
+    🔴 **No se despliega así.** Una sesión pegada a mano muere a los 5 días sin avisar a nadie, y
+    con la decisión 36 el plazo sigue corriendo: a los 2 días de sesión muerta el cron descarta
+    gente real diciéndole que su resultado no llegó, sin que nadie haya podido preguntar. Está en
+    `before-deploy.md` como bloqueo: PsicoAlianza no sale a un servidor hasta que la sesión se
+    consiga sola, o exista una alerta a soporte cuando muera y alguien que la renueve.
+
+    **Lo que se mide gratis por el camino:** si la cookie de *permanecer conectado* reautentica
+    sola cuando caduca `ats_session`, si esa reautenticación estira su vida, y cuánto dura de
+    verdad. Son los datos que la medición del captcha nunca llegó a producir, y los necesita
+    cualquier camino que se elija después.
+
+    ~~Las pruebas con proxy que el usuario hace en paralelo quedan fuera de esta decisión y de
+    los briefs.~~ **Entraron el mismo día**: el proxy móvil funcionó y es el camino oficial
+    (decisión 43). La sesión a mano se queda como **red de emergencia y para local**, no como
+    "mientras tanto".
+43. **El login de PsicoAlianza lo hace un Chrome sin ventana saliendo por IP móvil, dentro
+    del backend, y solo para acuñar la sesión; el proxy es un módulo propio con puerto y
+    adaptador** (2026-09-13, decidido con el usuario tras la prueba con proxy móvil). Es el
+    **camino oficial**. Revierte a medias la 24, descarta la 25 y confirma la 26.
+
+    **Lo que la prueba demostró (script en el traspaso del 2026-09-13):** el mismo Chrome
+    automatizado que el sitio rechazaba desde IP de casa y desde proxy residencial rotativo
+    (3 de 3 rechazos) **entra saliendo por una IP móvil colombiana** (DataImpulse, sesión
+    pegajosa, con y sin ventana). La propia página ejecuta el captcha; el script solo escribe
+    y hace clic. *Permanecer conectado* viene marcado por defecto y emite la cookie de
+    recuerdo de 5 días. ⚠️ **Número de intentos por anotar**: el traspaso dice que entró
+    siempre, pero no cuántas veces de cuántas; el usuario lo completa aquí.
+
+    **La arquitectura, toda en el backend:**
+
+    | Pieza | Dónde | Qué hace |
+    | --- | --- | --- |
+    | **Módulo `proxy`** | Nuevo, al nivel de los demás módulos | Un puerto con una operación, *arrendar una IP*: recibe país, tipo de IP y adherencia (pegajosa con un identificador que **genera quien llama**, o rotativa); devuelve protocolo, host, puerto, usuario y contraseña como datos estructurados, más hasta cuándo vale. Un adaptador por proveedor —DataImpulse hoy—, que es solo cómo se codifican país y sesión en las credenciales. Errores propios: *sin configurar* (al arrendar, no al arrancar) y *petición no soportada* (antes de tocar nada). Sin selector de proveedor mientras haya uno: cambiarlo es un adaptador y una línea |
+    | **Almacén de sesión** | En la conexión de la empresa, en la base | Las cookies (`ats_session`, `remember_web_<hash>`) cifradas como la contraseña, cuándo se acuñaron, cuándo se vieron vivas, y si hay un login en curso desde cuándo. No en memoria ni en el `.env`: sobrevive reinicios y todas las instancias comparten un login |
+    | **Cliente dado una sesión** | Capa psicométrica, PsicoAlianza | HTTP con las cookies del almacén; CSRF fresco antes de cada envío; guarda las cookies reemitidas; si lo mandan al login, lanza *sesión caducada* y no insiste |
+    | **Acuñador de sesión** | Capa psicométrica, PsicoAlianza | Pide al puerto de proxy una IP móvil pegajosa con identificador nuevo; lanza Chrome sin ventana por esa IP, sin la marca de automatización, bloqueando imágenes, CSS y fuentes; va a `/login`, escribe, hace clic; clasifica el resultado —*entró*, *captcha rechazado*, *credenciales rechazadas*, *bloqueada*, *desconocido*— con captura en los fallos; guarda las cookies. Reintentos: rechazo de captcha → otro arriendo y repetir hasta N; bloqueo o credenciales → parar en seco |
+    | **Fuente manual** | La de la 42 | Red de emergencia y local: pegar cookies a mano |
+
+    **Lo que le pasa a una candidata.** El cron consulta su resultado por HTTP. Si la sesión
+    murió, el cliente lanza *sesión caducada*, el acuñador entra en menos de un minuto, guarda
+    las cookies y la consulta se repite en la misma pasada. Ella no nota nada. Si el acuñador
+    agota sus intentos, esa pasada termina en *no se pudo consultar* —ya tolerado— y se avisa a
+    soporte, porque con la 36 el plazo sigue corriendo: **dos días sin sesión son descartes
+    reales**, y el aviso tiene que llegar a alguien que sepa pegar una sesión a mano (42).
+
+    **Protecciones, todas obligatorias:** un login a la vez por conexión, con marca de tiempo y
+    reseteo si se atasca (precedente: el bug de `scrapingClaimedAt` encoló miles de tareas);
+    tope de logins por día por conexión; ante *bloqueada* o *credenciales* nunca reintentar;
+    Chrome como proceso hijo con tiempo límite duro y cierre garantizado, nunca en el hilo de
+    una petición; ni contraseña, ni credenciales del proxy, ni cookies al registro.
+
+    **Lo que cuesta, y es el único cambio no aditivo de la etapa:** la imagen del backend
+    carga Chromium (de 300 a 500 MB más), y durante el minuto del login la instancia puede
+    doblar su memoria (pico de 200 a 400 MB sobre los 150 a 300 del backend). En Docker, sin
+    GPU y sin la memoria compartida del contenedor, que por defecto es de 64 MB y tumba a
+    Chrome. **Antes del brief del acuñador hay que saber cómo se construye la imagen, el límite
+    de memoria del contenedor y cuántas instancias corren.** Va en `before-deploy.md`.
+
+    🔴 **Dos mediciones pendientes antes del brief del acuñador**, no de los otros dos:
+
+    1. **Que la sesión acuñada por IP móvil sirva desde otra IP.** Toda la arquitectura da por
+       hecho que PsicoAlianza no ata la sesión a la IP; nunca se probó (el 2026-09-09 las
+       cookies se usaron desde la máquina que las creó). Prueba: con las cookies de un login
+       por proxy, pedir `/login` sin proxy; si redirige a `/inicio`, vale. Si no, el backend
+       tendría que salir por el proxy en todas las peticiones y el gasto deja de ser cero.
+    2. **La tasa sin ventana**, N de N, para escribir la política de reintentos con un número.
+
+    **Riesgo aceptado a sabiendas:** es la apuesta de la 23 con más maquinaria —entrar al
+    sitio del proveedor por IP móvil para pasar su protección contra robots, con la cuenta de
+    gerencia del cliente—. Si PsicoAlianza lo nota, la cuenta expuesta es la del cliente. Sigue
+    sin hacerse lo más barato: **preguntarle a PsicoAlianza** si tienen usuario de integración o
+    pueden eximir una IP; si contestan que sí, el acuñador y el proxy sobran.
 
 ## Falta de PsicoAlianza
 
@@ -1583,10 +1709,13 @@ que hacer antes está en `before-deploy.md`.
 Todo lo decidido que cae ahí, para que no se pierda (regla de la hoja de ruta). Nada de esto
 está empezado.
 
-**El bloqueo:** el login de PsicoAlianza está detrás de reCAPTCHA v3 (*Riesgos*). Decidido
+**El bloqueo:** el login de PsicoAlianza está detrás de reCAPTCHA v3 (*Riesgos*). ~~Decidido
 resolverlo con SolveCaptcha (23), por HTTP y sin navegador (24), en su propio módulo con puerto
-y adaptador (25), cacheando la sesión de forma agresiva (26). **Falta medir con qué puntaje
-mínimo pasa el sitio**, subiendo desde abajo.
+y adaptador (25), cacheando la sesión de forma agresiva (26). Falta medir con qué puntaje
+mínimo pasa el sitio, subiendo desde abajo.~~ **Resuelto el 2026-09-13 en dos vueltas** (ver
+*Dónde va la etapa 3*): el solucionador no entra (1 de 85) y se descarta; entra un Chrome sin
+ventana por IP móvil, y ese es el camino oficial (43), con la sesión a mano como red (42). La
+26 se queda: la sesión se cachea en la conexión de la empresa y el login es raro.
 
 **El adaptador de PsicoAlianza:** invitación en cuatro pasos (27); tipo de documento del
 candidato con CC por defecto (12); traducir el centinela `-2.0` a *sin puntaje* (37); y lo que
@@ -1746,25 +1875,34 @@ anotados que empeoran con el tiempo.
 
 ### Cómo se parte
 
-Los números son de brief, no de orden, y no se renumeran. Del 1 al 3 son aditivos —nada los llama—
+Los números son de brief, no de orden, y no se renumeran. Del 2 al 3 son aditivos —nada los llama—
 y llevan brief corto y una ronda; del 4 en adelante tocan el embudo o se ven, y llevan el
 tratamiento completo. **Con el 5 cerrado se puede probar en local de punta a punta**; el 6 va
 después, porque en local la conexión y la configuración de la oferta se pueden escribir a mano.
+**Repartido el 2026-09-13 (decisión 43):** el 2 y el 2b son independientes y pueden ir en paralelo;
+el 2c necesita a los dos y, además, las dos mediciones pendientes de la 43 y saber cómo se
+construye la imagen. El 2 y el 2b se escriben ya.
 
 | # | Paso | Riesgo |
 | --- | --- | --- |
-| 1 | El módulo de captcha: puerto sin proveedor, adaptador de SolveCaptcha, solo reCAPTCHA v3 — brief `brief-etapa3-paso1-modulo-captcha.md`, **escrito, en espera: la medición del captcha (abajo) falló** | Aditivo |
-| 2 | El cliente de PsicoAlianza: login con CSRF y captcha, sesión guardada con un solo login a la vez por conexión, sus peticiones y el registro sin contraseñas; la lectura única de conexiones reconoce la de PsicoAlianza; se mide el puntaje del captcha | Aditivo |
+| 1 | ~~El módulo de captcha~~ **Descartado** (decisiones 25 y 43): no hay solucionador. El brief `brief-etapa3-paso1-modulo-captcha.md` queda como registro de la forma que el 2b copia | — |
+| 2 | El cliente de PsicoAlianza **dado una sesión viva**: el almacén de sesión en la conexión de la empresa, la fuente manual del `.env` (decisión 42), el CSRF de las peticiones, las peticiones del contrato, *sesión caducada* como error propio y el registro sin cookies ni contraseñas; la lectura única de conexiones reconoce la de PsicoAlianza | Aditivo |
+| 2b | El módulo `proxy`: puerto de *arrendar una IP*, adaptador de DataImpulse, errores propios, sin selector (decisión 43). Nada lo llama hasta el 2c | Aditivo |
+| 2c | El acuñador de sesión: Chrome sin ventana por el puerto de proxy, clasificador, reintentos, candado y tope, aviso a soporte; Chromium en la imagen del backend (decisión 43). **Espera las dos mediciones y el dato de la imagen** | Aditivo en código; **la imagen no** |
 | 3 | El adaptador de PsicoAlianza contra el puerto psicométrico. Puede partirse: listar y comprobar vacantes, después invitar y leer resultados | Aditivo |
 | 4 | El resolvedor de adaptador por conexión, y el cron preguntando al proveedor de la invitación (decisiones 6, 38 y 41). Puede partirse | Embudo |
 | 5 | Backend: guardar y validar la conexión de PsicoAlianza, el documento en la invitación y su motivo de rechazo | Embudo |
 | 6 | Portal: selector de proveedor, modal por proveedor, pruebas adicionales solo de EvaluaTest (decisiones 3 y 4) | Visible |
 
-**Antes del paso 1, fuera del código:** clave de SolveCaptcha y cuenta de PsicoAlianza para probar
-(confirmadas por el usuario el 2026-09-13). La clave va en el `.env`, y el usuario confirmó que la
-misma sirve para producción. **La conexión de PsicoAlianza no va en el `.env`**, ni siquiera en
-local: se guarda en la base como cualquier conexión (decisiones 34 y 40, y las reglas de credenciales
-del backend); cómo insertarla en local llega con el paso 2.
+**Antes del paso 2, fuera del código:** cuenta de PsicoAlianza para probar y **una sesión de esa
+cuenta pegada en el `.env` local** (decisión 42; cómo sacarla, en `../entorno-local.md`). Para el 2b
+y el 2c, la cuenta del proxy móvil (DataImpulse, ya contratada) en el `.env` con las variables
+neutras de `../entorno-local.md`, y Chrome instalado en la máquina. La clave de SolveCaptcha ya no
+hace falta. **La conexión de PsicoAlianza no
+va en el `.env`**, ni siquiera en local: se guarda en la base como cualquier conexión (decisiones 34
+y 40, y las reglas de credenciales del backend); cómo insertarla en local llega con el paso 2. En el
+`.env` va solo la sesión, que es otra cosa: la conexión dice *qué cuenta usa esta empresa*; la sesión
+es *ya estoy dentro de esa cuenta*.
 
 ### Lo que la lista de herencia no tenía (contrastado el 2026-09-13)
 
@@ -1842,8 +1980,11 @@ la nota.
 aclararon:
 
 - En la **demo neutral de Google** (`recaptcha-demo.appspot.com`), tres tokens normales de
-  SolveCaptcha sacaron **0.9** los tres, pedidos 0.3, 0.9 y 0.3. El servicio no tiene un problema de
-  nota.
+  SolveCaptcha sacaron **0.9** los tres, pedidos 0.3, 0.9 y 0.3. ~~El servicio no tiene un problema
+  de nota.~~ **Eso no se sigue** (corregido el 2026-09-13): Google calcula la nota **por sitio**, con
+  el tráfico de cada clave, así que un token que vale 0.9 en la demo puede valer 0.1 en
+  PsicoAlianza. La demo solo prueba que el servicio produce tokens válidos; de la nota en
+  PsicoAlianza no dice nada.
 - En PsicoAlianza, pidiendo el token con **`enterprise=1`** —la variante Enterprise de SolveCaptcha—,
   **un intento de dos entró**: redirección a `/inicio`, sesión viva y la cookie `remember_web_<hash>`
   de *permanecer conectado*. El otro fue rechazado con el mensaje de siempre. Con `userAgent` y sin
@@ -1894,8 +2035,22 @@ todo lo que el servicio ofrece por configuración; el único éxito en 85 es ind
 Quedan sin probar dos cosas que no se pueden medir en una sesión: **resolver con un proxy
 residencial** pasado a SolveCaptcha (hace falta un proxy; su documentación no confirma proxy para
 v3) y **pedir a soporte de SolveCaptcha que ajuste su solucionador para este sitekey** (días). La
-decisión de fondo —qué camino toma la autenticación de PsicoAlianza— queda con el usuario; las
-opciones y su probabilidad, arriba en *Cómo seguir* del traspaso, no en el código.
+decisión de fondo —qué camino toma la autenticación de PsicoAlianza— queda con el usuario.
+
+**Los caminos, con lo que le pasa a una candidata en cada uno** (escritos aquí el 2026-09-13; una
+versión anterior de este párrafo remitía a un texto que solo existía en el chat del planificador):
+
+| Camino | Qué le pasa a la candidata | Riesgo real |
+| --- | --- | --- |
+| **Preguntarle a PsicoAlianza**: usuario de integración, clave, IP exenta del captcha, o webhook (A9) | Recibe su enlace siempre | Nadie lo ha preguntado: todo lo de "API no pública" es observado, no consultado. Es el cliente pagando por el servicio. **Es el camino que se recomienda, y sigue sin hacerse** |
+| **Login humano y sesión reutilizada**, cada 5 días | Recibe su enlace mientras alguien renueve la sesión | Si nadie la renueva, la decisión 36 hace el resto: a los 2 días de sesión muerta se la descarta diciéndole que su resultado no llegó. Solo vale en un servidor con alerta a soporte cuando la sesión muera |
+| **Otro solucionador o proxy residencial**, como experimento acotado | Igual que hoy: nadie sabe si entra | Una tarde y un presupuesto fijo. La probabilidad es desconocida; no baja de cero por probar |
+| **Insistir hasta entrar**: 1 % por intento, la cuenta no se bloquea, dos centavos cada quince intentos | Entra "a veces" | Cientos de intentos fallidos de *verificar que eres una persona* contra el login del proveedor del cliente. Queda en la lista por honestidad; **no se recomienda** |
+
+✅ **Decidido el 2026-09-13: el segundo, provisional y solo en local** (decisión 42), para seguir
+desarrollando el resto de la etapa mientras se resuelve cómo se consigue la sesión. El primero
+sigue siendo el que hay que hacer, y no depende de código. **Y esa misma tarde apareció un quinto
+camino que esta tabla no tenía, y es el oficial: ver *Medición con proxy*, abajo.**
 
 **Lo que se sabe:**
 
@@ -1912,5 +2067,39 @@ opciones y su probabilidad, arriba en *Cómo seguir* del traspaso, no en el cód
 servicio de pago lo alcanzaría.
 
 🔴 **Consecuencia: la decisión 23 no funciona como está.** Con SolveCaptcha no se entra a
-PsicoAlianza por HTTP. El paso 1 queda en espera y los pasos 2 a 6 no arrancan hasta decidir cómo se
-autentica el sistema. La decisión es del usuario y queda pendiente.
+PsicoAlianza por HTTP. El paso 1 queda en espera. ~~Los pasos 2 a 6 no arrancan hasta decidir cómo
+se autentica el sistema.~~ **Sí arrancan** (decisión 42, el mismo día): con la sesión conseguida a
+mano y pegada en el `.env` local, el cliente y todo lo que viene detrás se desarrollan igual. ~~Lo que
+sigue pendiente es cómo se consigue la sesión sola, que es lo único que bloquea el despliegue.~~
+**Resuelto la misma tarde: abajo.**
+
+### Medición con proxy — ✅ ENTRA (2026-09-13, la misma tarde)
+
+Hecha por el usuario en otro chat, con un script desechable fuera de los repositorios (Node,
+`puppeteer-core` manejando el Chrome instalado). Un quinto camino que la tabla de arriba no tenía:
+**el mismo navegador automatizado, pero saliendo por otra IP.**
+
+| Variante | Resultado |
+| --- | --- |
+| Chrome automatizado, IP de casa (el 2026-09-09) | Rechazado |
+| SolveCaptcha, cualquier variante (esta mañana) | 1 de 85 |
+| Chrome automatizado por **proxy residencial rotativo** | 0 de 3 |
+| Chrome automatizado por **proxy móvil colombiano** (DataImpulse, sesión pegajosa), con ventana | **Entra** — ⚠️ N de N por anotar |
+| Igual, **sin ventana** | **Entra a la primera** — ⚠️ N de N por anotar |
+
+Lo que hace el script: pide al proxy una IP pegajosa por intento (país y sesión codificados en el
+usuario del proxy), lanza Chrome con esa IP y sin la marca de automatización, va a `/login`,
+escribe correo y contraseña con pausas, hace clic; la propia página ejecuta el captcha y envía.
+Éxito = redirige fuera de `/login`; rechazo = queda en `/login` con el mensaje del captcha.
+*Permanecer conectado* viene marcado por defecto, así que el login deja `ats_session`,
+`remember_web_<hash>` (5 días, como dice la ayuda del propio sitio: «hasta 5 días sin caducar por
+inactividad») y `XSRF-TOKEN`.
+
+**Lectura:** lo que PsicoAlianza —o Google para su clave— castiga es **la IP**, no el navegador ni
+el endurecimiento. Corrige el riesgo del 2026-09-09 que decía "no volver por esta vía".
+
+**Lo que esta medición no dice, y falta:** si la sesión sirve desde otra IP que la que la creó, y
+la tasa exacta. Las dos están en la decisión 43 como condición del brief del acuñador.
+
+✅ **Decidido el 2026-09-13, y cierra el bloqueo: el proxy móvil es el camino oficial** (decisión
+43), todo en el backend. El login humano (42) queda como red de emergencia y para local.

@@ -162,8 +162,18 @@ Freno para lo que habla con el mundo real:
 
 El resto tiene valor por defecto y no hace falta tocarlo.
 
-**SolveCaptcha:** sus variables entran con el brief 1 de la etapa 3, y este documento se
-actualiza en ese mismo diff.
+**PsicoAlianza, dos formas de tener sesión** (decisiones 42 y 43):
+
+- **Pegada a mano**, la de emergencia y la de hoy: ver la sección *La sesión de PsicoAlianza, a
+  mano*, más abajo.
+- **Acuñada por el backend con Chrome por proxy móvil**, la oficial, cuando exista el paso 2c.
+  Necesita en el `.env` la cuenta del proxy (DataImpulse) con nombres neutros —`PROXY_HOST`,
+  `PROXY_PORT`, `PROXY_LOGIN`, `PROXY_PASS`, y el protocolo, HTTP por defecto—, y Chrome
+  instalado en la máquina. Los nombres exactos y la ruta de Chrome los fija el brief del 2b y
+  del 2c; este documento se actualiza en esos diffs. Sin estas variables el backend arranca y
+  falla solo al acuñar.
+
+**SolveCaptcha:** ya no hace falta (decisión 25 descartada).
 
 ## 3 · El `.env` del portal
 
@@ -229,6 +239,32 @@ docker compose -f docker-compose.local.yml down      # para la base; los datos s
 🔴 Añadir `-v` a ese comando **borra el volumen, es decir, la base local entera**. No tiene vuelta
 atrás.
 
+## La sesión de PsicoAlianza, a mano (decisión 42: emergencia y local)
+
+Hasta que exista el acuñador (paso 2c), el backend local **no hace login en PsicoAlianza**: usa
+una sesión que tú abres en el navegador y pegas en el `.env`. Después, sigue sirviendo como red
+de emergencia. Dura **5 días**; cuando el backend empiece a fallar con *sesión de PsicoAlianza
+caducada*, se repite esto.
+
+1. En el navegador, entrar a `https://ats.psicoalianza.com/login` con la cuenta de pruebas y
+   **la casilla *permanecer conectado* marcada**. Sin la casilla, la sesión dura horas.
+2. Abrir las herramientas de desarrollador → *Application* (Chrome) o *Almacenamiento*
+   (Firefox) → *Cookies* → `https://ats.psicoalianza.com`.
+3. Copiar el valor de **`ats_session`** y el de **`remember_web_<hash>`** (el nombre termina en
+   una tira larga de letras y números; es una sola cookie).
+4. Pegarlos en el `.env` del backend, en **una línea**, con la forma exacta con que el navegador
+   manda la cabecera `Cookie`: nombre, `=`, valor, y `; ` entre las dos:
+
+   `PSICOALIANZA_SESSION_COOKIE=ats_session=<valor>; remember_web_<hash>=<valor>`
+
+   Sin comillas, sin espacios alrededor del `=` de la variable. `XSRF-TOKEN` no hace falta: el
+   backend la renueva solo antes de cada envío.
+5. Reiniciar el backend: el `.env` se lee al arrancar.
+
+🔴 **Esa línea es una credencial viva de la cuenta del cliente.** El `.env` está ignorado por git
+y ahí se queda; no va a ningún mensaje, captura de pantalla ni `.md`. Y **no va en ningún
+servidor**: la lista de antes del despliegue lo tiene como bloqueo.
+
 ## Lo que este entorno todavía no cubre
 
 - **Probar la etapa psicométrica de punta a punta.** El candidato habla por WhatsApp, y aquí
@@ -240,4 +276,5 @@ atrás.
   plataforma, así que el desvío de correos de pruebas de EvaluaTest no sirve.
 - **La conexión de PsicoAlianza de la empresa local** se guarda en la base, cifrada con la
   `SECRET_KEY` local, como en producción. Cómo insertarla se añade aquí cuando el backend sepa
-  leerla (brief 2 de la etapa 3). **No va en el `.env`.**
+  leerla (brief 2 de la etapa 3). **No va en el `.env`**: en el `.env` va solo la sesión (arriba),
+  que es otra cosa — la conexión dice *qué cuenta usa esta empresa*; la sesión, *ya estoy dentro*.
