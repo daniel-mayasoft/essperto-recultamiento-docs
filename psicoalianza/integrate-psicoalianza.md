@@ -1161,14 +1161,21 @@ Se da por terminado cuando se cumplen las dos condiciones:
     Chrome. **Antes del brief del acuñador hay que saber cómo se construye la imagen, el límite
     de memoria del contenedor y cuántas instancias corren.** Va en `before-deploy.md`.
 
-    🔴 **Dos mediciones pendientes antes del brief del acuñador**, no de los otros dos:
+    🔴 **Dos mediciones pendientes antes del brief del acuñador**, no de los otros dos. ✅ **La
+    primera se cerró el mismo 2026-09-13** (ver *Medición cruzada de IP*, abajo); **queda solo la
+    segunda**:
 
-    1. **Que la sesión acuñada por IP móvil sirva desde otra IP.** Toda la arquitectura da por
-       hecho que PsicoAlianza no ata la sesión a la IP; nunca se probó (el 2026-09-09 las
-       cookies se usaron desde la máquina que las creó). Prueba: con las cookies de un login
-       por proxy, pedir `/login` sin proxy; si redirige a `/inicio`, vale. Si no, el backend
-       tendría que salir por el proxy en todas las peticiones y el gasto deja de ser cero.
-    2. **La tasa sin ventana**, N de N, para escribir la política de reintentos con un número.
+    1. ✅ ~~Que la sesión acuñada por IP móvil sirva desde otra IP.~~ **MEDIDA Y CONFIRMADA**: sirve.
+       Era el supuesto que sostenía toda la arquitectura —acuñar por móvil y trabajar por HTTP desde
+       el servidor— y el único que, de haber salido mal, habría obligado a que el backend saliera por
+       el proxy en **todas** las peticiones, con el gasto disparado.
+    2. 🔴 **La tasa sin ventana**, N de N, para escribir la política de reintentos con un número.
+       **Sigue abierta a 2026-09-13.** Lo que hay son datos sueltos de las corridas del día —el
+       primer intento sin ventana entró, y al acuñar para la prueba cruzada una corrida falló y otra
+       entró a la primera—, y **eso no es una tasa**: son intentos sueltos, que es justo el error que
+       costó la mañana con el solucionador. Falta lo sistemático: cinco entradas de N intentos
+       repartidas en el día, **anotando por qué falla cada uno** —captcha rechazado o el proxy que no
+       responde—, porque de esa distinción sale el diseño del reintento.
 
     **Riesgo aceptado a sabiendas:** es la apuesta de la 23 con más maquinaria —entrar al
     sitio del proveedor por IP móvil para pasar su protección contra robots, con la cuenta de
@@ -2139,6 +2146,35 @@ la tasa exacta. Las dos están en la decisión 43 como condición del brief del 
 
 ✅ **Decidido el 2026-09-13, y cierra el bloqueo: el proxy móvil es el camino oficial** (decisión
 43), todo en el backend. El login humano (42) queda como red de emergencia y para local.
+
+### Medición cruzada de IP — ✅ LA SESIÓN NO ESTÁ ATADA A LA IP (2026-09-13)
+
+La medición que sostenía toda la arquitectura de la decisión 43, y salió bien. Script
+`test-cross-ip.mjs`, del chat de mediciones.
+
+**Qué se hizo:** acuñar una sesión entrando por **IP móvil colombiana** con el proxy, y después
+usar esas cookies **desde otra máquina y otra IP residencial, sin proxy ninguno**.
+
+| Qué se mandó desde la otra IP | Resultado |
+| --- | --- |
+| Todas las cookies de la sesión | Redirige a `/inicio` |
+| Solo `ats_session` | Redirige a `/inicio` |
+| Solo `remember_web_<hash>` | Redirige a `/inicio` |
+
+**Lo que queda probado, y es el permiso para construir el 2c como está diseñado:**
+
+- **PsicoAlianza no ata la sesión a la IP que la creó.** El navegador acuña por móvil y el backend
+  trabaja por HTTP desde la IP del servidor. Si esto hubiera salido mal, el backend tendría que
+  salir por el proxy en **todas** las peticiones y el gasto dejaría de ser casi cero.
+- **La cookie de *permanecer conectado* reautentica sola**, y ahora está comprobado **desde otra
+  IP**. Confirma A13 y la decisión 26 por observación y no por lectura de su documentación, y
+  significa que al acuñador le basta con guardar esa cookie para sobrevivir a la caducidad de la
+  sesión corta.
+
+⚠️ **Lo que no dice:** cuánto dura de verdad. Que reautentique hoy no mide los cinco días.
+
+📌 Las dos direcciones IP concretas quedaron en la salida del script y **no se copian aquí**: una es
+la IP doméstica de quien lo corrió, rotan las dos, y dentro de un mes no significan nada.
 
 ### Paso 2 — ✅ HECHO (2026-09-13)
 
