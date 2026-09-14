@@ -78,10 +78,37 @@ pena salvo que algo obligue a reloguear seguido (sesiones que mueren, muchas cue
   rechazado. Con un solo intento no se puede afirmar que bloquear rompa el login (puede ser el fallo
   aleatorio de la tasa aún sin medir). No adoptar sin repetirlo varias veces.
 
+## Tasa de éxito — ✅ MEDIDA (2026-09-14)
+
+Dos tandas de diez intentos seguidos, sin ventana, por proxy móvil, rotando la IP pegajosa en cada
+uno y con veinticinco segundos entre intentos:
+
+| Variante | Entraron | Tiempo medio por intento |
+| --- | --- | --- |
+| Perfil de Chrome **persistente** | **4 de 10** | **18 s** |
+| Perfil **limpio en cada intento** | **2 de 10** | 34 s |
+| Sin proxy, IP residencial | 0 de 3 | 11 s |
+
+Todos los fallos fueron rechazo del captcha: ninguno de red ni de credenciales, y **ninguna señal de
+bloqueo** tras unos treinta intentos en el día.
+
+- **Sin ventana SÍ se entra**: seis de veinte. Confirma lo que este documento ya decía y **descarta**
+  la lectura contraria que circuló el mismo día a partir de tres fallos seguidos — con esta tasa, tres
+  fallos seguidos pasan más de la mitad de las veces.
+- **La tasa ronda el 30% por intento.** De ahí sale la política de reintentos: cinco intentos para
+  entrar con un 80% de confianza, ocho para un 95%, y **de uno a dos minutos por sesión conseguida**.
+- **El perfil persistente abarata el login** (los tiempos caen a la mitad, porque la página llega
+  cacheada). Que además **mejore la tasa no está probado**: 4 contra 2 sobre diez es muy poco.
+
+⚠️ **Al repetir la medición, dos trampas.** Con perfil persistente hay que **borrar las cookies del
+sitio entre intentos** —si no, tras el primer éxito el navegador ya está autenticado, el login
+redirige al inicio y los intentos siguientes fallan con un error que no es del captcha— y **conservar
+las de Google**, que son las de la reputación. Y los intentos que entran parecen más lentos solo
+porque al entrar se carga la página de trabajo.
+
 ## Pendiente de medir
 
-**Tasa de éxito del login headless**: cuántas veces entra de cuántos intentos. Hoy solo hay datos
-sueltos (entró 1/1 en una prueba; en otra, una corrida falló y la siguiente entró a la primera). No es
-una tasa. Falta muestreo sistemático (varias tandas de N intentos repartidas en el día para no martillar
-la cuenta), registrando **por qué** falla cada intento (captcha rechazado vs. timeout del proxy), que es
-lo que decide el diseño del reintento.
+**Con ventana contra sin ventana, con muestras comparables.** Lo único que hay a favor de la ventana
+es un intento suelto, y montar una pantalla virtual en la imagen del servidor no es gratis: hacen
+falta al menos diez intentos por lado, seguidos, a la misma hora y con el perfil tratado igual en
+ambos. Distinguir de verdad un 30% de un 60% pide del orden de treinta por lado.

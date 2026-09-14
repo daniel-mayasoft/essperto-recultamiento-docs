@@ -7,6 +7,12 @@ otros `.md`.** Toca solo el backend.
 > comprobaciones del 2026-09-14 (bitácora, *Tanda de comprobaciones para el paso 3*) contestó con
 > mediciones casi todo lo que antes eran suposiciones. **Donde este brief dice «medido», está
 > medido**; donde dice «sin ver», nadie lo ha visto.
+>
+> **Contrastado contra el código el 2026-09-14, por el planificador, antes de entregarlo.** Dos
+> puntos de la versión anterior no se podían implementar con lo que el código da —emparejar
+> resultados por documento y distinguir una vacante completada de una suspendida— y se corrigieron;
+> lo que cambió está marcado como «corregido el 2026-09-14» en su sitio, y el detalle en la bitácora,
+> *Contraste del brief contra el código*.
 
 ## Antes de escribir una sola línea
 
@@ -36,15 +42,19 @@ El embudo no se entera de nada: sigue hablando el idioma neutro que ya habla con
 **Nada lo llama todavía.** El resolvedor que elige proveedor es el paso 4. Aditivo: brief corto, una
 ronda.
 
-🔴 **Pero «aditivo» no quiere decir «no toca nada existente»: hay una pieza compartida con
-EvaluaTest**, que es la etapa que hoy corre en producción.
+🔴 **Pero «aditivo» no quiere decir «no toca nada existente»: hay dos piezas compartidas con
+EvaluaTest**, que es la etapa que hoy corre en producción (corregido el 2026-09-14: la versión
+anterior contaba una).
 
 | Pieza compartida | Qué se le hace | Qué pasa si sale mal |
 | --- | --- | --- |
 | **El tipo de la invitación del puerto** | Se le añade **un campo opcional**, el plazo (punto 6) | Si se declara **obligatorio**, deja de compilar el embudo, que hoy no lo pasa — y este paso deja de ser aditivo y arrastra al paso 4 |
+| **El error *falta un dato del candidato*** | Su campo solo admite hoy «correo»; se **amplía** para poder decir «documento» (punto 5) | Nada, si solo se amplía: el embudo lo reconoce por el tipo, no por el campo. ⚠️ Y ese embudo lo convierte **siempre** en *sin correo* — con un documento ausente diría lo que no es. No es de este paso: lo hereda el 5 |
 
-Todo lo demás son archivos nuevos que nadie importa. Por eso hay una prueba dedicada a que la
-invitación de EvaluaTest siga comportándose igual con el campo nuevo delante.
+Todo lo demás son archivos nuevos que nadie importa, **más una petición nueva en el cliente del
+paso 2** (punto 3) y la corrección de cómo codifica los participantes (punto 5), que no tocan a
+EvaluaTest. Por eso hay una prueba dedicada a que la invitación de EvaluaTest siga comportándose
+igual con el campo nuevo delante.
 
 ## Cómo tiene que quedar
 
@@ -65,20 +75,34 @@ indistinguible de cualquier otro proveedor.
 3. **Comprobar si una vacante sirve.** Por el estado del proceso, **medido el 2026-09-14**: hay tres
    valores vivos y el contrato solo tenía dos.
 
-   | Estado | Qué devuelve |
+   🔴 **Corregido el 2026-09-14 contra el código: la única petición de vacantes del cliente del paso
+   2 trae solo las activas** —filtra por estado—, así que con ella una vacante completada o suspendida
+   **no aparece** y no se distingue de una que no existe. **Este paso añade al cliente una petición
+   hermana sin el filtro de estado**, medida en el contrato: omitir el tamaño de página trae todas
+   las vacantes de la cuenta en una sola respuesta, archivadas incluidas. El adaptador busca ahí la
+   vacante por su identificador:
+
+   | Lo que encuentra | Qué devuelve |
    | --- | --- |
-   | Activo | **Usable** |
-   | Completado | **No usable**, con su motivo |
-   | Suspendido | **No usable**, con su motivo |
-   | 🔴 Cualquier otro | **Indeterminado**, nunca usable |
+   | No está en la lista | **Indeterminado** |
+   | Está, pero archivada (`activo` en falso) | **No usable**, con su motivo |
+   | Estado Activo (2) | **Usable** |
+   | Estado Completado (3) | **No usable**, con su motivo |
+   | Estado Suspendido (5) | **No usable**, con su motivo |
+   | 🔴 Cualquier otro estado | **Indeterminado**, nunca usable |
 
    Lo último es lo que importa: aparecerán más estados, y tratar «lo que no conozco» como usable deja
-   invitar a una vacante muerta.
+   invitar a una vacante muerta. El listado del punto 2 sigue usando la petición de activas.
 
 4. **Validar la conexión: no llama a nadie** (decisión 44). Da por buena la conexión que tenga correo
    y contraseña. **No hace login**, porque hacerlo aquí exigiría acuñar una sesión y un fallo del
    captcha acusaría a las credenciales de estar mal. La comprobación de verdad y lo que ve el
    reclutador son del paso 5.
+
+   **Y el correo de pruebas de la empresa no existe para este adaptador** (decidido el 2026-09-14;
+   la bitácora lo dejaba «para el paso 3»). La lectura única entrega ese correo para cualquier
+   proveedor, pero es el desvío de QA de EvaluaTest y en PsicoAlianza no sirve —un correo es de una
+   sola persona en toda la plataforma—. **Este adaptador no lo lee en ninguna operación.**
 
 5. **Invitar, en cuatro pasos** (decisión 27), y en este orden:
 
@@ -92,13 +116,43 @@ indistinguible de cualquier otro proveedor.
       lo haya agregado** (medido reinvitando), así que su respuesta no prueba nada.
    4. **Pedir el enlace personal** con ese identificador, una sola vez, y devolverlo.
 
+   🔴 **Antes de tocar la invitación, mira el contrato: el payload real del portal se capturó el
+   2026-09-14 y desmiente cómo la armó el paso 2.** Los participantes viajan en **un solo campo con
+   el JSON dentro**, con las siete claves —las cuatro de teléfono en nulo— y el tipo de documento
+   como texto, no como campos sueltos con índice. **Se alinea con la forma del portal** y se corrige
+   el cliente del paso 2 en este mismo diff: el paso 2 dejó esa codificación aislada en una sola
+   función justo para esto. Que la forma actual funcione hoy no la salva: depende de que su backend
+   siga aceptando las dos. **Se vuelve a comprobar invitando de verdad** al documento del usuario,
+   como en la tanda.
+
+   **El tipo de documento va siempre como CC** en este paso (constante, en un solo sitio). La
+   decisión 12 —el del candidato, CC solo por defecto— no cabe aquí: el contrato del puerto no trae
+   el tipo, nuestro tipo es texto libre y de PsicoAlianza solo se conoce el identificador de CC. Cae
+   en el paso 5, con una medición previa de su catálogo.
+
+   ✅ **El título y el cuerpo del correo que PsicoAlianza le manda al candidato: los de su propio
+   portal, tal cual** (decidido por el usuario el 2026-09-14; están en el contrato). Fijos para
+   todas las empresas, en un solo sitio del adaptador, sin configurar. No se inventa texto —en la
+   tanda del 14 se mandó uno inventado y le llegó a una persona— y no se intenta apagar ese correo:
+   el botón «Comenzar» y el enlace de WhatsApp llevan a la misma pantalla de tareas pendientes, **y
+   pedir el enlace por la API no invalida el botón del correo** (confirmado por el usuario el
+   2026-09-14). Los dos canales se refuerzan, no chocan.
+
    **Antes de tocar al proveedor**, y con el mismo orden que el adaptador de EvaluaTest: la conexión
    —si falta, *sin conexión*—, el nombre de la vacante —si falta, **el error permanente** (decisiones
    35 y 39)—, y los datos del candidato. PsicoAlianza exige **correo y documento**: si falta
-   cualquiera de los dos, *falta un dato del candidato*, nombrando cuál.
+   cualquiera de los dos, *falta un dato del candidato*, nombrando cuál — para eso se amplía el
+   campo del error (tabla de piezas compartidas).
 
    ⚠️ **El documento todavía no llega**: el arranque no lo pasa (comprobado en la etapa 1). Eso se
    arregla en el paso 5; aquí solo hay que aceptarlo del contrato y fallar limpio si no viene.
+
+   🔴 **Lo que falla a mitad de los cuatro pasos es pasajero, salvo lo ya dicho.** *Sesión caducada*
+   —también *sin sesión*— se deja salir como error normal: el cron reintenta cada cinco minutos y,
+   cuando exista el acuñador, se resuelve solo. **No es permanente** aunque hoy reintentar no la
+   arregle: la decisión 39 reserva ese tipo al nombre de vacante ausente, y marcar la sesión como
+   permanente descartaría gente real en tres intentos. Reinvitar en el reintento es inofensivo
+   (trampa 7).
 
 6. **El plazo viaja en la invitación**, y es un campo nuevo del contrato del puerto.
 
@@ -115,10 +169,15 @@ indistinguible de cualquier otro proveedor.
 
 7. **Consultar resultados**, en lote por vacante (decisión 22). Trae el tablero una vez y empareja.
 
-   🔴 **El emparejamiento es por documento, no por correo** (medido): en PsicoAlianza una misma
-   persona tiene **dos correos distintos** —el del registro y el de la última invitación— y no
-   coinciden, así que el correo no es una llave. El identificador del proveedor sirve de respaldo,
-   como en EvaluaTest.
+   🔴 **El emparejamiento es por el identificador de PsicoAlianza, y solo por él** (corregido el
+   2026-09-14 contra el código; la versión anterior decía «por documento»). **Nunca por correo**
+   (medido): en PsicoAlianza una misma persona tiene **dos correos distintos** —el del registro y el
+   de la última invitación— y no coinciden, así que el correo no es una llave. **Y por documento no se
+   puede**: lo que el cron manda por candidato es nuestra referencia, el identificador del proveedor y
+   los dos correos; el documento no viaja. No hace falta: el identificador es la llave global que
+   PsicoAlianza le da a la persona, la invitación lo obtuvo buscándola en el tablero por documento, y
+   el cron solo consulta a quien ya lo tiene — a quien no, lo reinvita. Los dos correos del pedido
+   **se ignoran**.
 
    **Traducir las agendas a un estado neutro es el corazón de este paso.** PsicoAlianza da un
    veredicto **por prueba** y el puerto espera uno **por persona**:
@@ -128,7 +187,13 @@ indistinguible de cualquier otro proveedor.
    | No aparece esa persona | *no aparece* | — |
    | **Todas** sus pruebas finalizadas | *terminado* | El índice de talento |
    | Alguna sin terminar — agendada o vencida | *sigue en ello* | — |
+   | Aparece **sin ninguna agenda**, o con una en un estado que no se conoce | *sigue en ello* | — |
    | La petición falló o la sesión no sirve | *no se pudo consultar*, **para todos los pedidos** | — |
+
+   **Este adaptador nunca devuelve *rechazado por el proveedor***: PsicoAlianza no descarta a nadie
+   por su cuenta —su veredicto se guarda y no decide (punto 8)—. Y un estado de agenda que no sea
+   agendada, finalizada o vencida —el 2, que nadie ha visto— cuenta como *sin terminar*, por la misma
+   regla que la vacante: lo desconocido nunca aprueba ni descarta.
 
    **Por qué una prueba vencida cuenta como *sigue en ello* y no como rechazo** (decisión del usuario,
    2026-09-14): PsicoAlianza no la ha rechazado, simplemente no la hizo. Dejarla así hace que la saque
@@ -161,6 +226,10 @@ indistinguible de cualquier otro proveedor.
 - **No se toca la sesión**: ni acuñarla, ni Chrome, ni proxy. El adaptador usa el cliente y ya.
 - **No se implementa el estado de sesión** que verá el reclutador: es del paso 5 (decisión 44).
 - **No se hace que el arranque pase el documento**: paso 5.
+- **No se manda el tipo de documento real ni se mide su catálogo**: siempre CC. Paso 5.
+- **No se añade el documento a la consulta de resultados** del puerto: el identificador basta.
+- **No se toca el texto de WhatsApp** que hoy manda el embudo, aunque sus instrucciones sean de
+  EvaluaTest («Aplicar ahora», «regístrate»): es del embudo, y lo hereda el paso 4/5.
 - **Nada de pruebas adicionales** al estilo EvaluaTest: son exclusivas de aquel proveedor
   (decisión 4).
 - **No se toca `psicoalianza-api.md`**: si algo del contrato resulta falso, se dice en el reporte.
@@ -174,7 +243,8 @@ dice la verdad.
 cero tenía uno dentro. No usarlo para nada.
 
 **3. Hay dos correos por persona y ninguno sirve de llave.** El de la consulta por documento es el
-que recibe los avisos; el de la ficha es el último que se mandó. Emparejar por documento.
+que recibe los avisos; el de la ficha es el último que se mandó. Al invitar se busca por documento;
+al consultar resultados, por el identificador.
 
 **4. La etapa del candidato no avanza.** Se queda en *En pruebas* aunque la prueba esté finalizada y
 no recomendada. **El veredicto no está ahí**, está en la agenda.
@@ -189,13 +259,20 @@ la deuda conocida del proyecto con los clientes externos, y aquí se estrena lim
 **7. Reinvitar es inofensivo**: no duplica y **no le escribe al candidato** —tres invitaciones, un
 solo correo—. El reintento del cron es seguro.
 
+**8. Con la sesión manual encendida, el almacén entrega sesión sin mirar si la empresa tiene
+conexión** (leído del código el 2026-09-14). Por eso la comprobación de conexión del adaptador va
+primero en cada operación y no es redundante con el cliente: sin ella, en local una empresa sin
+conexión de PsicoAlianza hablaría igual con la plataforma. Y una prueba que simule el almacén sin
+simular la lectura única no la detecta.
+
 ## Lo que hay que preservar entero
 
 | Qué | Por qué |
 | --- | --- |
 | **EvaluaTest, intacto** | Es toda la etapa psicométrica que hoy corre en producción |
 | **El puerto y su token, apuntando a EvaluaTest** | Elegir proveedor es el paso 4 |
-| **El contrato del puerto**, salvo el campo del plazo, que es opcional | Romperlo obligaría a tocar el embudo y este paso dejaría de ser aditivo |
+| **El contrato del puerto**, salvo el campo del plazo, que es opcional, y el campo del error *falta un dato*, que se amplía | Romperlo obligaría a tocar el embudo y este paso dejaría de ser aditivo |
+| **Las demás peticiones del cliente del paso 2**: solo cambia la codificación de los participantes y se añade el listado sin filtro | El resto está medido contra la plataforma real |
 | **Compilación y pruebas en verde** | |
 
 ## Reglas de la casa
@@ -220,25 +297,36 @@ Con el cliente simulado —dobles, no peticiones—, como la prueba de paridad d
 - **Invitar hace los cuatro pasos en orden**, y usa **el correo que devuelve la consulta** cuando el
   documento ya existe, no el que le pasaron.
 - **Invitar manda nuestro plazo**, y **aborta con el error permanente si no se lo dieron**.
+- **Invitar manda el título y el cuerpo del portal**, y el tipo de documento **CC**.
 - **Sin conexión**, **sin nombre de vacante**, **sin correo** y **sin documento**: cada uno con su
-  error propio, **sin tocar al proveedor**, y en ese orden.
+  error propio, **sin tocar al proveedor**, y en ese orden. El de correo y el de documento **nombran
+  el campo que falta**.
+- **Sin conexión se aborta aunque el almacén tenga sesión** (trampa 8).
+- **Sesión caducada a mitad de la invitación** → sale como error normal, **no** como permanente.
 - **Si la persona no aparece en el tablero tras invitar**, la invitación falla en vez de devolver un
   identificador inventado.
-- **Los cuatro estados neutros**, uno por prueba: todas finalizadas, alguna agendada, **alguna
-  vencida**, y no aparece.
+- **Los estados neutros**, uno por prueba: todas finalizadas, alguna agendada, **alguna vencida**,
+  **sin agendas**, **una agenda en un estado desconocido**, y no aparece. Ninguna devuelve
+  *rechazado por el proveedor*.
 - **Terminado con el centinela de *sin nota*** → *sigue en ello*, **nunca terminado**.
 - **Una petición que falla** → *no se pudo consultar* **para todos los candidatos pedidos**, no solo
   para uno.
-- **El emparejamiento va por documento** aunque los correos no coincidan.
-- **La vacante**: activa usable; completada y suspendida no usables; **un estado inventado,
-  indeterminado**.
+- **El emparejamiento va por el identificador** aunque ninguno de los dos correos del pedido
+  coincida con el del tablero; y **no empareja por correo** aunque coincida y el identificador no.
+- **La vacante**: activa usable; completada, suspendida y **archivada** no usables; **un estado
+  inventado, indeterminado**; **una que no está en la lista, indeterminada**. Y la comprobación usa
+  **el listado sin filtro**, no el de activas.
 - **Validar la conexión no llama al cliente.**
+- **El correo de pruebas de la empresa no se lee**: una conexión que lo trae se comporta igual que
+  una que no.
 - **El veredicto de PsicoAlianza viaja en la bolsa** y no decide el estado.
 - **Listar vacantes** devuelve identificador y nombre, y lo propio del proveedor **en la bolsa**, sin
   filtrarlo por el camino.
-- 🔴 **No regresión de EvaluaTest**, que es la única pieza compartida: su invitación se comporta
+- **El cuerpo de la invitación del cliente** lleva los participantes como **un solo campo con el
+  JSON**, con las siete claves y el tipo como texto (la prueba que ya existe cambia con él).
+- 🔴 **No regresión de EvaluaTest**, en las dos piezas compartidas: su invitación se comporta
   **igual que antes** con el campo del plazo añadido al contrato — lo ignora, y una invitación sin
-  plazo le sigue funcionando.
+  plazo le sigue funcionando—, y su error de *sin correo* sigue nombrando «correo».
 
 ⚠️ Una prueba que pasa a la primera merece desconfianza: control negativo, y borrarlo después,
 limpiando la caché.
@@ -256,6 +344,9 @@ reporte.
 4. **Confirmación de que EvaluaTest no cambió** y de que el token del puerto sigue apuntando a él.
 5. **Confirmación de que el diff no trae cambios de formato** ni comentarios nuevos en código.
 6. **Qué encontraste del contrato que no cuadra** con lo escrito, si algo.
-7. **En tres líneas, qué falta para que un candidato real pase por PsicoAlianza de punta a punta.**
+7. **La invitación real de comprobación**: a qué documento, qué respondió PsicoAlianza con el cuerpo
+   nuevo, y que la persona apareció en el tablero. Sin eso, el cambio de codificación no está
+   verificado.
+8. **En tres líneas, qué falta para que un candidato real pase por PsicoAlianza de punta a punta.**
    Es lo que va a decidir el orden de los pasos 4 y 5.
-8. **Un mensaje de commit.**
+9. **Un mensaje de commit.**

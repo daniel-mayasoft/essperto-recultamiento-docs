@@ -1185,12 +1185,29 @@ Se da por terminado cuando se cumplen las dos condiciones:
     carga Chromium (de 300 a 500 MB más), y durante el minuto del login la instancia puede
     doblar su memoria (pico de 200 a 400 MB sobre los 150 a 300 del backend). En Docker, sin
     GPU y sin la memoria compartida del contenedor, que por defecto es de 64 MB y tumba a
-    Chrome. **Antes del brief del acuñador hay que saber cómo se construye la imagen, el límite
-    de memoria del contenedor y cuántas instancias corren.** Va en `before-deploy.md`.
+    Chrome. Va en `before-deploy.md`.
 
-    🔴 **Dos mediciones pendientes antes del brief del acuñador**, no de los otros dos. ✅ **La
-    primera se cerró el mismo 2026-09-13** (ver *Medición cruzada de IP*, abajo); **queda solo la
-    segunda**:
+    ✅ **El despliegue, leído el 2026-09-14** (`.deploy/test/docker-compose.yml` y el `Dockerfile`
+    del backend), que era el dato que faltaba:
+
+    | Qué | Cómo está |
+    | --- | --- |
+    | Imagen del backend | **`node:20-alpine`**, una sola etapa. Es exactamente el caso que la decisión 24 llamaba «el peor sitio para alojar Chromium»: en Alpine, Chromium es un paquete aparte del sistema y Puppeteer no trae el suyo |
+    | Instancias del backend | **Una sola**, sin réplicas |
+    | Límite de memoria del backend | **Ninguno declarado** — compite con los otros ocho contenedores del mismo servidor |
+    | 🔴 **Navegadores en ese servidor** | **Ya hay dos**: los dos robot-manager corren sin ventana, con **3 GB y 2 GB** de límite, clave de solucionador de captcha y **líneas de proxy ya cableadas** (hoy comentadas) |
+
+    🔴 **Ese último punto cambia el cuadro, y la decisión de meter Chrome en el backend se tomó
+    sin verlo.** El acuñador no estrena nada en ese servidor: **la infraestructura de navegador ya
+    existe al lado**, dimensionada para ello. Como una sola instancia del backend, el candado de
+    «un login a la vez» no tiene que coordinar procesos, pero el precio de Alpine sigue ahí. **Se
+    replantea con el usuario antes de escribir el brief del 2c**; lo decidido sigue siendo el
+    backend hasta que él diga otra cosa.
+
+    ✅ **Las dos mediciones que bloqueaban el brief del acuñador están hechas** —la cruzada de IP el
+    2026-09-13 y la tasa el 2026-09-14—, así que **la medición ya no bloquea el 2c**. Lo que sigue
+    faltando para escribirlo es el dato de la imagen del backend, y conviene cerrar antes la
+    comparación con ventana (abajo). Las dos, para el registro:
 
     1. ✅ ~~Que la sesión acuñada por IP móvil sirva desde otra IP.~~ **MEDIDA Y CONFIRMADA**: sirve.
        Era el supuesto que sostenía toda la arquitectura —acuñar por móvil y trabajar por HTTP desde
@@ -1200,26 +1217,41 @@ Se da por terminado cuando se cumplen las dos condiciones:
        ✅ **Primera medida sistemática, hecha por el planificador el 2026-09-14** (script propio, diez
        intentos seguidos con veinticinco segundos entre ellos, rotando la IP pegajosa en cada uno):
 
-       | Variante | Entraron | Tiempo medio |
+       | Variante | Entraron | Tiempo medio por intento |
        | --- | --- | --- |
-       | Proxy móvil, sin ventana, **perfil de Chrome limpio en cada intento** | **2 de 10** | 34 s por intento; 54 s los que entraron |
-       | Sin proxy, sin ventana, IP residencial | 0 de 3 | 11 s |
+       | Proxy móvil, sin ventana, **perfil de Chrome persistente** | **4 de 10** | **18 s** |
+       | Proxy móvil, sin ventana, **perfil limpio en cada intento** | **2 de 10** | 34 s |
+       | **Sin proxy**, sin ventana, IP residencial | **0 de 3** | 11 s |
 
-       **Los ocho fallos fueron todos rechazo del captcha**: ninguno de red, ninguno de credenciales
-       y **ninguna señal de bloqueo de la cuenta** tras trece logins fallidos en el día.
+       **Todos los fallos fueron rechazo del captcha**: ninguno de red, ninguno de credenciales, y
+       **ninguna señal de bloqueo de la cuenta** tras unos treinta intentos en el día.
 
-       ⚠️ **Ese 2 de 10 NO es la tasa del diseño, y por eso no se puede usar todavía para dimensionar
-       los reintentos.** Los scripts del otro chat —los que sí entraban— **reutilizan la carpeta de
-       perfil de Chrome entre intentos**, y el de esta medición la estrena en cada uno. Si Google
-       puntúa la reputación acumulada del navegador —que es justo lo que dice el riesgo del
-       2026-09-09, «un navegador recién nacido, sin historial ni cookies propias»—, las dos tandas no
-       miden lo mismo. **Se está midiendo la misma tanda con perfil persistente para comparar**, que
-       es la única variable que cambia.
+       🔴 **Lo que queda probado, y refuta una conclusión que circuló el mismo día: sin ventana SÍ se
+       entra.** Seis éxitos en veinte intentos sin ventana. La lectura contraria —que el modo
+       invisible delata al navegador y nunca pasa— se apoyaba en tres fallos seguidos, y con una tasa
+       de este orden eso ocurre **más de la mitad de las veces** por azar. **Antes de montar una
+       pantalla virtual en la imagen del servidor hay que medirlo con muestras comparables**, porque
+       esa pieza no es gratis.
 
-       ⏱️ **Y un detalle de los tiempos que engaña**: los intentos que entran tardan **más** (54 s
-       frente a 34 s), y no porque el captcha tarde, sino porque al entrar se carga la página de
-       trabajo, que es pesada. No cargarla —lo que propone `proxy-login.md` para ahorrar ancho de
-       banda— **también acorta el login**.
+       ⚠️ **Lo que NO queda probado: que el perfil persistente mejore la tasa.** 4 contra 2 sobre diez
+       intentos es demasiado poco para afirmarlo; haría falta del orden de treinta o cuarenta por
+       variante. Lo que **sí** está medido es que **abarata el login**: los tiempos caen a la mitad
+       porque la página de login llega cacheada. Como además no cuesta nada adoptarlo, **el acuñador
+       del paso 2c usa perfil persistente**, por los tiempos, no por la tasa.
+
+       ✅ **La cifra que faltaba para dimensionar los reintentos: alrededor de un 30% por intento.**
+       De ahí sale la política del 2c: con ese número hacen falta **unos cinco intentos para entrar
+       con un 80% de confianza, y ocho para un 95%**, y como cada intento cuesta de 18 a 34 segundos,
+       **conseguir una sesión cuesta del orden de uno a dos minutos**, no los veinte segundos de un
+       intento suelto. El tope diario por conexión tiene que contar **intentos**, no sesiones.
+
+       🔴 **Dos trampas de la medición, para quien la repita.** La primera tanda con perfil **se
+       saboteó sola**: en cuanto un intento entró, el perfil se quedó con la sesión y los siguientes
+       fallaban con un error extraño, porque PsicoAlianza **echa del login a quien ya está dentro** y
+       el botón desaparecía. Hay que **borrar las cookies del sitio entre intentos y conservar las de
+       Google**, que son las que dan reputación. Y los intentos que entran parecen más lentos solo
+       porque al entrar se carga la página de trabajo: **no cargarla acorta el login además de
+       ahorrar datos**.
 
     **Riesgo aceptado a sabiendas:** es la apuesta de la 23 con más maquinaria —entrar al
     sitio del proveedor por IP móvil para pasar su protección contra robots, con la cuenta de
@@ -1290,6 +1322,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
 | A11 | ~~¿Cómo se sabe si una vacante sigue sirviendo?~~ **RESUELTO a medias** (2026-09-14) | Por el estado del proceso, y son **tres** los vistos, no dos: `2` Activo, `3` Completado y **`5` Suspendido** (este no estaba en el contrato). Usable es **solo el 2**; el 3 y el 5 no. 🔴 **Cualquier otro valor tiene que quedar como indeterminado**, no como usable: aparecerán más. Medido: de 113 vacantes, 18 activas, 89 completadas y 6 suspendidas |
 | A12 | ¿Ambiente de pruebas o desvío de correos?         | Sin eso, cada ensayo invita a una persona real                                   |
 | A13 | ~~Qué cookies emite el login con *permanecer conectado* marcado~~ **RESUELTO** | Emite `remember_web_<hash>` y estira la sesión a 5 días. Con esa cookie Laravel reautentica solo, sin login ni captcha, si se toca el portal cada 5 días. Ver *Confirmado* y decisión 26 |
+| A14 | Catálogo de tipos de documento (levantado el 2026-09-14) | Solo se conoce CC = `1`. Sin el catálogo, el paso 3 manda siempre CC y la decisión 12 (el tipo del candidato) no se puede cumplir. Se mide antes del paso 5, capturando el desplegable del formulario de invitar |
 
 ## Falta decidir
 
@@ -2032,7 +2065,8 @@ Levantado leyendo el código y `psicoalianza-api.md`. Cada punto cae en el paso 
   ⚠️ **Y la lectura única lo entrega igual** (levantado en la opinión previa del paso 2, 2026-09-13):
   devuelve el correo de pruebas **de EvaluaTest** para cualquier proveedor, sin mirar cuál es. Una
   conexión de PsicoAlianza sale con ese campo relleno y no debe usarse. No se toca en el paso 2
-  —cambiarlo afecta a EvaluaTest—: se decide en el paso 3.
+  —cambiarlo afecta a EvaluaTest—: ~~se decide en el paso 3~~ ✅ **decidido el 2026-09-14: el
+  adaptador de PsicoAlianza no lo lee**, con su prueba. La lectura única no cambia.
 - **Al guardar la conexión desde el portal hay que conservar la sesión** (paso 5; encontrado el
   2026-09-13 verificando la opinión previa del paso 2). La ruta que guarda una conexión **reconstruye
   el objeto con los campos que conoce** y descarta el resto: hoy solo toca la de EvaluaTest, así que
@@ -2388,7 +2422,7 @@ todas por el cliente del paso 2.** Lo que contestó PsicoAlianza:
 
 | Qué | Resultado |
 | --- | --- |
-| **La forma del cuerpo de la invitación** | ✅ **Correcta**: 201 y *agregados: 1* a la primera. **Cierra el supuesto que dejó el paso 2** |
+| **La forma del cuerpo de la invitación** | ✅ **Funciona**: 201 y *agregados: 1* a la primera. ⚠️ Pero al capturar después el payload del portal se vio que **no es la suya** — ver el supuesto 2 del paso 2, y el contrato |
 | **El plazo** | 🔴 **Se respeta**: mandamos 2 días y la agenda quedó cerrando **exactamente 2 días después**. Confirma el mecanismo de los dos plazos: el que mandamos manda |
 | **El candidato recién invitado** | Puntaje `-2.0` (el centinela de *sin nota*), agenda en estado 1 *Agendada*, recomendación `0`, ajuste `null` |
 | **El enlace personal** | ✅ Se obtiene con el identificador que trae el tablero |
@@ -2451,6 +2485,54 @@ anota ese mismo, el registrado, sabiendo que **no se usa para emparejar**.
 ⚠️ **Lo que esto no rompe:** que la invitación le llegue a una dirección distinta de la que tenemos
 guardada del candidato da igual, porque **el enlace se le manda por WhatsApp** (B2) y el correo de
 PsicoAlianza es solo un respaldo.
+
+~~🔴 **Lo que la tanda dejó abierto, y no estaba en ninguna lista: qué dice el correo que PsicoAlianza
+le manda al candidato.**~~ ✅ **DECIDIDO por el usuario el 2026-09-14, la misma tarde.** La
+invitación lleva un título y un cuerpo, y en la tanda se mandaron textos inventados sobre la marcha
+que le llegaron a una persona. Se resolvió capturando el payload que manda el propio portal de
+PsicoAlianza cuando un reclutador invita desde su pantalla (está en el contrato):
+
+- **Se usa su plantilla por defecto, tal cual**: «Comienza tus pruebas» y su cuerpo. Fija para todas
+  las empresas, en un solo sitio del adaptador, sin configurar. Laura recibe el mismo correo que
+  recibiría de cualquier cliente de PsicoAlianza.
+- **No se intenta apagar el correo.** El botón «Comenzar» de ese correo y el enlace que pedimos por
+  la API llevan **a la misma pantalla** —la lista de tareas pendientes de la persona, desde donde
+  entra a la prueba—, así que los dos canales se refuerzan. Y **pedir el enlace por la API no
+  invalida el botón del correo** (confirmado por el usuario ese día): cierra la nota «invalidación sin
+  confirmar» del contrato.
+- ⚠️ **Lo que sí queda, y es del embudo (paso 4/5), no del adaptador**: las instrucciones que hoy van
+  por WhatsApp son de EvaluaTest —«haz clic en *Aplicar ahora*», «regístrate con tu correo»— y con
+  PsicoAlianza engañan: el enlace entra directo a las tareas pendientes, sin registro. El texto tiene
+  que ir por proveedor. Nadie lo tenía anotado.
+
+### Contraste del brief del paso 3 contra el código (2026-09-14, planificador)
+
+Antes de entregar el brief se leyeron el puerto, sus tipos, los tres errores, el adaptador de
+EvaluaTest, el cliente y el almacén del paso 2 y las dos llamadas del embudo al puerto. **Dos puntos
+del brief no se podían implementar tal como estaban escritos**, y tres más faltaban. Todo está
+corregido en el brief; aquí queda el porqué y lo que hereda el paso 5:
+
+| Qué decía el brief | Qué hay en el código | Qué se decidió |
+| --- | --- | --- |
+| Los resultados se emparejan **por documento**, con el identificador de respaldo | Lo que el cron manda por candidato es la referencia, el identificador del proveedor y los dos correos. **El documento no viaja** | Emparejar **solo por el identificador de PsicoAlianza**, su llave global de la persona, que la invitación obtuvo buscándola por documento. Ninguna pieza compartida se toca. Si algún día se quiere el documento como segunda llave, es un campo opcional más en el pedido del cron: **paso 5, si hace falta** |
+| La vacante se comprueba distinguiendo completada de suspendida | La única petición de vacantes del cliente **filtra por activas**: una completada no aparece y no se distingue de una inexistente | El paso 3 **añade al cliente el listado sin filtro** (medido en el contrato: sin tamaño de página trae todas). No está → indeterminada; archivada → no usable |
+| «Todo lo demás son archivos nuevos» | El error *falta un dato del candidato* tiene el campo acotado a «correo» | Se **amplía** para nombrar «documento»: segunda pieza compartida, aditiva. ⚠️ **Hereda el paso 5:** el embudo convierte hoy ese error **siempre** en `psychometric_missing_email`; con un documento ausente diría lo que no es. Va junto al motivo nuevo que ya tenía anotado |
+| Nada sobre el tipo de documento | El cliente exige un identificador de tipo por invitado; el puerto no lo trae; la decisión 12 dice «el del candidato, CC por defecto», y de PsicoAlianza solo se conoce CC=1 | **Siempre CC** en el paso 3. Mandar el real es del **paso 5** y necesita medir el catálogo de tipos de PsicoAlianza — fila nueva **A14** en *Falta de PsicoAlianza* |
+| Nada sobre el correo de pruebas de EvaluaTest que la lectura única entrega a cualquier proveedor («se decide en el paso 3») | Confirmado: lo entrega | **El adaptador de PsicoAlianza no lo lee**, con su prueba. Cerrado |
+
+**Tres líneas más que el brief no tenía**, sacadas del código: *sesión caducada* a mitad de una
+invitación es **pasajero, nunca permanente** (la 39 reserva ese tipo al nombre de vacante); una
+persona **sin agendas** o con una agenda en un estado desconocido cuenta como *sigue en ello*, y el
+adaptador **nunca** devuelve *rechazado por el proveedor*; y con la sesión manual encendida **el
+almacén entrega sesión sin mirar si la empresa tiene conexión**, así que la comprobación de conexión
+del adaptador va primero y no es redundante.
+
+**Y una decisión que no es aditiva, tomada con el usuario:** el cliente del paso 2 **cambia cómo
+codifica los participantes** para alinearse con el payload del portal (un solo campo con el JSON,
+siete claves, tipo como texto), aunque la forma actual funcionó el 14. Motivo: es la única forma que
+el portal de ellos usa de verdad, el paso 2 la dejó aislada en una función para poder corregirla de
+un toque, y se vuelve a comprobar con una invitación real al documento del usuario, que el reporte
+del paso 3 tiene que traer.
 
 #### Bloque D · presentar y reprobar — ✅ HECHO (2026-09-14). **Cierra A1**
 

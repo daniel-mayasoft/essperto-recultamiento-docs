@@ -151,13 +151,35 @@ conoce.
 | `dias_vencimiento_agendas` | `2` | **Aquí se fija la ventana de la prueba** — de aquí salen los ~2 días de `fecha_cierre` |
 | `vigencia_pruebas` | `1` | Bandera de vigencia |
 | `maneja_empresa` | `0` | |
-| `titulo_mensaje` / `descripcion_mensaje` | texto / HTML | El mensaje del correo. El HTML de ejemplo enlaza a `ats.psicoalianza.com` **genérico**, no a un enlace por candidato |
+| `titulo_mensaje` / `descripcion_mensaje` | texto / HTML | El mensaje del correo. ✅ **Lo que su portal manda por defecto, capturado el 2026-09-14** (abajo). El enlace del HTML va a `ats.psicoalianza.com` **genérico**, no al enlace personal del candidato |
 | `informacion` | `{"medio_envio":{"valor":"correo"}}` | **El medio de envío se elige al invitar.** Único valor visto: `correo` |
 | `participantes[]` | ver abajo | Los candidatos a invitar |
 
 **Cada participante:** `tipo_documento_id` (`1`=CC), `documento`, `email`,
 `indicativo_celular`, `celular`, `telefono`, `indicativo_telefono` (los de teléfono,
 opcionales, vistos en `null`).
+
+🔴 **Cómo viaja `participantes`, capturado del portal el 2026-09-14** — y **no** es como lo armó
+nuestro cliente:
+
+- **El portal manda UN SOLO campo llamado `participantes` con el JSON entero dentro**, como texto:
+  una lista de objetos con **las siete claves**, las cuatro de teléfono en `null`, y
+  **`tipo_documento_id` como texto** (`"1"`, no `1`).
+- Nuestro cliente lo manda como campos sueltos con índice (`participantes[0][documento]`, etc.) y con
+  solo tres claves. ⚠️ **Esa forma funciona** —se invitó de verdad el 2026-09-14 y la persona apareció
+  en el tablero—, pero **no es la del portal**, así que depende de que su backend siga aceptando las
+  dos. **Se alinea con la del portal**, que es la única garantizada.
+
+**El mensaje por defecto de su portal**, que es el que sus reclutadores usan y el candidato reconoce:
+
+- **Asunto:** `Comienza tus pruebas`
+- **Cuerpo** (HTML): un párrafo «¡Avanzas en el proceso, candidato!», otro diciendo que ha sido
+  invitado a presentar las **pruebas psicométricas**, y un tercero con «Accede al detalle aquí:» y el
+  enlace a `ats.psicoalianza.com`.
+
+⚠️ **Ese cuerpo no nombra a la empresa que invita ni lleva el enlace personal del candidato**: manda
+a la portada de la plataforma. Quien lo recibe tiene que saber ya de qué va. Con nosotros el enlace
+personal llega por WhatsApp, así que este correo es un segundo aviso.
 
 **Respuesta de error (400)** — formato observado:
 
@@ -192,8 +214,11 @@ presentar sus pruebas. `{usuario_id}` es el `id` global del candidato (p. ej. `6
 - **El enlace lleva a presentar las pruebas.** Al abrirlo, el candidato entra a su vista
   de tareas pendientes (que consulta `GET /vacantes-aplicante` — lado del candidato, no
   lo consumimos nosotros) con sus pruebas agendadas. Confirmado.
-- El `uuid` es personal por candidato. **"Regenerar" sugiere que cada llamada emite un
-  enlace nuevo y probablemente invalida el anterior** — pedirlo una vez, guardarlo y
-  entregarlo; no llamarlo en cada pasada del cron. (Invalidación sin confirmar.)
+- El `uuid` es personal por candidato. ~~**"Regenerar" sugiere que cada llamada emite un
+  enlace nuevo y probablemente invalida el anterior**~~ ✅ **Confirmado por el usuario el
+  2026-09-14: pedir el enlace por aquí NO invalida el botón «Comenzar» del correo que
+  PsicoAlianza manda al invitar**; los dos llevan a la misma pantalla de tareas pendientes
+  del candidato. Se sigue pidiendo una vez, guardando y entregando, y no en cada pasada
+  del cron.
 - **Esto es lo que rescata la entrega por WhatsApp** (B2): el enlace no depende del
   correo, se pide con el `id` del candidato y se reenvía por el canal que sea.
