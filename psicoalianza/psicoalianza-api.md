@@ -31,6 +31,10 @@ Base: `https://ats.psicoalianza.com`. Fecha de captura: 2026-09-09.
 - **Recorrido del usuario autenticado:** `/inicio` → `/vacantes` → `/procesos`. El
   trabajo vive bajo `/procesos`.
 - **Soporta varias sesiones simultáneas:** una segunda no tumba la primera.
+- **`remember_web_<hash>` sola sirve para los endpoints de datos** (medido el 2026-09-14 con
+  `GET /procesos-listado-tabla`): sin `ats_session`, responde 200 con los datos y emite una
+  `ats_session` nueva. **Sin ninguna cookie, el mismo endpoint responde 401** — y también emite
+  una `ats_session`, de una sesión anónima, así que recibir esa cookie no prueba estar dentro.
 - **Cómo llamar a los endpoints de datos:** mandar las cookies en la cabecera `Cookie`
   y `X-Requested-With: XMLHttpRequest`. Los listados son de la librería DataTables:
   responden un sobre `{ draw, recordsTotal, recordsFiltered, data[] }`.

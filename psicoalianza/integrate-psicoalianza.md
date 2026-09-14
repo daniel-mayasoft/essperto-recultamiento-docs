@@ -2442,6 +2442,31 @@ Las salidas posibles, sin elegir todavía: guardar solo cada cierto tiempo, guar
 cambie algo que no sea el cifrado, o no guardar la cookie corta y quedarse solo con la de
 *permanecer conectado*, que es la que de verdad reautentica (medición cruzada de IP).
 
+✅ **La tercera salida, medida el 2026-09-14 sobre un endpoint de datos** (la medición cruzada de IP
+solo lo había visto en la página de login). Sesión recién pegada, tres peticiones al listado de
+vacantes activas, solo lectura, sin login ni captcha:
+
+| Cookies enviadas | Respuesta |
+| --- | --- |
+| Todas (control) | 200, 15 vacantes |
+| **Solo la de *permanecer conectado*** | **200, las mismas 15 vacantes**, y una cookie corta nueva |
+| Ninguna (control negativo) | **401** |
+
+**La cookie de 5 días basta sola para trabajar**: con la corta vencida o ausente, PsicoAlianza
+reautentica y responde con datos. Eso hace viable **guardar en la base solo esa cookie, escrita al
+acuñar, y dejar la corta en memoria**: casi cero escrituras. ⚠️ **No se puede usar la cookie corta
+nueva como prueba de nada**: el control negativo también la recibe, porque el servidor abre una
+sesión anónima a cualquiera. La prueba son las vacantes.
+
+**De paso queda observado el 401** como respuesta de un endpoint de datos sin sesión: era una de
+las tres formas **supuestas** de sesión muerta que heredó el paso 3 del paso 2. Las otras dos
+—redirección al login y 419— siguen sin verse.
+
+✅ **DECIDIDO por el usuario el 2026-09-14: se adopta.** En la base se guarda **solo la cookie de
+*permanecer conectado***, escrita al acuñar; la corta vive en memoria y, si se pierde o vence, la de
+5 días reautentica. Con la de 5 días vencida, la petición falla como *sesión caducada* y toca acuñar.
+**Sin decidir todavía**: si va en un cambio pequeño propio antes del 2c o dentro de su brief.
+
 #### Bloques B y C · invitar de verdad — ✅ HECHO (2026-09-14)
 
 Se invitó al documento del propio usuario, con su correo, a una vacante activa. **Nueve peticiones,
