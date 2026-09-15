@@ -7,7 +7,8 @@ las conexiones de la empresa y la conexión de la oferta (paso 8a, decisión 41)
 leyendo la lista y "Puntaje mínimo" (paso 8b, decisiones 8 y 41), y el 2026-09-14 con el documento,
 el tipo y el plazo en la invitación y el descarte por documento (paso 5a, decisión 45) y con la
 conexión de PsicoAlianza guardada, validada y consultada por el backend (paso 5b, decisiones 44 y
-46). No es historia ni
+46) y con el resolvedor que elige proveedor al guardar la oferta, al invitar y al consultar (paso
+4a, decisión 48). No es historia ni
 justificación: **los porqués están en la bitácora**, y aquí solo se apunta el número de
 decisión. Cuenta qué le pasa a una persona en cada caso.
 
@@ -21,20 +22,30 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
   guarda su estado, aprueba y descarta. Es el único que conoce el modo demo.
 - **El puerto**: una capa que no conoce a ningún proveedor. Ofrece listar vacantes, comprobar
   que una vacante sirve, validar una conexión, **invitar** a un candidato y **consultar
-  resultados en lote**. Hoy tiene una sola implementación: el adaptador de EvaluaTest.
+  resultados en lote**. Tiene dos implementaciones, los adaptadores de EvaluaTest y de
+  PsicoAlianza, y **ya no hay un token que apunte a uno fijo**: quien necesita un adaptador se
+  lo pide al resolvedor.
+- **El resolvedor**: un servicio de la capa psicométrica que decide con qué proveedor se habla,
+  con una sola regla (decisión 48): por la conexión congelada en la oferta; sin ella, por la
+  empresa —una conexión, esa; ninguna, *sin conexión*; dos o más, **EvaluaTest**—; y al
+  consultar resultados, por el proveedor guardado en el candidato, con vacío como EvaluaTest.
+  No llama a ningún proveedor: lee la lista de conexiones de la empresa una vez, por la lectura
+  única, y devuelve el adaptador, el proveedor y la conexión con la que resolvió.
 - **La lectura única de conexiones**: un servicio de la capa psicométrica que, dada una empresa
   y un proveedor, devuelve **su conexión** —identificador, nombre, credenciales descifradas y el
   correo de pruebas de la empresa— o falla como **sin conexión** si no existe o está
-  incompleta. Es **la única regla de lectura de credenciales del backend**: por ahí pasan el
-  adaptador, la creación con IA, la sincronización del índice y el servicio de empresas
-  (decisión 41). Lee la lista `psychometricConnections`; el bloque viejo `evaluatestCredentials`
-  sigue en la base y **nadie lo lee ni lo escribe**.
+  incompleta, y también **la lista de conexiones de una empresa** sin descifrar, que es lo que
+  usa el resolvedor. Es **la única regla de lectura de credenciales del backend**: por ahí pasan
+  los adaptadores, el resolvedor, la creación con IA, la sincronización del índice y el servicio
+  de empresas (decisión 41). Lee la lista `psychometricConnections`; el bloque viejo
+  `evaluatestCredentials` sigue en la base y **nadie lo lee ni lo escribe**.
 - **El adaptador de EvaluaTest**: pide a la lectura única la conexión de EvaluaTest de la
   empresa, hace contra el cliente los pasos que EvaluaTest exige y traduce sus estados a los
   neutros del puerto. El embudo no lee ninguna credencial (decisiones 34 y 40).
 - **El cliente de EvaluaTest**: las peticiones HTTP. Exige credenciales en cada llamada; **ya
   no existe la cuenta compartida del entorno** (decisión 34).
-- **El cron**: cada 5 minutos consulta resultados por el puerto y decide el veredicto.
+- **El cron**: cada 5 minutos consulta resultados por el adaptador de cada proveedor y decide el
+  veredicto.
 
 ## 1 · La empresa se conecta y configura la oferta
 
@@ -92,16 +103,23 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
    vacante de la lista que el puerto devuelve, fija el **puntaje mínimo** (decisión 8; el campo
    guardado sigue siendo `minIGIScore`) y, opcionalmente, pruebas adicionales — estas últimas no
    pasan por el puerto: son exclusivas de EvaluaTest (decisión 4).
-3. Al guardar con la prueba activa, el backend comprueba por el puerto que la vacante sigue
-   sirviendo. **Si la empresa no tiene conexión, la comprobación falla antes de tocar al
-   proveedor y la ruta rechaza con un mensaje propio** —conéctalo en Mi compañía antes de
-   activar la prueba—, distinto del «no se pudo verificar, reintenta» de un fallo pasajero
-   (decisión 40). Apagar la prueba no exige conexión. Con conexión, guarda la configuración en
-   el bloque de siempre de la oferta —vacante, nombre, dos códigos propios, puntaje mínimo y
-   pruebas adicionales— **más `connectionId`, la conexión de la empresa con la que se activó,
-   y `providerData`, una bolsa para otro proveedor** (decisiones 5 y 41). Los dos se arrastran
-   en cada guardado: cambiar el puntaje o apagar la prueba no los borra. Cada vez que se abre la
-   oferta, el portal vuelve a comprobar la vacante y avisa si dejó de servir.
+3. Al guardar con la prueba activa, el backend **congela la conexión que mande el portal** en
+   el cuerpo —si no es de la empresa, rechazo con mensaje propio— y, si no manda ninguna (el
+   portal de hoy), **la que diga el resolvedor por la empresa**: una conexión, esa; dos, la de
+   EvaluaTest (decisión 48). Ya no busca siempre la de EvaluaTest. Con esa conexión comprueba
+   **por su adaptador** que la vacante sigue sirviendo. **Si la empresa no tiene conexión, la
+   comprobación falla antes de tocar al proveedor y la ruta rechaza con un mensaje propio**
+   —conéctalo en Mi compañía antes de activar la prueba—, distinto del «no se pudo verificar,
+   reintenta» de un fallo pasajero (decisión 40); con un proveedor que no es EvaluaTest, los
+   mensajes de vacante no usable y de no verificada no nombran a EvaluaTest. Apagar la prueba no
+   exige conexión. Con conexión, guarda la configuración en el bloque de siempre de la oferta
+   —vacante, nombre, dos códigos propios, puntaje mínimo y pruebas adicionales— **más
+   `connectionId`, la conexión con la que se activó, y `providerData`, una bolsa para otro
+   proveedor** (decisiones 5 y 41). Los dos se arrastran en cada guardado: cambiar el puntaje o
+   apagar la prueba no los borra. Cada vez que se abre la oferta, el portal vuelve a comprobar la
+   vacante y avisa si dejó de servir; el selector de vacantes y esa comprobación aceptan una
+   conexión opcional en la consulta y, sin ella, resuelven por la empresa. Las pruebas de la
+   vacante siguen siendo de EvaluaTest (decisión 4).
 
    **Migración única, antes de desplegar este backend** (decisión 41): un script de consola
    crea la conexión de EvaluaTest de cada empresa a partir de su bloque viejo y rellena
@@ -130,22 +148,24 @@ siguiente. Es lo primero que ocurre, antes de mirar nada más.
 
 **Si la tiene**, el arranque mira si la empresa está en modo demo (ver §7) y, si no, deja un
 aviso en el registro cuando la oferta **no trae conexión guardada** —la creó administración,
-que copia la configuración tal cual— y sigue igual: la conexión se resuelve por empresa y
-proveedor, que con una sola por proveedor es la misma (decisiones 2 y 41). Nada decide todavía
-con `connectionId`; el puerto recibe la empresa. Después:
+que copia la configuración tal cual, o es de antes de la migración— y sigue. Después:
 
-1. **Calcula el plazo**, una sola vez y antes de invitar, con el mismo resolutor que usa el
+1. **Pide el adaptador al resolvedor** con la conexión congelada en la oferta y, si no la
+   tiene, con la empresa (decisión 48): una conexión, esa; dos, EvaluaTest; ninguna, *sin
+   conexión* (abajo). Si la conexión congelada ya no está en la lista de la empresa, también
+   *sin conexión*. La rama demo no pasa por aquí (§7).
+2. **Calcula el plazo**, una sola vez y antes de invitar, con el mismo resolutor que usa el
    descarte (empresa > entorno > 2 días). Ese único valor va a la invitación y al mensaje de
    WhatsApp, también en la rama demo (decisión 45). Si esa lectura falla, no se invita: cae como
    fallo pasajero (abajo).
-2. Llama a **la invitación del puerto** con la vacante y su nombre, la empresa, nuestra
+3. Llama a **la invitación del adaptador resuelto** con la vacante y su nombre, la empresa, nuestra
    referencia del candidato, su nombre, su correo, **su documento y el tipo de documento, todos
    tal cual están guardados, con su nulo si no tiene**, y el plazo. Ya no se inventa ningún
    correo (decisión 33). Qué hacer con el documento, el tipo y el plazo lo sabe cada adaptador:
    **EvaluaTest los ignora**; PsicoAlianza exige documento y plazo, traduce el tipo a su catálogo
    (vacío → CC; desconocido → OTRO) y manda el documento sin espacios, puntos, comas ni guiones,
    sin tocar lo guardado (decisión 45).
-3. El adaptador comprueba, **en este orden y antes de tocar al proveedor**, y cada
+4. El adaptador comprueba, **en este orden y antes de tocar al proveedor**, y cada
    comprobación aborta con un error de tipo propio que el embudo trata distinto:
    - **La credencial de la empresa.** Si le falta cualquiera de las tres cosas, o no llegó
      empresa, aborta con *sin conexión*, y el embudo **aprueba la etapa y sigue**, por el
@@ -168,31 +188,40 @@ con `connectionId`; el puerto recibe la empresa. Después:
      decimales es **el error permanente** (decisión 39 ampliada).
 
    Son las dos puertas por las que hoy sale gente del proceso al entrar a la etapa; la del
-   documento no se alcanza hasta que una empresa use PsicoAlianza (paso 4).
+   documento solo se alcanza con una oferta que congeló una conexión de PsicoAlianza, que hasta
+   el paso 6 se escribe a mano (`../entorno-local.md`).
 
    Con todo en orden, con EvaluaTest pasan **cuatro** cosas (32-a): se resuelve el código de
    evaluación de la vacante, se registra al candidato con nuestra referencia, se le invita, y
-   **si la invitación falla se le manda el correo directo**.
-4. El embudo guarda en el candidato: el proveedor (`evaluatest`), el identificador que
-   EvaluaTest le dio, la fecha de consulta, y en la bolsa del proveedor **el correo de
-   registro solo si difiere del real** — vacío significa *empareja por el correo verdadero*
-   (32-d). El estado del candidato pasa a *esperando resultado externo*. El guardado es con
-   reintento (varios candidatos de la misma oferta terminan a la vez).
-5. Le escribe por WhatsApp: el enlace que devolvió la invitación, su correo enmascarado, las
+   **si la invitación falla se le manda el correo directo**. Con PsicoAlianza, los cuatro pasos
+   de la decisión 27: consultar el correo del documento, invitar, buscar a la persona en el
+   tablero y pedir su enlace personal.
+5. El embudo guarda en el candidato: **el proveedor que resolvió** (`evaluatest` o
+   `psicoalianza`), el identificador que ese proveedor le dio, la fecha de consulta, y en la
+   bolsa del proveedor **el correo de registro solo si difiere del real** — vacío significa
+   *empareja por el correo verdadero* (32-d). El estado del candidato pasa a *esperando
+   resultado externo*. El guardado es con reintento (varios candidatos de la misma oferta
+   terminan a la vez).
+6. Le escribe por WhatsApp: el enlace que devolvió la invitación, su correo enmascarado, las
    instrucciones y **el plazo**, el mismo valor que se calculó antes de invitar y que viajó en
    la invitación. Si la invitación no trajo enlace, el mensaje solo dice que llegará por
    correo — ⚠️ y no anuncia el plazo, aunque corre igual (riesgo abierto; con EvaluaTest hoy
-   es inalcanzable).
+   es inalcanzable). ⚠️ **El texto es el mismo para los dos proveedores** y sus instrucciones
+   son de EvaluaTest («Aplicar ahora», «regístrate»): con PsicoAlianza engañan, porque el
+   enlace personal entra directo a las tareas pendientes. El texto por proveedor es del 4b.
 
 ### Si el arranque falla
 
-- **Fallo pasajero** (red, proveedor caído, sin código de evaluación, **o la lectura del
-  plazo**, que va antes de invitar): se le avisa al
+- **Fallo pasajero** (red, proveedor caído, sin código de evaluación, **la lectura del
+  plazo o la resolución del proveedor**, que van antes de invitar): se le avisa al
   candidato **una sola vez** —con un enlace de respaldo si se puede armar, o el aviso del
   correo si no—, se le deja *esperando resultado externo* **sin identificador** y se guarda.
-  El enlace de respaldo lo arma **el adaptador**: con el código de evaluación guardado en la
-  oferta si lo hay, y si no resolviéndolo por el cliente con la credencial de la empresa; el
-  embudo ya no llama al cliente ni lee credenciales aquí. **El cron lo reintenta** cada 5 minutos (§4). ⚠️ *Sin código de evaluación*
+  El enlace de respaldo **solo existe con EvaluaTest resuelto** y lo arma **su adaptador**:
+  con el código de evaluación guardado en la oferta si lo hay, y si no resolviéndolo por el
+  cliente con la credencial de la empresa; el embudo ya no llama al cliente ni lee
+  credenciales aquí. Con PsicoAlianza, o si la resolución misma falló y no hay proveedor
+  resuelto, no hay respaldo y el mensaje dice que llegará por correo (decisión 48). **El cron
+  lo reintenta** cada 5 minutos (§4). ⚠️ *Sin código de evaluación*
   cuenta como pasajero a propósito: EvaluaTest responde igual cuando el código no existe y
   cuando el endpoint falla (decisión 39).
 - **Fallo permanente** (vacante sin nombre guardado): el arranque **deja salir la excepción**
@@ -234,10 +263,16 @@ cada oferta:
 3. Separa a los pendientes en dos: **los que tienen identificador del proveedor** entran a la
    consulta; los que no, van al reintento del arranque (§4).
 4. Carga en un solo golpe los correos reales de los que va a consultar.
-5. Hace **una sola llamada al puerto por oferta** (decisión 22) con, por candidato, nuestra
-   referencia, su identificador, el correo de registro y el correo real. El adaptador trae
-   el tablero de la vacante y empareja **por dos llaves**: primero por correo —el de registro
-   si existe, si no el real— y como respaldo por identificador.
+5. **Agrupa a los que va a consultar por el proveedor guardado en el candidato** —vacío es
+   EvaluaTest, que es lo que tiene todo el que estaba en vuelo— y hace **una llamada por grupo**
+   al adaptador que da el resolvedor (decisiones 6 y 48): a cada persona se le pregunta donde
+   fue invitada, aunque la empresa haya cambiado la oferta a otro proveedor después. Una oferta
+   con todos de EvaluaTest sigue siendo una sola llamada (decisión 22). Cada llamada lleva, por
+   candidato, nuestra referencia, su identificador, el correo de registro y el correo real. El
+   adaptador de EvaluaTest trae el tablero de la vacante y empareja **por dos llaves**: primero
+   por correo —el de registro si existe, si no el real— y como respaldo por identificador; el de
+   PsicoAlianza empareja solo por identificador. Si una de las llamadas lanza, la oferta entera
+   se cuenta como error y se salta esa pasada, como hoy.
 6. Recibe un estado neutro por candidato:
 
 | Estado | Qué significa | Qué hace el cron |
@@ -282,7 +317,9 @@ un único ayudante: el cron nunca pisa el correo de registro que escribió la in
   escribe un agradecimiento y **aprueba** la etapa. Las pruebas adicionales se piden **al
   adaptador de EvaluaTest directamente** —es un método propio, fuera del puerto, como el de
   las pruebas de la vacante (decisión 4)— con el identificador que volvió del tablero (puede
-  discrepar del guardado) y la credencial de la empresa resuelta con la regla del adaptador.
+  discrepar del guardado) y la credencial de la empresa resuelta con la regla del adaptador,
+  **y solo si el proveedor guardado en el candidato es EvaluaTest** (decisión 48): a quien
+  fue invitado en PsicoAlianza no se le piden, aunque la oferta las tenga configuradas.
   Si el adaptador falla ahí —también por *sin conexión*—, cuenta como error del ciclo y el
   candidato sigue esperando, como con cualquier excepción. Una oferta demo se las salta por
   su bandera, antes de llamar (§7).
@@ -301,7 +338,7 @@ los nuevos; al leer, el nuevo y si está vacío el viejo.** Solo dos se leen:
 
 | Campo | Quién lo lee |
 | --- | --- |
-| `psychometricProvider` | Nadie todavía (decisión 6; hoy siempre `evaluatest`) |
+| `psychometricProvider` | El cron, para agrupar a quién se le pregunta dónde, y para no pedir pruebas adicionales a quien no es de EvaluaTest (decisiones 6 y 48). Vacío se lee como `evaluatest` |
 | `psychometricCandidateId` | El cron (a quién consultar, y a quién reintentar), el retomar, el reenvío del botón |
 | `psychometricScore` | Nadie |
 | `psychometricState` | Nadie |
@@ -317,15 +354,18 @@ reinvitaría a quien se invitó después del despliegue (registro del paso 6b).
 ## 7 · El modo demo: cinco puntos, todos en el embudo
 
 Una empresa marcada como demo en la base (sin pantalla) enseña el producto a un cliente
-potencial con una candidata configurada. La etapa psicométrica **no llama nunca a EvaluaTest**
-y **el puerto no sabe que existe la demo** (decisión 38). Los cinco puntos:
+potencial con una candidata configurada. La etapa psicométrica **no llama nunca a EvaluaTest**,
+**el puerto no sabe que existe la demo** y **la demo no pasa por el resolvedor** (decisiones
+38 y 48). Los cinco puntos:
 
-1. **La invitación** (§2): en vez del puerto, fabrica un identificador determinístico y
-   **positivo**, un enlace de apariencia normal que no lleva a ninguna prueba, y escribe los
-   campos nuevos como cualquiera. El mensaje al candidato es el mismo.
+1. **La invitación** (§2): en vez de resolver e invitar, fabrica un identificador
+   determinístico y **positivo**, un enlace de apariencia normal que no lleva a ninguna prueba,
+   y escribe los campos nuevos como cualquiera, con `evaluatest` como proveedor. El mensaje al
+   candidato es el mismo.
 2. **El temporizador**: tras el mensaje, agenda una pasada del cron a los segundos de retraso
    configurados (45 por defecto) para que la demo se resuelva sin esperar 5 minutos.
-3. **La sustitución de la consulta** (§3): en vez del puerto, un constructor sintético
+3. **La sustitución de la consulta** (§3): en vez de agrupar por proveedor y preguntar a los
+   adaptadores, un constructor sintético
    devuelve `not_listed` a quien sigue dentro del retraso y `finished` con puntaje mínimo + 5
    a quien lo pasó. Sin credenciales, sin tablero.
 4. **La acción de administración "avanzar ya"**: atrasa a mano la fecha de arranque para

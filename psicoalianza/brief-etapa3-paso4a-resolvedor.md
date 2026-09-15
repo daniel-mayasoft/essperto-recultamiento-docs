@@ -7,6 +7,12 @@ decisión 48** y en las que ella nombra. Toca **solo el backend**.
 > EvaluaTest, cómo el cron agrupa a los candidatos y cómo el guardado de la oferta congela la conexión.
 > Es **el paso más delicado de la etapa**: cambia quién decide con qué proveedor se habla en el
 > arranque, en el cron y al guardar la oferta, que hoy corren en producción con EvaluaTest.
+>
+> **Incorpora la opinión previa del ejecutor del mismo día**, verificada contra el código: los montajes
+> de cinco pruebas cambian —y solo los montajes—, el token del puerto se retira del todo, la lectura
+> única gana «las conexiones de esta empresa», qué cuenta como conexión, el cron con dos grupos ante
+> un fallo, el respaldo cuando la resolución misma falla, y los mensajes neutros del guardado. Marcado
+> como «opinión previa» en su sitio.
 
 ## Antes de escribir una sola línea
 
@@ -65,6 +71,15 @@ Conoce los dos adaptadores por inyección y **no llama a ningún proveedor**: so
 conexiones de la empresa por la lectura única (una lectura, no una por adaptador). Devuelve **el
 adaptador y el proveedor resuelto**, porque el arranque tiene que escribir el segundo.
 
+**La lectura única gana «las conexiones de esta empresa», sin descifrar** (opinión previa): hoy tiene
+«la conexión de un proveedor» y «todas las empresas con un proveedor», pero no esta. Se añade allí
+para no abrir una segunda regla de lectura.
+
+**Qué cuenta como conexión** al contar una / ninguna / dos (opinión previa): **entradas en la lista,
+completas o no**, igual que la guarda del plazo del 5b. Una sola entrada incompleta → ese adaptador →
+*sin conexión* al resolver la credencial → la etapa se salta con aviso (40). Una entrada cuyo
+proveedor no tenga adaptador → *sin conexión*.
+
 🔴 **«Dos → EvaluaTest» es una decisión de producto, no un valor por defecto de conveniencia.** Está
 razonada en la 48: conectar PsicoAlianza no puede descartar gente en ofertas que nadie tocó. No se
 cambia por un error en este paso.
@@ -80,6 +95,14 @@ prueba sigue sin exigir conexión.
 El portal de hoy no manda conexión: **todo sigue igual que hoy** para él mientras la empresa tenga una
 sola, o dos con EvaluaTest entre ellas.
 
+**Los mensajes de la vacante no usable nombran a EvaluaTest** (opinión previa): «no tiene código de
+evaluación activo» es falso con una vacante de PsicoAlianza completada, suspendida o archivada. Con un
+proveedor resuelto que no sea EvaluaTest, los motivos distintos de *sin pruebas* responden con un texto
+neutro —*la vacante seleccionada ya no está activa en el proveedor de pruebas; elige otra*—, y el de
+*sin pruebas* y el de *no se pudo verificar* también sin nombrar a EvaluaTest. **Los textos de
+EvaluaTest quedan tal cual.** Es texto del backend que el portal muestra; se hace aquí porque sin ello
+una vacante de PsicoAlianza da un mensaje mentiroso desde el primer día que alguien la use.
+
 ### 3 · El arranque
 
 Antes de invitar, pide el adaptador al resolvedor con **la conexión de la oferta** y, si no la tiene,
@@ -89,7 +112,14 @@ de invitar, documento y tipo, la captura de errores, el mensaje— **no cambia**
 
 ⚠️ **El enlace de respaldo cuando falla el arranque sigue siendo la llamada fija a EvaluaTest**, pero
 **solo si el proveedor resuelto es EvaluaTest**; con PsicoAlianza no hay respaldo y el mensaje dice
-que llegará por correo, que es verdad. Recablearla del todo es del 4b; aquí solo la condición.
+que llegará por correo, que es verdad. Recablearla del todo es del 4b; aquí solo la condición. **Y si
+la resolución misma falla** por algo pasajero antes de invitar —una lectura de la base—, no hay
+proveedor resuelto: **tampoco hay respaldo**, sale el aviso del correo, y el cron reintenta (opinión
+previa; caso nuevo, con su prueba). Pedir el respaldo de EvaluaTest sin saber el proveedor sería
+suponer.
+
+**El proveedor del candidato se lee por un ayudante nuevo**, junto a los dos que ya existen, con vacío
+→ EvaluaTest: el cron agrupa con una regla, no con comparaciones sueltas.
 
 ### 4 · El cron
 
@@ -97,6 +127,12 @@ Para cada oferta, **agrupa a los pendientes con identificador por el proveedor g
 candidato** (vacío → EvaluaTest) y hace **una llamada al adaptador por grupo**. Quien fue invitado en
 EvaluaTest se consulta en EvaluaTest aunque la empresa haya conectado PsicoAlianza después (6). El
 reintento de quien no tiene identificador vuelve a pasar por el arranque, que resuelve solo.
+
+**Si una de las llamadas lanza** (opinión previa): **la misma semántica que hoy** —se cuenta a todos
+los pendientes como error y se abandona la oferta entera—, con un solo bloque protegido alrededor de
+las llamadas por grupo. Lanzar es raro, porque los adaptadores convierten los fallos del proveedor en
+*no se pudo consultar*; una semántica nueva por grupo sería un cambio de comportamiento que este paso
+no pide.
 
 ⚠️ **Las pruebas adicionales del veredicto siguen siendo la llamada fija a EvaluaTest**, y se añade la
 condición **proveedor del candidato = EvaluaTest** a las que ya tiene (oferta con pruebas, no demo,
@@ -110,16 +146,23 @@ vacante** siguen siendo de EvaluaTest y no cambian (4).
 
 ### 6 · El token del puerto
 
-**Se retira como «el proveedor»**: los tres que lo inyectan pasan a pedir al resolvedor. La validación
-y el estado de sesión del 5b **se quedan como están** (por proveedor, con el adaptador de PsicoAlianza
-inyectado): recablearlas es del 4b. Si retirar el token exige tocar el cableado del módulo, se hace;
-si conviene dejarlo apuntando a EvaluaTest sin que nadie lo use, se dice en la opinión previa.
+**Se retira del todo** (opinión previa): dejarlo apuntando a EvaluaTest sin que nadie lo use es justo el
+riesgo de la tabla de piezas —un consumidor futuro lo inyecta y habla siempre con EvaluaTest sin error—.
+**La interfaz del puerto se queda**: es lo que implementan los dos adaptadores y lo que devuelve el
+resolvedor. Consecuencias: el controlador de empresas inyecta **el adaptador de EvaluaTest
+directamente** para validar —una llamada fija más, hermana de las dos del 5b, para el 4b—; la prueba de
+cableado del paso 2 pasa de «el puerto apunta a EvaluaTest» a «el resolvedor se construye con los dos
+adaptadores y el token ya no existe»; y las pruebas del modal en el spec de paridad y del controlador
+del 5b cambian un argumento del constructor.
 
-### 7 · El documento del flujo
+### 7 · Los documentos
 
-Se actualiza en el mismo diff: §1 (qué conexión congela la oferta), §2 (quién resuelve al invitar y qué
-proveedor se escribe), §3 y §4 (el cron por proveedor), §5 (la condición de las pruebas adicionales) y
-§7 (la demo no pasa por el resolvedor).
+En el mismo diff: `flujo-actual-etapa-psicometrica.md` —§1 (qué conexión congela la oferta), §2 (quién
+resuelve al invitar, qué proveedor se escribe, el respaldo sin proveedor), §3 y §4 (el cron por
+proveedor), §5 (la condición de las pruebas adicionales) y §7 (la demo no pasa por el resolvedor)— y
+`../entorno-local.md`: **cómo activar una oferta con PsicoAlianza a mano** hasta el paso 6 —en el
+bloque de configuración de la prueba, `connectionId` con el identificador de la conexión de
+PsicoAlianza de la empresa y `jobProfileId` con la vacante de PsicoAlianza; el resto como siempre—.
 
 ## Los casos, persona por persona
 
@@ -184,7 +227,7 @@ de la lectura única. Cualquier otro texto dejaría al candidato sin cron que lo
 
 | Qué | Por qué |
 | --- | --- |
-| **Todas las pruebas del arranque, del cron y del modo demo que ya existen, sin tocarlas** | Son la etapa en producción |
+| **Todas las afirmaciones de las pruebas del arranque, del cron, del modo demo, de avanzar la demo y de paridad** | Son la etapa en producción. ⚠️ **Sus montajes sí cambian** (opinión previa): cinco specs construyen el orquestador o el servicio de ofertas a mano y le ponen el puerto como campo; hay que darles **un resolvedor de mentira que devuelve el mismo doble que ya tenían**. Cambian solo las líneas del montaje, **ninguna afirmación**, y el reporte lista spec por spec qué líneas |
 | **El contrato del puerto y los dos adaptadores** | |
 | **El guardado de la oferta con el portal de hoy** | |
 | **Compilación y pruebas en verde** | |
@@ -209,8 +252,12 @@ sin commitear y todo al índice.
   rechaza; sin ella, la regla.
 - **Cableado**: Nest construye el resolvedor con los dos adaptadores, y los tres consumidores lo
   reciben.
-- 🔴 **Ninguna prueba existente cambia.** Si una tiene que cambiar, se dice en la opinión previa y por
-  qué.
+- **El respaldo no se pide cuando la resolución misma falla**: sale el aviso del correo y queda
+  esperando.
+- **Los mensajes del guardado**: con PsicoAlianza, la vacante completada da el texto neutro; con
+  EvaluaTest, el de hoy.
+- 🔴 **Ninguna afirmación de una prueba existente cambia.** Solo los montajes de las cinco que ponen
+  el puerto a mano, y la prueba de cableado del paso 2, que pasa a afirmar el resolvedor.
 
 ⚠️ Una prueba que pasa a la primera merece desconfianza: control negativo, y borrarlo después,
 limpiando la caché.
@@ -224,11 +271,12 @@ Una vez sobre el conjunto: `npm run build` y `npm test` en el backend.
 1. **Qué cambió** y **qué se verificó**, con el resultado real.
 2. **Qué quedó fuera** y por qué.
 3. **Qué decisiones se tomaron que no estaban en este brief.**
-4. **Confirmación de que ninguna prueba existente cambió**, o cuáles y por qué.
-5. **Qué pasó con el token del puerto.**
-6. **Las llamadas fijas que quedan**, con su condición, para el 4b.
+4. **La lista, spec por spec, de qué líneas del montaje cambiaron**, y confirmación de que ninguna
+   afirmación cambió.
+5. **Confirmación de que el token ya no existe** y de que nadie lo inyecta.
+6. **Las llamadas fijas que quedan**, con su condición, para el 4b: el respaldo, las pruebas
+   adicionales, y las tres del controlador de empresas.
 7. **Confirmación de que el diff no trae cambios de formato** ni comentarios nuevos en código.
 8. **El documento del flujo actualizado.**
-9. **Cómo se prueba en local de punta a punta con PsicoAlianza**: qué hay que escribir a mano en la
-   oferta.
+9. **El entorno local actualizado** con cómo activar una oferta con PsicoAlianza a mano.
 10. **Un mensaje de commit.**

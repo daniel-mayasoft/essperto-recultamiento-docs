@@ -329,11 +329,48 @@ local**. Una contraseña cifrada en otra máquina no se descifra aquí.
 en la base y la sesión pegada en el `.env` con el interruptor encendido. El cliente todavía no
 guarda sesiones propias: sin la pegada responde *sin sesión*.
 
+## Una oferta con PsicoAlianza, a mano (hasta el paso 6 de la etapa 3)
+
+Desde el paso 4a el embudo invita y consulta por el proveedor de la conexión que la oferta tiene
+congelada (decisión 48). El portal todavía no manda esa conexión al guardar la prueba, y con la
+regla por empresa una empresa con las dos conexiones sigue congelando la de EvaluaTest, así que
+**para que una oferta use PsicoAlianza hay que escribirle la conexión a mano**. Dos formas:
+
+- **Por la ruta**, con el portal abierto: la ruta que guarda la configuración de la prueba
+  (`PATCH offers/<id>/evaluatest-config`) acepta `connectionId` en el cuerpo. Mandar el de la
+  conexión de PsicoAlianza junto a `enabled: true` y el `jobProfileId` de una vacante activa de
+  PsicoAlianza; el backend comprueba la vacante allí y la congela.
+- **En la base**, en `mongosh` contra `esscoti_local`, sobre una oferta que ya tenga la prueba
+  configurada:
+
+  ```js
+  db.offers.updateOne(
+    { _id: ObjectId("<id de la oferta>") },
+    { $set: {
+      "evaluatestConfig.enabled": true,
+      "evaluatestConfig.jobProfileId": <id de la vacante en PsicoAlianza>,
+      "evaluatestConfig.jobProfileName": "<nombre de la vacante>",
+      "evaluatestConfig.connectionId": "<id de la conexión de PsicoAlianza de tu empresa>"
+    } }
+  )
+  ```
+
+  El `connectionId` es el campo `id` de la entrada de la lista `psychometricConnections` de la
+  empresa (el que generó el paso de arriba). El nombre de la vacante es obligatorio: sin él la
+  invitación aborta como fallo permanente. Los campos `jobProfileCode`, `evaluationCode` y
+  `selectedTests` se quedan vacíos: son de EvaluaTest.
+
+Con eso, un candidato que entre a la etapa en esa oferta se invita en PsicoAlianza con los cuatro
+pasos, queda con `psicoalianza` como proveedor y el cron lo consulta en el tablero de esa vacante.
+Una empresa con **solo** la conexión de PsicoAlianza no necesita nada de esto: la regla por empresa
+ya la elige.
+
 ## Lo que este entorno todavía no cubre
 
 - **Probar la etapa psicométrica de punta a punta.** El candidato habla por WhatsApp, y aquí
-  WhatsApp está apagado a propósito. Cómo se mete a un candidato en la etapa sin WhatsApp se
-  decide antes del brief 5 de la etapa 3 y se anota aquí.
+  WhatsApp está apagado a propósito. Cómo se mete a un candidato en la etapa sin WhatsApp sigue
+  sin anotarse aquí; qué tiene que tener la oferta para que la etapa use PsicoAlianza, sí (*Una
+  oferta con PsicoAlianza, a mano*).
 - 🔴 **PsicoAlianza no tiene ambiente de pruebas.** Cada invitación hecha desde local le llega a
   una persona real en la cuenta real. Se prueba con documentos y correos propios, **un correo
   real distinto por candidato**: allá un correo pertenece a una sola persona en toda la
