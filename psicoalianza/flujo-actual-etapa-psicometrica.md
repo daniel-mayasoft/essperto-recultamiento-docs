@@ -4,7 +4,8 @@ Cómo funciona la etapa **tal como está en el código** de la rama de trabajo, 
 2026-09-11 tras el paso 7 y el rescate, y actualizado el 2026-09-12 con el cambio de la cuenta
 compartida (decisiones 34 y 40) y el del correo inventado (decisión 33), y el 2026-09-13 con
 las conexiones de la empresa y la conexión de la oferta (paso 8a, decisión 41) y con el portal
-leyendo la lista y "Puntaje mínimo" (paso 8b, decisiones 8 y 41). No es historia ni
+leyendo la lista y "Puntaje mínimo" (paso 8b, decisiones 8 y 41), y el 2026-09-14 con el documento,
+el tipo y el plazo en la invitación y el descarte por documento (paso 5a, decisión 45). No es historia ni
 justificación: **los porqués están en la bitácora**, y aquí solo se apunta el número de
 decisión. Cuenta qué le pasa a una persona en cada caso.
 
@@ -105,11 +106,19 @@ que copia la configuración tal cual— y sigue igual: la conexión se resuelve 
 proveedor, que con una sola por proveedor es la misma (decisiones 2 y 41). Nada decide todavía
 con `connectionId`; el puerto recibe la empresa. Después:
 
-1. Llama a **la invitación del puerto** con la vacante y su nombre, la empresa, nuestra
-   referencia del candidato, su nombre y su correo **tal cual, con su nulo si no tiene**. Ya no
-   se inventa ningún correo (decisión 33).
-2. El adaptador comprueba tres cosas, **en este orden y antes de tocar al proveedor**, y cada
-   una aborta con un error de tipo propio que el embudo trata distinto:
+1. **Calcula el plazo**, una sola vez y antes de invitar, con el mismo resolutor que usa el
+   descarte (empresa > entorno > 2 días). Ese único valor va a la invitación y al mensaje de
+   WhatsApp, también en la rama demo (decisión 45). Si esa lectura falla, no se invita: cae como
+   fallo pasajero (abajo).
+2. Llama a **la invitación del puerto** con la vacante y su nombre, la empresa, nuestra
+   referencia del candidato, su nombre, su correo, **su documento y el tipo de documento, todos
+   tal cual están guardados, con su nulo si no tiene**, y el plazo. Ya no se inventa ningún
+   correo (decisión 33). Qué hacer con el documento, el tipo y el plazo lo sabe cada adaptador:
+   **EvaluaTest los ignora**; PsicoAlianza exige documento y plazo, traduce el tipo a su catálogo
+   (vacío → CC; desconocido → OTRO) y manda el documento sin espacios, puntos, comas ni guiones,
+   sin tocar lo guardado (decisión 45).
+3. El adaptador comprueba, **en este orden y antes de tocar al proveedor**, y cada
+   comprobación aborta con un error de tipo propio que el embudo trata distinto:
    - **La credencial de la empresa.** Si le falta cualquiera de las tres cosas, o no llegó
      empresa, aborta con *sin conexión*, y el embudo **aprueba la etapa y sigue**, por el
      mismo camino que la oferta sin prueba: el candidato no recibe ningún mensaje, no se le
@@ -118,28 +127,39 @@ con `connectionId`; el puerto recibe la empresa. Después:
    - **El nombre de la vacante.** Si no está guardado, aborta con **el error de tipo
      permanente** (decisiones 35 y 39). Va antes que el correo porque es un error de
      configuración y merece la alerta a soporte.
-   - **El correo del candidato**, nulo o en blanco. Aborta con *falta un dato del candidato*,
-     y el embudo lo **descarta** con `psychometric_missing_email`, sin mensaje y sin escribirle
-     nada más: Julián contestó la última pregunta y se quedó en silencio (decisiones 31 y 33).
-     Es la única puerta por la que hoy sale gente del proceso al entrar a la etapa.
+   - **El correo del candidato**, nulo o en blanco. Aborta con *falta un dato del candidato*
+     nombrando el correo, y el embudo lo **descarta** con `psychometric_missing_email`, sin
+     mensaje y sin escribirle nada más: Julián contestó la última pregunta y se quedó en
+     silencio (decisiones 31 y 33).
+   - **El documento del candidato**, solo con PsicoAlianza (EvaluaTest no lo mira): nulo, en
+     blanco o **sin ningún dígito** después de limpiarlo —«Bogotá» en el campo del documento—.
+     Aborta con *falta un dato del candidato* nombrando el documento, y el embudo lo
+     **descarta** con `psychometric_missing_document`, con el mismo trato que el correo: sin
+     mensaje (decisión 45). El embudo elige el motivo por el campo que nombra el error. Con
+     PsicoAlianza, el adaptador comprueba antes que estos dos el plazo: ausente o con
+     decimales es **el error permanente** (decisión 39 ampliada).
 
-   Con las tres en orden, pasan **cuatro** cosas (32-a): se resuelve el código de evaluación
-   de la vacante, se registra al candidato con nuestra referencia, se le invita, y **si la
-   invitación falla se le manda el correo directo**.
-3. El embudo guarda en el candidato: el proveedor (`evaluatest`), el identificador que
+   Son las dos puertas por las que hoy sale gente del proceso al entrar a la etapa; la del
+   documento no se alcanza hasta que una empresa use PsicoAlianza (paso 4).
+
+   Con todo en orden, con EvaluaTest pasan **cuatro** cosas (32-a): se resuelve el código de
+   evaluación de la vacante, se registra al candidato con nuestra referencia, se le invita, y
+   **si la invitación falla se le manda el correo directo**.
+4. El embudo guarda en el candidato: el proveedor (`evaluatest`), el identificador que
    EvaluaTest le dio, la fecha de consulta, y en la bolsa del proveedor **el correo de
    registro solo si difiere del real** — vacío significa *empareja por el correo verdadero*
    (32-d). El estado del candidato pasa a *esperando resultado externo*. El guardado es con
    reintento (varios candidatos de la misma oferta terminan a la vez).
-4. Le escribe por WhatsApp: el enlace que devolvió la invitación, su correo enmascarado, las
-   instrucciones y **el plazo**, que sale del mismo resolutor que usa el descarte (empresa >
-   entorno > 2 días). Si la invitación no trajo enlace, el mensaje solo dice que llegará por
+5. Le escribe por WhatsApp: el enlace que devolvió la invitación, su correo enmascarado, las
+   instrucciones y **el plazo**, el mismo valor que se calculó antes de invitar y que viajó en
+   la invitación. Si la invitación no trajo enlace, el mensaje solo dice que llegará por
    correo — ⚠️ y no anuncia el plazo, aunque corre igual (riesgo abierto; con EvaluaTest hoy
    es inalcanzable).
 
 ### Si el arranque falla
 
-- **Fallo pasajero** (red, proveedor caído, sin código de evaluación): se le avisa al
+- **Fallo pasajero** (red, proveedor caído, sin código de evaluación, **o la lectura del
+  plazo**, que va antes de invitar): se le avisa al
   candidato **una sola vez** —con un enlace de respaldo si se puede armar, o el aviso del
   correo si no—, se le deja *esperando resultado externo* **sin identificador** y se guarda.
   El enlace de respaldo lo arma **el adaptador**: con el código de evaluación guardado en la
@@ -158,8 +178,9 @@ con `connectionId`; el puerto recibe la empresa. Después:
 Por dónde se puede llegar a arrancar la etapa, y qué hace cada una con el fallo permanente
 (decisión 39). **Ni *sin conexión* ni *falta un dato* llegan a ninguna**: el arranque los
 convierte en aprobar y en descartar antes de que salgan, así que por las cinco puertas la
-empresa sin conexión se salta la etapa (decisión 40) y el candidato sin correo se descarta
-(decisión 33). Dos consecuencias que constan: el reintento manual del administrador responde
+empresa sin conexión se salta la etapa (decisión 40) y el candidato sin correo o sin documento
+se descarta (decisiones 33 y 45). Las cinco cargan el candidato entero, así que el documento y
+su tipo llegan por todas. Dos consecuencias que constan: el reintento manual del administrador responde
 "reintentado" en los dos casos, y el botón "Continuar proceso" aprueba o descarta sin decir
 nada.
 
@@ -293,13 +314,13 @@ con credenciales usa las suyas para elegir vacante. La demo **se queda como est�
 
 ## 8 · Lo que ve el reclutador
 
-- **Motivos de rechazo** (decisiones 13, 16 y 33; paso 7 y cambio del correo): el backend
-  escribe solo los cinco con prefijo `psychometric_`; el portal traduce viejos y nuevos **para
-  siempre**, las métricas unifican viejo y nuevo antes de contar, y el visor del embudo los
-  agrupa en *Psicométrica — no completó* (vencimiento), *Psicométrica — reprobada* (puntaje,
-  prueba adicional y descarte del proveedor) y *Psicométrica — sin correo* (`missing_email`,
-  con grupo propio porque nunca se le mandó nada). 🔴 Despliegue: el orden vigente es el de
-  `before-deploy.md`.
+- **Motivos de rechazo** (decisiones 13, 16, 33 y 45; paso 7, cambio del correo y paso 5a): el
+  backend escribe solo los seis con prefijo `psychometric_`; el portal traduce viejos y nuevos
+  **para siempre**, las métricas unifican viejo y nuevo antes de contar, y el visor del embudo
+  los agrupa en *Psicométrica — no completó* (vencimiento), *Psicométrica — reprobada* (puntaje,
+  prueba adicional y descarte del proveedor), *Psicométrica — sin correo* (`missing_email`) y
+  *Psicométrica — sin documento* (`missing_document`), los dos últimos con grupo propio porque
+  nunca se le mandó nada. 🔴 Despliegue: el orden vigente es el de `before-deploy.md`.
 - **Ficha de la oferta**: la vacante elegida, el interruptor de la etapa, el **puntaje mínimo**
   —en ningún texto del portal ni del agente de WhatsApp aparece ya "IGI" (decisión 8)— y la
   alerta si la vacante dejó de servir. **Sin conexión de la empresa**, en su lugar el aviso de §1 —el

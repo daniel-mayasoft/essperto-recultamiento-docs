@@ -1332,6 +1332,45 @@ Se da por terminado cuando se cumplen las dos condiciones:
     5**: la etiqueta, los tres estados, el botón y la operación que pregunta por el estado de la
     sesión, que hoy no existe en el puerto.
 
+45. **Lo que PsicoAlianza exige del candidato lo pasa el embudo tal cual, y el adaptador lo traduce
+    y lo protege** (2026-09-14, decidido con el usuario sobre mediciones en producción de ese día;
+    paso 5a). El embudo pasa a la invitación el documento, el tipo de documento y el plazo **tal como
+    están guardados**; quien sabe qué hacer con ellos es el adaptador de cada proveedor. EvaluaTest
+    los ignora.
+
+    **El tipo de documento**, según el catálogo de PsicoAlianza (A14): vacío → **CC** (decisión 12);
+    CC, TI, PA, CE y PEP → su número; **PT y cualquier texto desconocido → OTRO**, nunca CC, porque
+    no se afirma lo que no se sabe. **Medido**: de 8.272 candidatos, 4.747 tienen el tipo vacío y
+    3.525 CC, y ningún otro valor. Hoy todo sale como CC; la tabla es para lo que llegue mañana.
+
+    **El documento se limpia al mandarlo** —espacios, puntos, comas y guiones, como en la carga
+    masiva— en los dos lados al buscar en el tablero, y **lo guardado no se toca**. **Medido: hoy no
+    hay ningún documento con separadores**; el usuario lo dejó **como protección** para el futuro.
+
+    🔴 **Un documento sin ningún dígito cuenta como sin documento**: descarte con motivo propio,
+    `psychometric_missing_document`, sin mensaje, con el mismo trato que el correo (33). **Medido**:
+    1.389 documentos llevan letras, pero 1.368 son un lote de agosto de 2026 que empieza por «DEM» y
+    sin portal de origen; quedan unos once con un nombre de ciudad en el campo, y con PsicoAlianza se
+    registraría a esa persona con «Bogotá» como CC en la cuenta del cliente. **Lo que la guarda no
+    hace**: corregir un documento mal tecleado — ese riesgo sigue aceptado (B1). De las 33 personas
+    que han pasado por la etapa psicométrica, **una** no tiene documento y ninguna lo tiene con letras.
+
+    **El motivo tiene grupo propio en el visor**, *Psicométrica — sin documento*, como el de correo:
+    en «sin correo» diría lo que no es, y en «no completó», que no hizo algo que nunca se le mandó.
+
+    **El plazo se calcula antes de invitar**, una sola vez, y el mismo valor va a PsicoAlianza y al
+    mensaje de WhatsApp: así no pueden diferir. ✅ **Y arregla de paso un fallo latente** (levantado
+    por el ejecutor en la opinión previa del 5a, comprobado en el código): hoy la lectura del plazo va
+    **después** de invitar y guardar; si falla, la persona queda invitada y con identificador pero
+    **sin mensaje de WhatsApp y sin enlace**, y el cron no la reinvita porque ya tiene identificador.
+    Con la lectura antes, el fallo es pasajero como cualquier otro: aviso de respaldo, sin
+    identificador, y el cron reintenta.
+
+    ⚠️ **Lo que este paso no cierra, anotado** (mismo origen): el plazo que se manda a PsicoAlianza
+    queda fijo al invitar, y el cron lo recalcula en cada pasada con la configuración viva de la
+    empresa. Si alguien cambia el plazo con gente a mitad de prueba, los dos relojes se separan. Ya
+    pasa hoy entre el mensaje y el descarte; no lo introduce este paso y no tiene paso.
+
 ## Falta de PsicoAlianza
 
 | #   | Qué                                               | Por qué importa                                                                  |
@@ -2047,9 +2086,10 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 2 | ✅ **HECHO el 2026-09-13.** El cliente de PsicoAlianza **dado una sesión viva**: el almacén de sesión en la conexión de la empresa, la fuente manual del `.env` (decisión 42), el CSRF de las peticiones, las peticiones del contrato, *sesión caducada* como error propio y el registro sin cookies ni contraseñas; la lectura única de conexiones reconoce la de PsicoAlianza — brief `brief-etapa3-paso2-cliente-psicoalianza.md` | Aditivo |
 | 2b | El módulo `proxy`: puerto de *arrendar una IP*, adaptador de DataImpulse, errores propios, sin selector (decisión 43). Nada lo llama hasta el 2c | Aditivo |
 | 2c | El acuñador de sesión: Chrome sin ventana por el puerto de proxy, clasificador, reintentos, candado y tope, aviso a soporte; Chromium en la imagen del backend (decisión 43). **Espera las dos mediciones y el dato de la imagen** | Aditivo en código; **la imagen no** |
-| 3 | El adaptador de PsicoAlianza contra el puerto psicométrico. Puede partirse: listar y comprobar vacantes, después invitar y leer resultados | Aditivo |
+| 3 | ✅ **Revisado el 2026-09-14, pendiente de commit.** El adaptador de PsicoAlianza contra el puerto psicométrico, con la invitación real de comprobación hecha — brief `brief-etapa3-paso3-adaptador-psicoalianza.md`, registro en *Paso 3* | Aditivo |
 | 4 | El resolvedor de adaptador por conexión, y el cron preguntando al proveedor de la invitación (decisiones 6, 38 y 41). Puede partirse. 🔴 **No puede mandar ninguna empresa a PsicoAlianza antes de que el 5 esté hecho**: sin plazo ni documento, cada candidato sale descartado (opinión previa del paso 3) | Embudo |
-| 5 | Backend: guardar y validar la conexión de PsicoAlianza, **el documento y el plazo en la invitación**, su motivo de rechazo, el tipo de documento real (A14), y no aceptar plazos con decimales en una empresa con PsicoAlianza | Embudo |
+| 5a | **Embudo**: el documento, su tipo y el plazo en la invitación, la traducción del tipo y la limpieza del documento en el adaptador, y el motivo *sin documento* con su grupo en el portal (decisión 45) — brief `brief-etapa3-paso5a-embudo-psicoalianza.md`, opinión previa el 2026-09-14 | Embudo y portal |
+| 5b | **Conexión**: guardar y validar la conexión de PsicoAlianza sin login y conservando la sesión, la operación que pregunta si la sesión está viva (44), y no aceptar plazos con decimales en una empresa con PsicoAlianza | Embudo |
 | 6 | Portal: selector de proveedor, modal por proveedor, pruebas adicionales solo de EvaluaTest (decisiones 3 y 4) | Visible |
 
 **Antes del paso 2, fuera del código:** cuenta de PsicoAlianza para probar y **una sesión de esa
@@ -2614,6 +2654,53 @@ con mediciones de solo lectura ese mismo día. Todo está incorporado al brief.
 | Sesión caducada en la consulta acaba como *no se pudo consultar* | Correcto hoy. **Hereda el 2c**: el reintento tras acuñar va dentro del adaptador o del cliente, no en el cron |
 | El WhatsApp enseña nuestro correo enmascarado y PsicoAlianza avisa a otro | **Hereda el paso 4/5**, junto a las instrucciones de EvaluaTest del mismo mensaje |
 | Cambios sin commitear en la documentación | Eran del planificador; no se mezclan con el diff del paso |
+
+### Paso 3 — ✅ REVISADO (2026-09-14), pendiente de commit
+
+El adaptador de PsicoAlianza, solo backend. Implementa las cinco operaciones del puerto **sin
+registrarse en su token**, que sigue apuntando a EvaluaTest (con prueba). Por el camino, el cliente del
+paso 2 gana el listado de vacantes sin filtros y manda los participantes como los manda el portal; el
+tipo de la invitación del puerto gana el plazo, opcional; y el error de dato faltante puede nombrar el
+documento. **Nada lo llama todavía y el flujo de la etapa no cambia.**
+
+**Verificado por el planificador** sobre el conjunto: compila; backend **107 suites y 993 pruebas (984
+pasan, 9 omitidas; 42 nuevas** desde las 951 del paso 2); todo en el índice; sin merge de `develop`;
+EvaluaTest y el token del puerto intactos; sin comentarios nuevos en código ni identificadores en
+español.
+
+**Una corrección del planificador sobre el diff:** el cuerpo del correo no era el del portal —sin las
+negritas y con otro texto en el enlace— porque **el contrato lo describía con palabras**. Se puso el HTML
+exacto en el contrato, se corrigió el adaptador, y la prueba pasó de mirar si contenía dos frases a
+comparar el cuerpo entero, con control negativo: sin las negritas, falla.
+
+✅ **Invitación real de comprobación**, al documento y al correo del usuario, en una vacante donde **no
+estaba** —comprobado antes de invitar, porque en una donde ya estuviera la invitación responde lo mismo
+aunque no invite—: la 1135, OPERARIO DE PRODUCCIÓN — MANISOL. Por el adaptador compilado y la sesión
+pegada:
+
+| Qué | Resultado |
+| --- | --- |
+| Comprobar la vacante | Usable. Antes, la 4590 elegida primero salió **completada** y el script se paró sin invitar, que es lo que tiene que hacer |
+| La invitación, **con la codificación del portal** | 201. La persona **aparece** en el tablero, con identificador y enlace personal. **Cierra el cambio de codificación** |
+| El plazo | La agenda cierra **exactamente 2 días después** |
+| El estado leído | *sigue en ello* |
+| 🔴 **El estado de la agenda recién creada** | **`2` «Iniciada»**, que nunca se había visto: en la tanda, una invitación nueva salió «Agendada». Causa sin medir; lo probable es haber leído el tablero después de pedir el enlace. El adaptador lo trata como sin terminar, que es justo la guarda del brief. En el contrato |
+| El registro del cliente | Método, ruta y código: **ni el documento ni el correo** |
+
+⚠️ **Falta que el usuario confirme** que el correo llegó con el cuerpo nuevo y que se ve bien.
+
+**Decisiones que no estaban en el brief**, aceptadas:
+
+- **Un tablero vacío deja a cada persona como *no aparece*, no como *no se pudo consultar*** como en
+  EvaluaTest. El cliente de PsicoAlianza falla ruidoso cuando la petición falla, así que un tablero vacío
+  lo está de verdad; y a quien se consulta ya se le encontró allí al invitar, así que sigue esperando y
+  el plazo corre, que es lo decidido (36).
+- **El plazo se comprueba entre el nombre de vacante y los datos del candidato**: es configuración, como
+  el nombre, y su error permanente gana a *falta un dato*.
+
+**Lo que falta para que una persona real pase por PsicoAlianza**, que decide el orden de lo que sigue:
+el paso 5 —plazo y documento desde el embudo, tipo de documento real—, el paso 4 —el resolvedor, que no
+se enciende antes del 5—, y una forma de tener sesión en un servidor (2c).
 
 #### Bloque D · presentar y reprobar — ✅ HECHO (2026-09-14). **Cierra A1**
 

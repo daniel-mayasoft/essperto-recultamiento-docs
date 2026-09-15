@@ -126,7 +126,13 @@ y no depende del correo, así que la entrega por WhatsApp se sostiene.)*
 
 **Catálogos, hasta ahora:**
 
-- Agenda `estado`: `1` Agendada · `3` Finalizada · `4` Expirada. Faltan `2` y `5`+.
+- Agenda `estado`: `1` Agendada · **`2` Iniciada** · `3` Finalizada · `4` Expirada. Faltan `5`+.
+  ✅ **El `2` se vio el 2026-09-14** en la invitación real de comprobación del paso 3: la agenda
+  recién creada ya salió «Iniciada», con recomendación `0` e índice `-2.0`, **sin que la persona
+  abriera nada**. En la tanda de ese mismo día, una invitación nueva había salido «Agendada».
+  ⚠️ **La causa no está medida**: la diferencia probable es que esta vez el tablero se leyó
+  **después** de pedir el enlace personal. En el tablero 1135 había además otras dos agendas en `2`.
+  Para el adaptador es *sin terminar*, como cualquier estado que no sea finalizada.
 - `recomendacion`: `0` pendiente · `3` recomendado. Faltan los valores de "no
   recomendado" y demás bandas — un candidato reprobado los revelará.
 - Etapa del candidato: solo se ha visto `9` "En pruebas". No se ha observado que avance.
@@ -191,9 +197,14 @@ nuestro cliente:
 **El mensaje por defecto de su portal**, que es el que sus reclutadores usan y el candidato reconoce:
 
 - **Asunto:** `Comienza tus pruebas`
-- **Cuerpo** (HTML): un párrafo «¡Avanzas en el proceso, candidato!», otro diciendo que ha sido
-  invitado a presentar las **pruebas psicométricas**, y un tercero con «Accede al detalle aquí:» y el
-  enlace a `ats.psicoalianza.com`.
+- **Cuerpo** (HTML), **carácter por carácter** como lo mandó el portal el 2026-09-14 — con sus
+  `<strong>`, el punto dentro del segundo, el espacio antes de cerrar el tercero y el texto del
+  enlace sin `https://`:
+
+  `<p>¡Avanzas en el proceso, candidato!</p><p>Has sido invitado a presentar las <strong>pruebas psicométricas.</strong></p><p><strong>Accede al detalle aquí: </strong><a href="https://ats.psicoalianza.com"><strong>ats.psicoalianza.com</strong></a></p>`
+
+  ⚠️ Una versión anterior de este documento lo describía con palabras, y el paso 3 lo reconstruyó
+  sin las negritas y con otro texto en el enlace.
 
 ⚠️ **Ese cuerpo no nombra a la empresa que invita ni lleva el enlace personal del candidato**: manda
 a la portada de la plataforma. Quien lo recibe tiene que saber ya de qué va. Con nosotros el enlace
