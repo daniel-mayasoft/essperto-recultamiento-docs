@@ -331,12 +331,15 @@ cifrada con tu `SECRET_KEY` local**. Una contraseña cifrada en otra máquina no
 en la base y la sesión pegada en el `.env` con el interruptor encendido. El cliente todavía no
 guarda sesiones propias: sin la pegada responde *sin sesión*.
 
-## Una oferta con PsicoAlianza, a mano (hasta el paso 6 de la etapa 3)
+## Una oferta con PsicoAlianza
 
 Desde el paso 4a el embudo invita y consulta por el proveedor de la conexión que la oferta tiene
-congelada (decisión 48). El portal todavía no manda esa conexión al guardar la prueba, y con la
-regla por empresa una empresa con las dos conexiones sigue congelando la de EvaluaTest, así que
-**para que una oferta use PsicoAlianza hay que escribirle la conexión a mano**. Dos formas:
+congelada (decisión 48). **Desde el paso 6.2b se elige en el portal**: al crear la oferta o en el
+modal de la prueba de su ficha, con un selector de proveedor cuando la empresa tiene las dos
+conexiones, y sin selector cuando tiene una sola. El portal manda siempre la conexión al guardar.
+
+**Escribirla a mano sigue sirviendo** si hace falta —por ejemplo, para preparar una oferta de las
+pruebas a mano—. Dos formas:
 
 - **Por la ruta**, con el portal abierto: la ruta que guarda la configuración de la prueba
   (`PATCH offers/<id>/evaluatest-config`) acepta `connectionId` en el cuerpo. Mandar el de la

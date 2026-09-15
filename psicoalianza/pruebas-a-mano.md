@@ -33,6 +33,40 @@ Brief: `brief-etapa3-paso6-1-mi-compania.md`. El número de caso es el del brief
 | 12 | 5 | Apagar el interruptor, **reiniciar el backend** y recargar | El mismo aviso | ☐ |
 | 13 | 7 | Volver a la sesión válida y reiniciar; en las herramientas del navegador, **bloquear solo la petición del estado de sesión**, y recargar | «No se pudo comprobar la sesión», nunca *Sin conexión* | ☐ |
 | 14 | 8 | Quitar el bloqueo; *Editar conexión* de PsicoAlianza, cambiar solo el nombre y reteclear la contraseña | Cambia el nombre y la etiqueta se vuelve a pedir | ☐ |
-| 15 | 13 | Abrir una oferta de esa empresa | Sigue diciendo *no tienes proveedor*: lo esperado **si el 6.2 todavía no está hecho**. Con el 6.2 hecho, este caso lo sustituyen los del 6.2 | ☐ |
+| 15 | 13 | ~~Abrir una oferta de esa empresa~~ | **Sustituido** por la sección del paso 6.2b, que ya está hecho | — |
 
 **No se hace**: el caso extra con una cuenta real de EvaluaTest, porque no la hay.
+
+## Paso 6.2b — la oferta elige su conexión
+
+Brief: `brief-etapa3-paso6-2b-la-oferta-por-proveedor.md`. El número de caso es el del brief. **Ningún caso
+invita a nadie**, pero los que listan o comprueban vacantes consultan las cuentas reales en solo lectura.
+
+🔴 **No hay cuenta real de EvaluaTest.** Los casos que necesitan listar o comprobar vacantes de EvaluaTest se
+anotan como *no se pueden correr sin cuenta*. Para tener «las dos conexiones» basta insertar a mano en la base
+una conexión de EvaluaTest con datos inventados (`../entorno-local.md`): cuenta como configurada, pero su lista
+de vacantes y su estado fallarán.
+
+**Preparación**, sobre la empresa del 6.1, que ya tiene PsicoAlianza conectada: al menos una vacante activa en
+PsicoAlianza, y para el caso 8 las de los estados que se puedan preparar.
+
+| Orden | Caso | Cómo está la empresa | Qué se hace | Qué se tiene que ver | Resultado |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 2 | Solo PsicoAlianza | Crear una oferta con la prueba activada | Sin selector; vacantes de PsicoAlianza, cada una solo con su nombre; **sin pruebas adicionales**; se crea | ☐ |
+| 2 | 2 | Igual | Abrir la oferta del orden 1 | Los controles de la prueba, **no** *tu empresa no tiene proveedor* | ☐ |
+| 3 | 8 | Igual | En el modal, elegir cada vacante que se haya preparado (completada, suspendida, sin pruebas) y escribir un número inventado | Cada una con su texto del alcance 4 del brief; el número inventado, «No encontramos esta vacante…» | ☐ |
+| 4 | 12 | Igual | Abrir una oferta de antes de la migración, sin conexión congelada, con prueba y vacante (preparada a mano en la base) | PsicoAlianza, **sin vacante** y con su puntaje | ☐ |
+| 5 | 13 | Igual | En la oferta del orden 1: *Desactivar* la prueba, recargar y volver a *Configurar* | Aparecen la conexión y la vacante de antes; se vuelve a activar y guarda | ☐ |
+| 6 | 6 | Igual | Copiar desde el listado la oferta del orden 1 | La copia viene con PsicoAlianza y su vacante | ☐ |
+| 7 | 3 | **Las dos** (insertar la de EvaluaTest a mano) | Crear desde cero con la prueba activada e intentar pasar de paso sin elegir proveedor | *Selecciona el proveedor de la prueba psicométrica para continuar, o desactiva este paso.*; no se ven vacante, puntaje ni pruebas | ☐ |
+| 8 | 3 | Igual | Elegir EvaluaTest y una vacante con pruebas adicionales; cambiar a PsicoAlianza; elegir vacante y guardar | Al cambiar se borran vacante y pruebas y se listan las de PsicoAlianza. ⚠️ **Elegir vacante en EvaluaTest no se puede correr sin cuenta**: hacer solo el cambio de proveedor y el guardado con PsicoAlianza | ☐ |
+| 9 | 4 | Igual | Abrir la oferta del orden 8, cambiar el puntaje y guardar. Pedir al planificador la consulta de la base | PsicoAlianza elegida. **En la base**: la conexión congelada es la de PsicoAlianza, el código de perfil es texto vacío y las pruebas adicionales una lista vacía. **La ficha recibe la conexión** de la oferta (se ve elegida al abrir) | ☐ |
+| 10 | 9 | Igual | En el modal, elegir una vacante de PsicoAlianza; cambiar a EvaluaTest y escribir el mismo número | El aviso se vuelve a consultar al cambiar (se ve «Verificando…» otra vez). ⚠️ El resultado en EvaluaTest **no se puede comprobar sin cuenta** | ☐ |
+| 11 | 5 | Igual | Pasar una oferta activa de EvaluaTest a PsicoAlianza desde la ficha | ⚠️ **No se puede correr sin cuenta**: necesita una oferta activa en EvaluaTest | ☐ |
+| 12 | 7 | Igual | Crear con la IA | EvaluaTest elegida con la vacante sugerida. ⚠️ **No se puede correr sin cuenta**: la IA solo sugiere vacantes de EvaluaTest | ☐ |
+| 13 | 11 | **Solo PsicoAlianza**, con una oferta activa congelada en una conexión que ya no existe (cambiar su conexión a mano en la base) | Abrir la oferta y *Configurar* | El aviso nuevo **junto a los controles**; el modal abre con PsicoAlianza, **sin vacante**; elegir una vacante y guardar, y el aviso desaparece. Repetir la preparación y *Desactivar* en vez de guardar | ☐ |
+| 14 | 11 | Igual, con **las dos** conexiones | Lo mismo | El modal abre **sin proveedor elegido** y sin vacante | ☐ |
+| 15 | 10 | **Sin ninguna** conexión configurada, con la misma oferta | Abrir la oferta | El aviso de hoy, *tu empresa ya no tiene un proveedor conectado*, **en lugar de** los controles | ☐ |
+| 16 | 1 | Solo EvaluaTest | Crear una oferta con prueba; abrirla y cambiar el puntaje | ⚠️ **No se puede correr sin cuenta** | ☐ |
+| 17 | Revisión del diff | Solo PsicoAlianza, con la oferta del orden 1 | En las herramientas del navegador, **bloquear solo la petición de la empresa** (`/tenants/my-tenant`) del listado de ofertas; recargar y copiar la oferta con prueba | Sale el error del listado y **no se abre el diálogo**; nunca un diálogo con la prueba sin vacante | ☐ |
+| 18 | Revisión del diff | Igual | Con la petición de la empresa todavía bloqueada, recargar el listado, *Crear con IA*, escribir una descripción y generar | El error sale **dentro del diálogo de la IA**, que sigue abierto **con la descripción escrita**; no se abre el diálogo de crear. Sin cuenta real de EvaluaTest la IA no sugiere prueba, pero el fallo se ve igual | ☐ |

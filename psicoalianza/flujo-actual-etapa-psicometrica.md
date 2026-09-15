@@ -131,16 +131,33 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
      se rechaza si la empresa tiene —o va a tener en esa misma petición— conexión de PsicoAlianza,
      mirando la lista resultante. Con EvaluaTest se sigue aceptando. Es la mitad de producto de la
      guarda del adaptador (§2); la variable de entorno no se valida.
-2. Al crear o editar una oferta, el reclutador ve los controles de la prueba psicométrica
-   **solo si la conexión de EvaluaTest de la empresa está configurada** —correo, contraseña e
-   identificador de empresa—, y no basta con que haya alguna conexión: los controles llaman a
-   EvaluaTest. Si no, en su lugar ve un aviso
-   neutro —*tu empresa no tiene un proveedor de pruebas psicométricas conectado; esta etapa se
-   omitirá*— con un enlace a *Mi compañía* si tiene permiso para editar la empresa, y si no,
-   la indicación de pedírselo a un administrador (decisión 40). Con conexión, elige una
-   vacante de la lista que el puerto devuelve, fija el **puntaje mínimo** (decisión 8; el campo
-   guardado sigue siendo `minIGIScore`) y, opcionalmente, pruebas adicionales — estas últimas no
-   pasan por el puerto: son exclusivas de EvaluaTest (decisión 4).
+2. Al crear o editar una oferta, el reclutador ve los controles de la prueba psicométrica **si la
+   empresa tiene alguna conexión configurada**, del proveedor que sea (decisión 51). Si no tiene
+   ninguna, en su lugar ve un aviso neutro —*tu empresa no tiene un proveedor de pruebas
+   psicométricas conectado; esta etapa se omitirá*— con un enlace a *Mi compañía* si tiene permiso
+   para editar la empresa, y si no, la indicación de pedírselo a un administrador (decisión 40).
+
+   **La conexión de la oferta.** Con una sola conexión configurada no hay selector y se usa esa; con
+   dos, un selector de proveedor encima de la vacante, con el nombre y el proveedor de cada una
+   (decisión 3). Qué viene elegido al abrir (decisión 51):
+
+   - **Crear desde cero**: ninguna. Con dos conexiones no se ven vacante, puntaje ni pruebas hasta
+     elegir, y no se deja pasar de paso sin elegir proveedor.
+   - **Crear desde un borrador de la IA**: EvaluaTest, con la vacante sugerida.
+   - **Copiar una oferta, o abrir la ficha de una que tenga conexión o vacante guardada**, con la
+     prueba activa o desactivada: su conexión congelada si sigue configurada, o EvaluaTest si no tiene
+     congelada, **con su vacante**. En cualquier otro caso —la congelada ya no está, o no hay congelada
+     ni EvaluaTest— ninguna elegida (con una sola conexión, esa) y **sin vacante**, porque el número
+     sería de otro proveedor; el puntaje sí se conserva. En la copia lo decide el listado antes de abrir el diálogo; en la ficha, la propia ficha al cargar la oferta.
+   - **La ficha de una oferta que nunca tuvo prueba**: ninguna.
+
+   Cambiar de proveedor borra la vacante, sus pruebas adicionales y su aviso, y vuelve a pedir la
+   lista de vacantes. El reclutador elige una vacante de la lista **del proveedor elegido** —que se
+   pide con esa conexión—, fija el **puntaje mínimo** (decisión 8; el campo guardado sigue siendo
+   `minIGIScore`) y, **solo con EvaluaTest**, pruebas adicionales, que no pasan por el puerto
+   (decisión 4). El aviso de la vacante se consulta con la conexión elegida, vuelve a consultarse si
+   cambia, y habla de su proveedor: con PsicoAlianza, sus textos para completada, suspendida,
+   archivada, sin pruebas, no encontrada y no verificada.
 3. Al guardar con la prueba activa y una vacante, el backend elige la conexión en este orden
    (decisiones 48 y 51): **la que mande el portal** en el cuerpo —si no es de la empresa, rechazo
    con mensaje propio—; si no manda ninguna (el portal de hoy y el agente de WhatsApp), **la ya
@@ -166,20 +183,29 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
    conexión opcional en la consulta y, sin ella, resuelven por la empresa. Las pruebas de la
    vacante siguen siendo de EvaluaTest (decisión 4).
 
-   ⚠️ Hasta el paso 6.2b, en local, editar desde la ficha una oferta congelada en PsicoAlianza y
-   elegirle otra vacante del selector —que lista EvaluaTest— comprueba ese número en PsicoAlianza.
+   **El portal manda siempre la conexión** al guardar con la prueba activa, también con una sola
+   conexión configurada, y con PsicoAlianza manda el código de perfil como texto vacío y la lista de
+   pruebas adicionales vacía, para que no se conserven los de EvaluaTest (paso 6.2b, decisión 51).
 
    **Migración única, antes de desplegar este backend** (decisión 41): un script de consola
    crea la conexión de EvaluaTest de cada empresa a partir de su bloque viejo y rellena
    `connectionId` en las ofertas con la prueba activa. Sin él, ninguna empresa tiene conexión y
    la etapa se salta en silencio para todas.
-4. **Una oferta con la prueba activa cuya empresa ya no tiene conexión** —solo puede pasar
-   si se borraron las credenciales después, o si la oferta se creó desde administración, que
-   copia la configuración sin comprobar nada— muestra en el detalle un aviso de advertencia
-   propio: *la prueba está activada, pero tu empresa ya no tiene proveedor; la etapa se está
-   omitiendo*. Sin interruptor, sin botón de configurar y sin la alerta de estado de la
-   vacante, que consultaría al proveedor sin conexión. El detalle tampoco pide las pruebas de
-   la vacante hasta saber que la conexión de EvaluaTest de la empresa está configurada.
+4. **Una oferta con la prueba activa que se quedó sin su conexión** (decisiones 40 y 51):
+   - Si la empresa **no tiene ninguna** conexión configurada —se borraron las credenciales después,
+     o la oferta se creó desde administración, que copia la configuración sin comprobar nada—, el
+     detalle muestra **en lugar de los controles** el aviso de advertencia *la prueba está activada,
+     pero tu empresa ya no tiene proveedor; la etapa se está omitiendo*. Sin interruptor, sin botón
+     de configurar y sin la alerta de estado de la vacante.
+   - Si la oferta tiene una conexión congelada que **ya no está entre las configuradas** y la
+     empresa **tiene alguna**, el detalle muestra un aviso propio **junto a los controles** —*la
+     conexión que usaba ya no está en tu empresa; la etapa se está omitiendo: configura otra conexión
+     o desactiva la prueba*—, sin la alerta de estado de la vacante, y *Configurar* abre sin conexión
+     elegida si hay dos, con esa si hay una, y siempre sin vacante. Así la oferta se repara eligiendo
+     otra vacante o se desactiva.
+
+   El detalle solo pide las pruebas adicionales de la vacante al cargar si la conexión de la oferta es
+   de EvaluaTest, o si no tiene congelada y la empresa tiene EvaluaTest configurada.
 
 ## 2 · El candidato entra a la etapa
 
@@ -450,9 +476,13 @@ con credenciales usa las suyas para elegir vacante. La demo **se queda como est�
   nunca se le mandó nada. 🔴 Despliegue: el orden vigente es el de `before-deploy.md`.
 - **Ficha de la oferta**: la vacante elegida, el interruptor de la etapa, el **puntaje mínimo**
   —en ningún texto del portal ni del agente de WhatsApp aparece ya "IGI" (decisión 8)— y la
-  alerta si la vacante dejó de servir. **Sin conexión de la empresa**, en su lugar el aviso de §1 —el
-  informativo si la oferta no tiene prueba, el de advertencia si la tiene activa y se está
-  omitiendo—, con enlace a *Mi compañía* solo para quien puede editar la empresa (decisión 40).
+  alerta si la vacante dejó de servir, consultada con la conexión de la oferta y con los textos de
+  su proveedor. En el modal de configurar, el selector de proveedor cuando la empresa tiene dos
+  conexiones, y las pruebas adicionales solo con EvaluaTest (decisión 51). **Sin ninguna conexión
+  configurada**, en su lugar el aviso de §1 —el informativo si la oferta no tiene prueba, el de
+  advertencia si la tiene activa y se está omitiendo—, con enlace a *Mi compañía* solo para quien
+  puede editar la empresa (decisión 40). **Con la conexión de la oferta ya no configurada y otra en
+  la empresa**, el aviso de §1 punto 4 junto a los controles, para repararla o desactivarla.
 - **Lo que no ve**: nada de los campos del candidato de §6 (el portal no los lee).
 
 ## 9 · Lo que este flujo todavía arrastra, con su paso
