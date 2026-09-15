@@ -1426,6 +1426,41 @@ Se da por terminado cuando se cumplen las dos condiciones:
     dónde; el esquema es el mismo; hay una sola instancia del backend (leído del despliegue), y con
     varias cada una tendría su corta y todas la misma de 5 días.
 
+48. **El adaptador lo elige un resolvedor: por la conexión de la oferta al invitar, por el proveedor
+    del candidato al consultar, y con EvaluaTest como respuesta cuando nada lo dice** (2026-09-14,
+    decidido con el usuario; paso 4, en dos partes). Es la pieza que la 38 mandó a esta etapa, y hace
+    código la 6 y la 41.
+
+    **La regla, en orden:**
+
+    1. **Al guardar la oferta**, se congela **la conexión que mande el portal**; si no manda ninguna
+       —el portal de hoy—, la que diga la regla de la empresa (3). Ya no se busca siempre la de
+       EvaluaTest.
+    2. **Al invitar**, por la conexión congelada en la oferta. Sin ella —oferta vieja o creada desde
+       administración—, por la empresa (3). Y en el candidato se escribe **el proveedor que resolvió**.
+    3. **Por la empresa**: una sola conexión → esa; ninguna → *sin conexión* y la etapa se salta (40);
+       **dos → EvaluaTest.**
+    4. **Al consultar resultados**, por el proveedor guardado en el candidato (6); vacío → EvaluaTest
+       (15). El cron agrupa por proveedor dentro de la oferta: quien fue invitado en EvaluaTest se sigue
+       consultando allí aunque la empresa haya cambiado.
+
+    🔴 **Por qué «dos → EvaluaTest» y no un error.** Conectar PsicoAlianza es una acción en *Mi
+    compañía*; si eso hiciera fallar el arranque en las ofertas que nadie tocó, cada candidato nuevo
+    de una oferta de julio saldría descartado con alerta a soporte sin que la reclutadora hubiera
+    cambiado nada en ella. EvaluaTest no es adivinar: es lo que esa oferta ya venía usando. El cambio
+    a PsicoAlianza lo hace alguien a propósito, oferta por oferta, con el selector del paso 6. **El
+    precio**: hasta ese selector, ninguna oferta se activa con PsicoAlianza salvo escribiendo la
+    conexión a mano, que es lo que ya se hace en local.
+
+    **Las llamadas fijas** que quedan —el enlace de respaldo del arranque, las pruebas adicionales del
+    veredicto, la validación y el estado de sesión del 5b— pasan por el resolvedor o quedan
+    condicionadas al proveedor. Las pruebas de la vacante para el portal siguen siendo de EvaluaTest
+    (4). **El modo demo no pasa por el resolvedor**: sigue siendo condicional en el embudo (38).
+
+    **En dos partes**: 4a —resolvedor, guardado de la oferta, arranque y cron—, que ya deja pasar a
+    una persona real por PsicoAlianza en local; 4b —el texto de WhatsApp por proveedor, que aprueba el
+    usuario, y las llamadas fijas—.
+
 ## Falta de PsicoAlianza
 
 | #   | Qué                                               | Por qué importa                                                                  |
@@ -2143,7 +2178,8 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 2c | El acuñador de sesión: Chrome sin ventana por el puerto de proxy, clasificador, reintentos, candado y tope, aviso a soporte; Chromium en la imagen del backend (decisión 43). **Espera las dos mediciones y el dato de la imagen** | Aditivo en código; **la imagen no** |
 | 2d | ✅ **Revisado el 2026-09-14, pendiente de commit.** El almacén guarda solo la cookie de 5 días y deja la corta en memoria (decisión 47) — brief `brief-etapa3-paso2d-cookie-de-sesion.md`. Verificado: 114 suites y 1.113 pruebas (1.104 pasan, 9 omitidas; 4 nuevas). Solo el almacén y dos pruebas; el cliente, el esquema y la rama manual, intactos. La huella es la tira cifrada de la base; la cookie de 5 días se reconoce por prefijo; lo guardado a mano no se limpia | Toca el almacén del paso 2 |
 | 3 | ✅ **HECHO el 2026-09-14.** El adaptador de PsicoAlianza contra el puerto psicométrico, con la invitación real de comprobación hecha — brief `brief-etapa3-paso3-adaptador-psicoalianza.md`, registro en *Paso 3* | Aditivo |
-| 4 | El resolvedor de adaptador por conexión, y el cron preguntando al proveedor de la invitación (decisiones 6, 38 y 41). Puede partirse. 🔴 **No puede mandar ninguna empresa a PsicoAlianza antes de que el 5 esté hecho**: sin plazo ni documento, cada candidato sale descartado (opinión previa del paso 3) | Embudo |
+| 4a | **El resolvedor** (decisión 48): guardado de la oferta con la conexión que mande el portal, arranque por la conexión de la oferta escribiendo el proveedor que resolvió, cron por el proveedor del candidato agrupando por proveedor — brief `brief-etapa3-paso4a-resolvedor.md`. El 5 ya está hecho, así que el arranque ya pasa plazo y documento | Embudo |
+| 4b | El texto de WhatsApp por proveedor (lo aprueba el usuario) y las llamadas fijas: enlace de respaldo, pruebas adicionales, validación y estado de sesión del 5b | Embudo, visible |
 | 5a | **Embudo**: el documento, su tipo y el plazo en la invitación, la traducción del tipo y la limpieza del documento en el adaptador, y el motivo *sin documento* con su grupo en el portal (decisión 45) — brief `brief-etapa3-paso5a-embudo-psicoalianza.md`, opinión previa el 2026-09-14 | Embudo y portal |
 | 5b | **Conexión**: guardar y validar la conexión de PsicoAlianza por proveedor, sin login y conservando la sesión, la ruta que pregunta si la sesión está viva (44), y no aceptar plazos con decimales en una empresa con PsicoAlianza (decisión 46) — brief `brief-etapa3-paso5b-conexion-psicoalianza.md` | Ruta de producción |
 | 6 | Portal: selector de proveedor, modal por proveedor, pruebas adicionales solo de EvaluaTest (decisiones 3 y 4) | Visible |
