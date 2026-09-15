@@ -5,7 +5,9 @@ Cómo funciona la etapa **tal como está en el código** de la rama de trabajo, 
 compartida (decisiones 34 y 40) y el del correo inventado (decisión 33), y el 2026-09-13 con
 las conexiones de la empresa y la conexión de la oferta (paso 8a, decisión 41) y con el portal
 leyendo la lista y "Puntaje mínimo" (paso 8b, decisiones 8 y 41), y el 2026-09-14 con el documento,
-el tipo y el plazo en la invitación y el descarte por documento (paso 5a, decisión 45). No es historia ni
+el tipo y el plazo en la invitación y el descarte por documento (paso 5a, decisión 45) y con la
+conexión de PsicoAlianza guardada, validada y consultada por el backend (paso 5b, decisiones 44 y
+46). No es historia ni
 justificación: **los porqués están en la bitácora**, y aquí solo se apunta el número de
 decisión. Cuenta qué le pasa a una persona en cada caso.
 
@@ -54,6 +56,32 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
    no se llega a quitar ni a mandar vacía: **no hay "desconectar"**. Sirve de vuelta el bloque
    **derivado de la lista, sin contraseña** —de ahí sale el correo que se muestra— y la lista con
    `id`, `name`, `provider` y `configured`. La contraseña no sale del backend.
+
+   **El backend ya guarda, valida y consulta la conexión de PsicoAlianza; el portal todavía no la
+   manda** (paso 5b, decisión 46; la pantalla es del paso 6, y en local se inserta a mano):
+
+   - **Guardar por proveedor.** El mismo bloque del modal —que conserva su nombre de EvaluaTest,
+     contrato con el portal de hoy— acepta `provider`: vacío o ausente es EvaluaTest, y un valor
+     que no sea `evaluatest` ni `psicoalianza` se rechaza con mensaje propio. La regla de tres
+     casos se aplica **solo a la conexión de ese proveedor**: guardar PsicoAlianza en una empresa
+     con EvaluaTest deja las dos, y quitar una no toca la otra; cada oferta sigue usando la
+     conexión con la que se activó. Al reconstruir se parte de la conexión guardada y se pisan
+     solo correo y contraseña —el identificador de empresa, solo con EvaluaTest—: **renombrar la
+     conexión de PsicoAlianza conserva su sesión acuñada** y cualquier otro campo de la bolsa. Sin
+     nombre nace como «PsicoAlianza».
+   - **Validar sin login.** La misma ruta de validación acepta `provider`; con PsicoAlianza responde
+     por su adaptador **sin llamar a nadie** —válida si trae correo y contraseña, sin identificador
+     de empresa— porque validar sería acuñar una sesión y un captcha rechazado acusaría a la
+     contraseña (decisión 44). Con EvaluaTest sigue haciendo login por el puerto.
+   - **El estado de la sesión.** Una ruta de solo lectura bajo *Mi compañía* responde `connected`,
+     `no_session`, `expired` o `no_connection`, comprobando de verdad con la petición barata del
+     cliente y **sin acuñar nada**; primero resuelve la conexión, así que con la sesión manual
+     encendida una empresa sin PsicoAlianza sale `no_connection` y no «conectada». El botón para
+     conectar llega con el acuñador (2c).
+   - **Plazo en días enteros.** Al crear o editar la empresa, un plazo de la prueba con decimales
+     se rechaza si la empresa tiene —o va a tener en esa misma petición— conexión de PsicoAlianza,
+     mirando la lista resultante. Con EvaluaTest se sigue aceptando. Es la mitad de producto de la
+     guarda del adaptador (§2); la variable de entorno no se valida.
 2. Al crear o editar una oferta, el reclutador ve los controles de la prueba psicométrica
    **solo si la conexión de EvaluaTest de la empresa está configurada** —correo, contraseña e
    identificador de empresa—, y no basta con que haya alguna conexión: los controles llaman a

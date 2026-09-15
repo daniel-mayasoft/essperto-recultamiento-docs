@@ -287,9 +287,12 @@ se gasta de una corrida a otra.
 y ahí se queda; no va a ningún mensaje, captura de pantalla ni `.md`. Y **no va en ningún
 servidor**: la lista de antes del despliegue lo tiene como bloqueo.
 
-## La conexión de PsicoAlianza, a mano (hasta el paso 5 de la etapa 3)
+## La conexión de PsicoAlianza, a mano (hasta el paso 6 de la etapa 3)
 
-El portal todavía no sabe guardarla, así que en local se inserta en la base. Es la cuenta de
+El portal todavía no sabe guardarla, así que en local se inserta en la base. **El backend ya
+sabe guardarla** desde el paso 5b —la ruta de *Mi compañía* acepta el bloque de credenciales
+con `provider: "psicoalianza"`—, pero hasta que el portal la mande (paso 6) este procedimiento
+sigue valiendo. Es la cuenta de
 PsicoAlianza de la empresa: correo y contraseña, **la contraseña cifrada con tu `SECRET_KEY`
 local**. Una contraseña cifrada en otra máquina no se descifra aquí.
 

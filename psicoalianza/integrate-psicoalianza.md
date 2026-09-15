@@ -1371,6 +1371,28 @@ Se da por terminado cuando se cumplen las dos condiciones:
     empresa. Si alguien cambia el plazo con gente a mitad de prueba, los dos relojes se separan. Ya
     pasa hoy entre el mensaje y el descarte; no lo introduce este paso y no tiene paso.
 
+46. **La conexión de PsicoAlianza se guarda por proveedor, convive con la de EvaluaTest, y su estado
+    se comprueba de verdad** (2026-09-14, decidido con el usuario; paso 5b).
+
+    **Conviven las dos conexiones.** Guardar PsicoAlianza en una empresa con EvaluaTest **no quita** la
+    de EvaluaTest: cada oferta sigue usando la conexión con la que se activó (5 y 41), y cuál usan las
+    ofertas nuevas lo decide el selector del paso 6 (3). Quitar una al guardar la otra dejaría a las
+    ofertas vivas sin conexión y la etapa se saltaría en silencio (40). Es la respuesta a la mitad de
+    B3 que dependía del backend; la otra mitad —qué se le ofrece al reclutador— es del paso 6. La
+    decisión 2 («una conexión por empresa, por ahora») queda como regla de pantalla, no de datos.
+
+    **El estado de la sesión se comprueba de verdad**, con la petición barata del cliente (44): leer
+    solo la fecha de «visto vivo» diría *conectado* con una sesión ya muerta, que es justo lo que la
+    etiqueta no puede hacer.
+
+    **La conexión no se puede guardar desde el portal de hoy**, que no manda el proveedor, y **no se
+    añade una ruta de administración para ello**: hasta el paso 6 se inserta a mano en local, como
+    hasta ahora. Una pieza menos.
+
+    **Y al reconstruir una conexión se conserva lo que ya tenía** —la sesión, y cualquier campo de la
+    bolsa que el bloque no traiga— y se pisan solo los campos que llegan. Es lo que cierra la trampa
+    5b del paso 2.
+
 ## Falta de PsicoAlianza
 
 | #   | Qué                                               | Por qué importa                                                                  |
@@ -2089,7 +2111,7 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 3 | ✅ **Revisado el 2026-09-14, pendiente de commit.** El adaptador de PsicoAlianza contra el puerto psicométrico, con la invitación real de comprobación hecha — brief `brief-etapa3-paso3-adaptador-psicoalianza.md`, registro en *Paso 3* | Aditivo |
 | 4 | El resolvedor de adaptador por conexión, y el cron preguntando al proveedor de la invitación (decisiones 6, 38 y 41). Puede partirse. 🔴 **No puede mandar ninguna empresa a PsicoAlianza antes de que el 5 esté hecho**: sin plazo ni documento, cada candidato sale descartado (opinión previa del paso 3) | Embudo |
 | 5a | **Embudo**: el documento, su tipo y el plazo en la invitación, la traducción del tipo y la limpieza del documento en el adaptador, y el motivo *sin documento* con su grupo en el portal (decisión 45) — brief `brief-etapa3-paso5a-embudo-psicoalianza.md`, opinión previa el 2026-09-14 | Embudo y portal |
-| 5b | **Conexión**: guardar y validar la conexión de PsicoAlianza sin login y conservando la sesión, la operación que pregunta si la sesión está viva (44), y no aceptar plazos con decimales en una empresa con PsicoAlianza | Embudo |
+| 5b | **Conexión**: guardar y validar la conexión de PsicoAlianza por proveedor, sin login y conservando la sesión, la ruta que pregunta si la sesión está viva (44), y no aceptar plazos con decimales en una empresa con PsicoAlianza (decisión 46) — brief `brief-etapa3-paso5b-conexion-psicoalianza.md` | Ruta de producción |
 | 6 | Portal: selector de proveedor, modal por proveedor, pruebas adicionales solo de EvaluaTest (decisiones 3 y 4) | Visible |
 
 **Antes del paso 2, fuera del código:** cuenta de PsicoAlianza para probar y **una sesión de esa
