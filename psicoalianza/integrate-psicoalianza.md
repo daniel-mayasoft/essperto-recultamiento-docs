@@ -1334,6 +1334,14 @@ Se da por terminado cuando se cumplen las dos condiciones:
     5b hizo solo la operación del backend; la etiqueta y sus tres estados son del paso 6.1 de la
     etapa 3, y el botón llega con el acuñador (2c).
 
+    🔴 **Y el aviso de la tabla está mal: con la conexión guardada y la sesión muerta, la etapa NO se
+    omite** (comprobado en el código del embudo el 2026-09-14). La 40 solo omite cuando no hay
+    conexión. Con sesión muerta, la invitación falla como pasajera: la persona recibe el aviso de que
+    la prueba le llegará por correo, que no llega, y queda esperando sin identificador. El cron la
+    reintenta cada cinco minutos **sin plazo**, porque el vencimiento solo se mira a quien ya tiene
+    identificador. A quien ya estaba invitado no se le puede consultar, y el plazo lo descarta. El texto
+    de la etiqueta lo fija la 50.
+
 45. **Lo que PsicoAlianza exige del candidato lo pasa el embudo tal cual, y el adaptador lo traduce
     y lo protege** (2026-09-14, decidido con el usuario sobre mediciones en producción de ese día;
     paso 5a). El embudo pasa a la invitación el documento, el tipo de documento y el plazo **tal como
@@ -1492,6 +1500,35 @@ Se da por terminado cuando se cumplen las dos condiciones:
     terminada, y el vencimiento la descarta (decisión del 2026-09-14 en *Lo que la lista de herencia no
     tenía*). El paso 2 **no nombra el botón** de la pantalla de pruebas porque nadie lo ha confirmado.
     El mensaje sin enlace («en breve recibirás un correo…») queda igual para los dos.
+
+50. **Mi compañía enseña una fila por proveedor, el backend sirve el correo de cada conexión, y el
+    plazo con PsicoAlianza va en días enteros también en la pantalla** (2026-09-14, decidido con el
+    usuario; paso 6.1).
+
+    **Una fila por proveedor, siempre**: *EvaluaTest* y *PsicoAlianza*, cada una con su nombre y su
+    correo si está conectada, o *sin conectar*, y un botón que abre el modal **ya fijado a ese
+    proveedor**. Sin selector de proveedor en el modal, y sin forma de crear una segunda conexión del
+    mismo proveedor. Así la decisión 2 queda como *una conexión por proveedor en cada empresa*. **El
+    precio, aceptado**: todas las empresas ven PsicoAlianza ofrecido, también las que no lo han pedido.
+    Se descartó una fila por conexión existente con un botón «agregar» que pidiera el proveedor en el
+    modal.
+
+    **El backend sirve el correo de cada conexión** en la lista que ya manda a *Mi compañía* (aditivo):
+    sin él, la fila de PsicoAlianza no puede enseñar el correo y el modal abre con el correo vacío. La
+    contraseña sigue sin salir, y el bloque derivado de EvaluaTest no cambia.
+
+    **El plazo de la prueba**, que vive en la pestaña de desarrollo de *Mi compañía*: con PsicoAlianza
+    conectado el campo solo acepta días enteros, su texto deja de nombrar a EvaluaTest, y cuando el
+    backend rechaza por el plazo se enseña su mensaje en vez del «error al actualizar» genérico.
+    🔴 **Tanto al guardar esa pestaña como al pulsar cualquier interruptor de etapa del flujo**, porque
+    los interruptores reenvían el plazo guardado: una empresa con 1,5 días guardados que conecte
+    PsicoAlianza no podría encender ni apagar ninguna etapa, y solo vería el error genérico. Hoy no le
+    pasa a nadie: ninguna empresa tiene plazo propio.
+
+    ⚠️ **Pendiente: el texto de la etiqueta cuando la sesión no sirve**, que depende de cuándo llegue el
+    botón de conectar (2c). No puede decir que la etapa se omite (ver la corrección en la 44). Propuesta
+    del planificador, sin botón: *«Sin conexión — las invitaciones a PsicoAlianza no están saliendo y
+    quienes ya están en la prueba pueden descartarse por vencimiento. Avisa a soporte.»*
 
 ## Falta de PsicoAlianza
 
@@ -2216,8 +2253,8 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 4b | ✅ **HECHO el 2026-09-14.** **El mensaje de WhatsApp por proveedor** (decisión 49, texto aprobado) y la validación de la conexión por el resolvedor. Las demás llamadas fijas no necesitan recablearse (ver la 48) — brief `brief-etapa3-paso4b-mensaje-por-proveedor.md`. El condicional es «el proveedor resuelto es PsicoAlianza», así la demo y cualquier caso sin proveedor se quedan con el texto de hoy; el correo de la bolsa solo se enseña con PsicoAlianza, porque con EvaluaTest y el desvío activo es la dirección de QA. Pruebas que comparan los dos mensajes enteros | Embudo, visible |
 | 5a | ✅ **HECHO el 2026-09-14.** **Embudo**: el documento, su tipo y el plazo en la invitación, la traducción del tipo y la limpieza del documento en el adaptador, y el motivo *sin documento* con su grupo en el portal (decisión 45) — brief `brief-etapa3-paso5a-embudo-psicoalianza.md`, opinión previa el 2026-09-14 | Embudo y portal |
 | 5b | ✅ **HECHO el 2026-09-14.** **Conexión**: guardar y validar la conexión de PsicoAlianza por proveedor, sin login y conservando la sesión, la ruta que pregunta si la sesión está viva (44), y no aceptar plazos con decimales en una empresa con PsicoAlianza (decisión 46) — brief `brief-etapa3-paso5b-conexion-psicoalianza.md` | Ruta de producción |
-| 6.1 | **Portal, Mi compañía**: el modal de la conexión por proveedor (46); la etiqueta del estado de sesión con sus tres estados (44), sin el botón de conectar, que llega con el 2c; la señal de «hay conexión», que hoy solo mira EvaluaTest, y los lectores que la 41 dejó leyendo campos de EvaluaTest; no aceptar plazos con decimales en una empresa con PsicoAlianza (46). El bloque y la ruta de validación que se llaman como EvaluaTest **no se renombran** salvo motivo concreto acordado con el usuario | Visible |
-| 6.2 | **Portal, la oferta**: el selector de proveedor, solo con más de una conexión (3); la conexión elegida, mandada al guardar la oferta y al pedir el selector y el estado de la vacante (48); las pruebas adicionales solo con EvaluaTest (4); el texto de los motivos nuevos de vacante no usable (ver *Opinión previa del paso 3*, en esta etapa). Va después del 6.1, que es quien deja guardar una conexión de PsicoAlianza desde el portal | Visible |
+| 6.1 | **Portal, Mi compañía** (decisión 50): una fila por proveedor, cada una con su modal (46 y 50); la etiqueta del estado de sesión con sus tres estados (44), sin el botón de conectar, que llega con el 2c; los lectores de Mi compañía que la 41 dejó leyendo campos de EvaluaTest; el plazo en días enteros con PsicoAlianza y el mensaje del rechazo, también en los interruptores del flujo (46 y 50). **En el backend, aditivo**: la lista de conexiones servida gana el correo (50). El bloque y la ruta de validación que se llaman como EvaluaTest **no se renombran** salvo motivo concreto acordado con el usuario | Visible; backend aditivo |
+| 6.2 | **Portal, la oferta**: la señal de «hay conexión», que hoy solo mira EvaluaTest y decide si la ficha y el diálogo de crear enseñan los controles de la prueba; el selector de proveedor, solo con más de una conexión (3); la conexión elegida, mandada al guardar la oferta y al pedir el selector y el estado de la vacante (48); las pruebas adicionales solo con EvaluaTest (4); el texto de los motivos nuevos de vacante no usable (ver *Opinión previa del paso 3*, en esta etapa). Va después del 6.1, que es quien deja guardar una conexión de PsicoAlianza desde el portal | Visible |
 
 **Antes del paso 2, fuera del código:** cuenta de PsicoAlianza para probar y **una sesión de esa
 cuenta pegada en el `.env` local** (decisión 42; cómo sacarla, en `../entorno-local.md`). Para el 2b

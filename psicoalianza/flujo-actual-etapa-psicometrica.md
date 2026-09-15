@@ -231,7 +231,10 @@ que copia la configuración tal cual, o es de antes de la migración— y sigue.
   resuelto, no hay respaldo y el mensaje dice que llegará por correo (decisión 48). **El cron
   lo reintenta** cada 5 minutos (§4). ⚠️ *Sin código de evaluación*
   cuenta como pasajero a propósito: EvaluaTest responde igual cuando el código no existe y
-  cuando el endpoint falla (decisión 39).
+  cuando el endpoint falla (decisión 39). 🔴 **Con PsicoAlianza, una sesión muerta o ausente cae
+  aquí**, y la etapa no se omite: el aviso dice que la prueba llegará por correo y no llega, y como
+  el vencimiento (§4) solo se mira a quien ya tiene identificador, la persona espera **sin plazo**
+  hasta que vuelva la sesión (corrección de la decisión 44).
 - **Fallo permanente** (vacante sin nombre guardado): el arranque **deja salir la excepción**
   y actúa el mecanismo de la casa para cualquier etapa que falla al arrancar: correo de
   alerta a soporte, vuelta a la cola, hasta tres intentos y descarte con el motivo de
