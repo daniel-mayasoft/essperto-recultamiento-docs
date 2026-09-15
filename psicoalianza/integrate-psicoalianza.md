@@ -1525,10 +1525,11 @@ Se da por terminado cuando se cumplen las dos condiciones:
     PsicoAlianza no podría encender ni apagar ninguna etapa, y solo vería el error genérico. Hoy no le
     pasa a nadie: ninguna empresa tiene plazo propio.
 
-    ⚠️ **Pendiente: el texto de la etiqueta cuando la sesión no sirve**, que depende de cuándo llegue el
-    botón de conectar (2c). No puede decir que la etapa se omite (ver la corrección en la 44). Propuesta
-    del planificador, sin botón: *«Sin conexión — las invitaciones a PsicoAlianza no están saliendo y
-    quienes ya están en la prueba pueden descartarse por vencimiento. Avisa a soporte.»*
+    ✅ **El texto de la etiqueta cuando la sesión no sirve, aprobado por el usuario el mismo día**, con el
+    6.1 antes que el 2c y por eso sin botón: *«Sin conexión — las invitaciones a PsicoAlianza no están
+    saliendo y quienes ya están en la prueba pueden descartarse por vencimiento. Avisa a soporte.»* No
+    dice que la etapa se omite (ver la corrección en la 44). Cuando llegue el botón del 2c, el texto se
+    revisa.
 
 ## Falta de PsicoAlianza
 

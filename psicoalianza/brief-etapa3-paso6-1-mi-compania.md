@@ -8,6 +8,12 @@ decisión 50** y en las que ella nombra. Toca **el portal** y, con un cambio adi
 > proveedor, el tipo de la empresa en el portal, el controlador y el servicio de empresas del backend,
 > la validación por proveedor, la ruta del estado de sesión y la prueba que fija lo que se sirve al
 > portal. Las decisiones de producto las tomó el usuario ese día (decisión 50).
+>
+> **Incorpora la opinión previa del ejecutor del mismo día**, verificada contra el código por el
+> planificador: el tercer sitio que manda el cuerpo general del guardado (el modal de los portales de
+> empleo), el correo obligatorio con PsicoAlianza, que el campo del plazo solo aparece con `mode=dev`,
+> el plazo tecleado que viaja con un interruptor, el correo de una conexión incompleta de EvaluaTest y
+> las respuestas desordenadas de la etiqueta. Marcado como «opinión previa» en su sitio.
 
 ## Antes de escribir una sola línea
 
@@ -91,7 +97,10 @@ El mismo modal —nombre, correo y contraseña, **contraseña siempre vacía y o
 proveedor de la fila:
 
 - **Al abrir**: el nombre de la conexión de ese proveedor si existe, aunque esté incompleta, y si no, el
-  del proveedor («EvaluaTest» o «PsicoAlianza»). El correo, el de esa conexión o vacío.
+  del proveedor («EvaluaTest» o «PsicoAlianza»). El correo, el de esa conexión o vacío. ⚠️ **Con
+  EvaluaTest cambia un caso, aceptado** (opinión previa): una conexión incompleta abre hoy el modal con
+  el correo vacío, porque el bloque derivado solo existe con contraseña guardada; ahora lo abre con su
+  correo. Es a mejor, y en producción había cero conexiones incompletas (medido para la decisión 34).
 - **Al guardar, manda el proveedor en las dos peticiones**: en la validación y en el bloque del guardado.
   Con EvaluaTest también, aunque para el backend dé igual mandarlo que no (decisión 46).
 - **Con EvaluaTest, todo lo demás igual que hoy**: si la validación dice inválida, el mensaje de
@@ -99,6 +108,11 @@ proveedor de la fila:
   empresa*; y se guarda con ese identificador.
 - 🔴 **Con PsicoAlianza, la validación no trae identificador de empresa y no lo exige**: es válida si hay
   correo y contraseña (decisión 44). Se guarda **sin** identificador. Inválida → el mismo mensaje de hoy.
+- 🔴 **Con PsicoAlianza, el correo es obligatorio en el formulario** (opinión previa). Hoy el modal solo
+  exige nombre y contraseña, y la validación de PsicoAlianza da inválida **únicamente** si falta el
+  correo: sin esto, un correo vacío enseñaría «correo o contraseña incorrectos» sin haber comprobado
+  ninguno de los dos, que es lo que la decisión 44 quería evitar. **Con EvaluaTest, el correo sigue sin
+  ser obligatorio**, como hoy.
 - Al guardar bien, la fila se actualiza con la empresa que devuelve el guardado, como hoy, y **se
   vuelve a pedir el estado de la sesión** (alcance 4).
 - El título del modal nombra el proveedor.
@@ -117,12 +131,17 @@ la fila de EvaluaTest nunca.
 | `no_connection` | Nada: la fila ya dice *sin conectar*. Solo se alcanza si la conexión cambió entre la carga y la consulta |
 | **La petición falla** | «No se pudo comprobar la sesión». **No** «sin conexión», que no se sabe |
 
+**Solo cuenta la última respuesta pedida** (opinión previa): la etiqueta se pide al cargar y otra vez al
+guardar el modal, y si la primera llega después de la segunda, la pisaría. Una respuesta que ya no es la
+última pedida se descarta. Sin capa nueva.
+
 🔴 **No dice que la etapa se omite**: no se omite (corrección de la 44). **No hay botón de conectar**:
 llega con el 2c. La etiqueta dice *conectado*, nunca *credenciales válidas* (44).
 
 ### 5 · El plazo de la prueba
 
-El campo vive en la pestaña de desarrollo de *Mi compañía*. Cuenta como **«la empresa tiene
+El campo vive en la pestaña de desarrollo de *Mi compañía*, que **solo aparece añadiendo `mode=dev` a la
+dirección de la página** (opinión previa): un reclutador normal no lo ve nunca. Cuenta como **«la empresa tiene
 PsicoAlianza»** que exista la entrada en la lista, **completa o no**: es la misma regla que la guarda
 del backend.
 
@@ -132,11 +151,14 @@ del backend.
 - **El texto del campo deja de nombrar a EvaluaTest**, en español y en inglés. Se cambia el **texto**,
   no la clave.
 - 🔴 **Cuando el backend rechaza el guardado con un 400, se enseña su mensaje** en vez de *error al
-  actualizar*, **en las dos funciones que mandan el cuerpo general**: guardar la pestaña de desarrollo
-  y los interruptores de etapa del flujo. Cualquier otro fallo, el mensaje genérico de hoy. Leído en el
-  servicio de empresas el 2026-09-14: los 400 que puede devolver ese guardado son el del plazo, el de
-  proveedor desconocido y el de identificador mal formado, los tres en español y los dos últimos
-  inalcanzables desde este portal.
+  actualizar*, **en las tres funciones que mandan el cuerpo general**: guardar la pestaña de desarrollo,
+  los interruptores de etapa del flujo y **guardar el modal de credenciales de un portal de empleo**
+  (Computrabajo, elempleo, Pandapé; opinión previa). Cualquier otro fallo, el mensaje genérico de hoy.
+  Hay una cuarta función que arma ese cuerpo y **no la llama nadie**: no se toca. El interruptor de cada
+  portal de empleo manda solo sus credenciales y no se ve afectado. **Desde esos tres guardados, el único
+  400 alcanzable es el del plazo** (opinión previa, verificado): el de proveedor desconocido necesita el
+  bloque de la conexión, que no mandan; el de identificador mal formado sale de la sesión autenticada; y
+  el NIT duplicado es un 409, que sigue con el mensaje genérico.
 
 ### 6 · Textos
 
@@ -164,6 +186,8 @@ textos que ve el usuario, en su idioma. Ningún texto existente cambia salvo el 
 | Pulsa *Conectar* en la fila de PsicoAlianza | El modal con «PsicoAlianza» de nombre y el correo vacío |
 | Guarda correo y contraseña | Sin entrar en PsicoAlianza; se guarda sin identificador; **la fila de EvaluaTest no cambia** |
 | Guarda con la contraseña vacía | El formulario la exige, como hoy |
+| Guarda con el correo vacío | **El formulario lo exige**, sin llamar a la validación (con EvaluaTest, como hoy) |
+| La empresa tenía 1,5 días guardados, conecta PsicoAlianza y cambia su contraseña de Computrabajo | El backend rechaza y **se ve su mensaje** |
 | Abre la página con PsicoAlianza conectado y la sesión viva | Carga, luego **Conectado** |
 | Sin sesión, o con la sesión caducada | El texto de *Sin conexión* aprobado |
 | La consulta del estado falla | «No se pudo comprobar la sesión» |
@@ -196,8 +220,17 @@ error. El caso a mano 3 lo comprueba mirando las dos filas.
 sin separar esa comprobación por proveedor, conectar PsicoAlianza siempre falla con *no se pudo
 identificar tu empresa*.
 
-**3. Los interruptores del flujo mandan el cuerpo entero**, plazo incluido, en cada pulsación. Por eso el
-mensaje del 400 va en las dos funciones y no solo en la de la pestaña.
+**3. Tres guardados mandan el cuerpo entero**, plazo incluido: los interruptores del flujo en cada
+pulsación, la pestaña de desarrollo y el modal de credenciales de un portal de empleo. Por eso el mensaje
+del 400 va en los tres y no solo en la pestaña. Caso: Laura tiene 1,5 días guardados, conecta
+PsicoAlianza y cambia su contraseña de Computrabajo; sin esto, ve «error al actualizar» sin saber que es
+el plazo.
+
+⚠️ **Y lo tecleado viaja aunque no se haya guardado. Aceptado, no se arregla aquí** (opinión previa):
+con PsicoAlianza, alguien escribe 1,5 en la pestaña de desarrollo, el portal no lo manda y avisa; luego
+pulsa un interruptor del flujo, el 1,5 sigue en el formulario compartido, viaja, y el backend lo rechaza
+con su mensaje. No es silencioso, y hoy, sin PsicoAlianza, lo tecleado sin guardar ya se guarda de rebote
+al pulsar un interruptor.
 
 **4. La ruta del estado con una conexión incompleta responde `no_connection`.** Por eso la etiqueta solo
 se pide con la conexión configurada. Si se pidiera siempre, una fila incompleta enseñaría una etiqueta que
@@ -207,7 +240,11 @@ contradice su propio *sin conectar*.
 con conexión. En local, *Conectado* dice que la sesión pegada sirve, no que la empresa haya acuñado nada.
 No es un fallo del paso. Es lo que hay que saber para leer el caso a mano 4.
 
-**6. El correo sale también por las demás rutas que sirven la empresa** (las ofertas, el listado interno).
+**6. El correo sale también por las demás rutas que sirven la empresa**: *Mi compañía*, crear, actualizar,
+el logo, el listado interno y la búsqueda por NIT (opinión previa). ⚠️ **La búsqueda por NIT, sin
+llamador conocido**: buscado el nombre del método en todo el backend fuera de las pruebas el 2026-09-14,
+solo aparece su definición. Una búsqueda no descarta un llamador indirecto: confírmalo antes de escribir
+código.
 Es el correo de la cuenta del proveedor, que con EvaluaTest ya sale por el bloque derivado. **No es una
 contraseña**, y la comprobación de que la contraseña cifrada no sale se queda.
 
@@ -226,11 +263,13 @@ contraseña**, y la comprobación de que la contraseña cifrada no sale se queda
 Las de `arranque-del-ejecutor.md`: sin lint ni formateador, **sin comentarios nuevos en código**,
 identificadores en inglés —también los parámetros de las funciones flecha y las claves de texto
 nuevas—, y los valores `evaluatest`, `psicoalianza` y los estados de la ruta son contrato. La solución
-más pequeña, sin commitear y todo al índice, **en los dos repositorios**.
+más pequeña, sin commitear y todo al índice, **en los dos repositorios**. Los archivos que se tocan usan
+finales de línea CRLF, y se respetan (opinión previa).
 
 **Documentación en el mismo diff:**
 - `flujo-actual-etapa-psicometrica.md`, **§1 punto 1**: qué ve hoy el reclutador en *Mi compañía*, las
-  dos filas, el modal por proveedor, la etiqueta y el plazo. Y en el bloque *El backend ya guarda, valida
+  dos filas, el modal por proveedor, la etiqueta y el plazo, **diciendo que el campo del plazo solo
+  aparece con `mode=dev`**. Y en el bloque *El backend ya guarda, valida
   y consulta la conexión de PsicoAlianza; el portal todavía no la manda*, que **el portal ya la manda**.
 - `../entorno-local.md`: la sección de la conexión de PsicoAlianza a mano pasa a decir que **se conecta
   desde *Mi compañía***, donde la contraseña la cifra el backend al guardar, y que insertarla en la base
@@ -250,18 +289,20 @@ empresa propia y la sesión de PsicoAlianza pegada. **El reporte dice el resulta
 | # | Cómo se prepara | Qué se hace | Qué se tiene que ver |
 | --- | --- | --- | --- |
 | 1 | Empresa sin ninguna conexión | Abrir *Mi compañía* | Dos filas *sin conectar*, sin etiqueta |
-| 2 | La misma | *Conectar* en EvaluaTest con credenciales inventadas | «Correo o contraseña incorrectos», igual que hoy, y la fila sigue *sin conectar* |
+| 2 | La misma. ⚠️ Hace un login real contra EvaluaTest con credenciales inventadas: ✅ **autorizado por el usuario el 2026-09-14**. Un solo intento, con un correo que no sea de nadie | *Conectar* en EvaluaTest con credenciales inventadas | «Correo o contraseña incorrectos», igual que hoy, y la fila sigue *sin conectar* |
 | 3 | La misma | *Conectar* en PsicoAlianza con correo y contraseña | Se guarda; la fila dice «PsicoAlianza (PsicoAlianza) — correo»; **la fila de EvaluaTest sigue *sin conectar*** (trampa 1). En la base, la lista tiene una entrada de PsicoAlianza y ninguna de EvaluaTest |
 | 4 | Interruptor de la sesión manual encendido, sesión válida pegada | Recargar | Carga y luego *Conectado* |
 | 5 | Interruptor apagado, sin sesión guardada en la conexión | Recargar | El texto de *Sin conexión* aprobado |
 | 6 | Interruptor encendido, cookie pegada inventada | Recargar | El texto de *Sin conexión* aprobado |
 | 7 | Conexión de PsicoAlianza guardada; en las herramientas del navegador, **bloquear solo la petición del estado de sesión** (apagar el backend no sirve: falla también la carga de la página) | Recargar | «No se pudo comprobar la sesión», nunca *Sin conexión* |
 | 8 | Conexión de PsicoAlianza guardada | *Editar conexión*: cambiar solo el nombre, reteclear la contraseña | La fila cambia el nombre; la etiqueta se vuelve a pedir |
-| 9 | Pestaña de desarrollo, con PsicoAlianza | Plazo 1,5 y guardar | No se guarda; mensaje de días enteros |
+| 9 | Pestaña de desarrollo (**`mode=dev` en la dirección**), con PsicoAlianza | Plazo 1,5 y guardar | No se guarda; mensaje de días enteros |
 | 10 | La misma | Plazo 2 y guardar | Se guarda |
-| 11 | **Otra empresa sin PsicoAlianza** | Plazo 1,5 y guardar | Se guarda, igual que hoy |
-| 12 | Empresa sin PsicoAlianza con 1,5 guardado; después conectar PsicoAlianza | Pulsar un interruptor de etapa del flujo | **El mensaje del backend**, no *error al actualizar* |
+| 11 | **Otra empresa sin PsicoAlianza**, pestaña de desarrollo (`mode=dev`) | Plazo 1,5 y guardar | Se guarda, igual que hoy |
+| 12 | Empresa sin PsicoAlianza con 1,5 guardado desde la pestaña de desarrollo (`mode=dev`); después conectar PsicoAlianza; recargar | Pulsar un interruptor de etapa del flujo | **El mensaje del backend**, no *error al actualizar* |
 | 13 | Empresa solo con PsicoAlianza | Abrir una oferta | Sigue viendo *no tienes proveedor* (6.2): confirma que las ofertas no cambiaron |
+| 14 | Conexión de PsicoAlianza por conectar | *Conectar* con la contraseña y **el correo vacío** | El formulario exige el correo; no sale «correo o contraseña incorrectos» |
+| 15 | La del caso 12 | Guardar las credenciales de un portal de empleo | **El mensaje del backend**, no *error al actualizar* |
 
 Si hay cuenta real de EvaluaTest, además: guardarla y comprobar que la fila sale igual que hoy y que la
 de PsicoAlianza no cambió. **Si no la hay, decirlo en el reporte**, no darlo por comprobado.
@@ -270,7 +311,7 @@ de PsicoAlianza no cambió. **Si no la hay, decirlo en el reporte**, no darlo po
 
 Una vez sobre el conjunto:
 - **Backend**: `npm run build` y `npm test`, con la caché de Jest limpia.
-- **Portal**: `npm run typecheck`, **y los trece casos a mano**.
+- **Portal**: `npm run typecheck`, **y los quince casos a mano**.
 
 ## Qué entregar
 
