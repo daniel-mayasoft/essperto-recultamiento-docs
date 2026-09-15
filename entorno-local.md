@@ -167,11 +167,10 @@ El resto tiene valor por defecto y no hace falta tocarlo.
 - **Pegada a mano**, la de emergencia y la de hoy: ver la sección *La sesión de PsicoAlianza, a
   mano*, más abajo.
 - **Acuñada por el backend con Chrome por proxy móvil**, la oficial, cuando exista el paso 2c.
-  Necesita en el `.env` la cuenta del proxy (DataImpulse) con nombres neutros —`PROXY_HOST`,
-  `PROXY_PORT`, `PROXY_LOGIN`, `PROXY_PASS`, y el protocolo, HTTP por defecto—, y Chrome
-  instalado en la máquina. Los nombres exactos y la ruta de Chrome los fija el brief del 2b y
-  del 2c; este documento se actualiza en esos diffs. Sin estas variables el backend arranca y
-  falla solo al acuñar.
+  Necesita en el `.env` la cuenta del proxy (DataImpulse) con las cinco variables neutras del
+  módulo de proxy (paso 2b), listadas en la tabla de abajo, y Chrome instalado en la máquina. La
+  ruta de Chrome la fija el brief del 2c; este documento se actualiza en ese diff. Sin estas
+  variables el backend arranca y falla solo al acuñar.
 
 Las tres variables de PsicoAlianza (paso 2 de la etapa 3). Ninguna es obligatoria: sin ellas el
 backend arranca igual.
@@ -181,6 +180,18 @@ backend arranca igual.
 | `PSICOALIANZA_BASE_URL` | vacía | Usa la oficial, `https://ats.psicoalianza.com` |
 | `PSICOALIANZA_MANUAL_SESSION_ENABLED` | `true` solo mientras pegues una sesión | Apagada por defecto. Encendida, **todas las empresas** de tu base hablan con PsicoAlianza por esa sesión |
 | `PSICOALIANZA_MANUAL_SESSION_COOKIES` | Las cookies de tu navegador | Ver *La sesión de PsicoAlianza, a mano* |
+
+Las cinco variables del proxy móvil (paso 2b de la etapa 3, decisión 43). Ninguna es
+obligatoria y una línea vacía cuenta como ausente: sin ellas el backend arranca y falla solo al
+arrendar una IP, que hoy nadie hace hasta el acuñador (2c).
+
+| Variable | Valor local | Nota |
+| --- | --- | --- |
+| `PROXY_HOST` | `gw.dataimpulse.com` | El gateway de DataImpulse |
+| `PROXY_PORT` | `823` | HTTP; `824` para SOCKS5 |
+| `PROXY_LOGIN` | El login de la cuenta de DataImpulse, sin sufijos | El país y la sesión pegajosa los añade el módulo |
+| `PROXY_PASS` | La contraseña de la cuenta | Tal cual, sin sufijos |
+| `PROXY_PROTOCOL` | vacía | `http` por defecto; `socks5` si se usa el puerto 824 |
 
 **SolveCaptcha:** ya no hace falta (decisión 25 descartada).
 

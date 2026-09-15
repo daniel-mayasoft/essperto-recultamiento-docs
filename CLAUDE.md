@@ -60,6 +60,10 @@ funciona la etapa hoy, de punta a punta, está en
 `psicoalianza/integrate-psicoalianza.md`; y lo que hay que hacer antes de desplegar la rama, en
 `psicoalianza/before-deploy.md`.
 
+Hay además un **módulo de proxy**, `src/proxy/`, al nivel de los demás módulos: un puerto sin
+proveedor que arrienda una IP (país, tipo y adherencia) y devuelve cómo conectarse al proxy, con
+DataImpulse como único adaptador; **nadie lo llama** hasta el acuñador de sesión de PsicoAlianza.
+
 ## Al leer el código
 
 Los comentarios largos casi siempre documentan una trampa averiguada en producción, no
