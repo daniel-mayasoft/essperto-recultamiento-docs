@@ -1393,6 +1393,39 @@ Se da por terminado cuando se cumplen las dos condiciones:
     bolsa que el bloque no traiga— y se pisan solo los campos que llegan. Es lo que cierra la trampa
     5b del paso 2.
 
+    ⚠️ **Laguna aceptada al revisar el diff (2026-09-14):** la guarda del plazo salta solo cuando la
+    petición trae un plazo con decimales. Añadir PsicoAlianza a una empresa que **ya tenía** 1,5 días
+    guardados pasa. Hoy ninguna empresa tiene plazo propio, y si ocurriera lo frena el adaptador con
+    el error permanente y su alerta a soporte, así que no es silencioso. Sin paso.
+
+47. **En la base vive solo la cookie de *permanecer conectado*; la corta vive en memoria** (2026-09-14,
+    decidido con el usuario sobre la medición de ese día; paso 2d, el cambio propio de la cookie).
+    Cierra el hallazgo 2 del bloque A: PsicoAlianza reemite la cookie corta con otro texto en cada
+    respuesta, y guardarla en cada cambio sería una escritura cifrada en el documento de la empresa
+    por petición —del orden de mil al día por empresa con el cron y las invitaciones—.
+
+    **Medido**: la cookie de 5 días **basta sola** para un endpoint de datos —responde 200 con las
+    vacantes y emite una corta nueva—, y la corta vieja sigue sirviendo tras recibir la nueva. Por eso
+    la corta no hace falta persistirla: al reiniciar, la primera petición va solo con la de 5 días y
+    PsicoAlianza reautentica.
+
+    **Regla**: el almacén escribe en la base **solo cuando cambia la cookie de 5 días** —al acuñar
+    (2c), o si PsicoAlianza la reemitiera, que no se ha visto—; la corta reemitida va a **memoria del
+    proceso, por empresa**. «Visto vivo» se escribe donde hoy: en la comprobación explícita y junto a
+    esa escritura rara de la cookie de 5 días. La sesión pegada del `.env` no cambia, y sigue siendo
+    una sola copia global. **La huella de la copia es la tira cifrada tal como está en la base**, sin
+    cifrar ni descifrar para comparar: el cifrado lleva sal e IV aleatorios y re-cifrar daría siempre
+    otra tira (opinión previa del 2d). Una sesión guardada solo con la corta, sin la de 5 días, no
+    sobrevive a un reinicio: coherente, y el `.env` local pide las dos.
+
+    🔴 **La copia en memoria recuerda de qué valor guardado nació**: si al leer la base el valor es
+    otro —el acuñador guardó una sesión nueva, o se quitó la conexión—, la copia se descarta. Sin eso,
+    una sesión recién acuñada perdería contra una corta vieja en memoria.
+
+    **Lo que no cambia**: el cliente sigue diciendo «guarda estas cookies» y el almacén decide qué va a
+    dónde; el esquema es el mismo; hay una sola instancia del backend (leído del despliegue), y con
+    varias cada una tendría su corta y todas la misma de 5 días.
+
 ## Falta de PsicoAlianza
 
 | #   | Qué                                               | Por qué importa                                                                  |
@@ -2108,7 +2141,8 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 2 | ✅ **HECHO el 2026-09-13.** El cliente de PsicoAlianza **dado una sesión viva**: el almacén de sesión en la conexión de la empresa, la fuente manual del `.env` (decisión 42), el CSRF de las peticiones, las peticiones del contrato, *sesión caducada* como error propio y el registro sin cookies ni contraseñas; la lectura única de conexiones reconoce la de PsicoAlianza — brief `brief-etapa3-paso2-cliente-psicoalianza.md` | Aditivo |
 | 2b | El módulo `proxy`: puerto de *arrendar una IP*, adaptador de DataImpulse, errores propios, sin selector (decisión 43). Nada lo llama hasta el 2c | Aditivo |
 | 2c | El acuñador de sesión: Chrome sin ventana por el puerto de proxy, clasificador, reintentos, candado y tope, aviso a soporte; Chromium en la imagen del backend (decisión 43). **Espera las dos mediciones y el dato de la imagen** | Aditivo en código; **la imagen no** |
-| 3 | ✅ **Revisado el 2026-09-14, pendiente de commit.** El adaptador de PsicoAlianza contra el puerto psicométrico, con la invitación real de comprobación hecha — brief `brief-etapa3-paso3-adaptador-psicoalianza.md`, registro en *Paso 3* | Aditivo |
+| 2d | **El almacén guarda solo la cookie de 5 días** y deja la corta en memoria (decisión 47). Antes del 2c, para que lo encuentre resuelto — brief `brief-etapa3-paso2d-cookie-de-sesion.md` | Toca el almacén del paso 2 |
+| 3 | ✅ **HECHO el 2026-09-14.** El adaptador de PsicoAlianza contra el puerto psicométrico, con la invitación real de comprobación hecha — brief `brief-etapa3-paso3-adaptador-psicoalianza.md`, registro en *Paso 3* | Aditivo |
 | 4 | El resolvedor de adaptador por conexión, y el cron preguntando al proveedor de la invitación (decisiones 6, 38 y 41). Puede partirse. 🔴 **No puede mandar ninguna empresa a PsicoAlianza antes de que el 5 esté hecho**: sin plazo ni documento, cada candidato sale descartado (opinión previa del paso 3) | Embudo |
 | 5a | **Embudo**: el documento, su tipo y el plazo en la invitación, la traducción del tipo y la limpieza del documento en el adaptador, y el motivo *sin documento* con su grupo en el portal (decisión 45) — brief `brief-etapa3-paso5a-embudo-psicoalianza.md`, opinión previa el 2026-09-14 | Embudo y portal |
 | 5b | **Conexión**: guardar y validar la conexión de PsicoAlianza por proveedor, sin login y conservando la sesión, la ruta que pregunta si la sesión está viva (44), y no aceptar plazos con decimales en una empresa con PsicoAlianza (decisión 46) — brief `brief-etapa3-paso5b-conexion-psicoalianza.md` | Ruta de producción |
@@ -2430,9 +2464,13 @@ proveedor es el paso 4. **Nada lo llama todavía y el flujo de la etapa no cambi
 - **El campo de sesión hay que declararlo en el esquema** o Mongo lo descarta al guardar **sin ningún
   error**: la sesión parecería guardada y no estaría.
 - **La comprobación de sesión viva no lanza**: devuelve *viva* o *muerta*, porque su trabajo es
-  contestar esa pregunta. Solo las operaciones de datos lanzan. Es además el único momento en que se
-  escribe *visto vivo por última vez*: hacerlo en cada petición serían escrituras continuas sobre el
-  documento de la empresa, varias por pasada del cron.
+  contestar esa pregunta. Solo las operaciones de datos lanzan. ~~Es además el único momento en que se
+  escribe *visto vivo por última vez*~~ ⚠️ **Corregido el 2026-09-14** (levantado por el ejecutor en
+  la opinión previa del 2d): en el código, guardar cookies **también** lo escribe, junto a ellas, y
+  la prueba del paso 2 lo afirma así. Con el 2d esa escritura queda solo cuando cambia la cookie de 5
+  días, que es raro (47). Hacerlo en cada petición serían escrituras continuas sobre el documento de
+  la empresa, varias por pasada del cron. Y desde el 5b la comprobación de sesión tiene un tercer
+  valor, *sin sesión*, distinto de *muerta*.
 - **Las cookies de la sesión pegada no se escriben en la base**, o esa empresa quedaría con una
   sesión que se usaría en cuanto alguien apague el interruptor. Viven en memoria mientras dure el
   proceso.
