@@ -201,14 +201,22 @@ que copia la configuración tal cual, o es de antes de la migración— y sigue.
    bolsa del proveedor **el correo de registro solo si difiere del real** — vacío significa
    *empareja por el correo verdadero* (32-d). El estado del candidato pasa a *esperando
    resultado externo*. El guardado es con reintento (varios candidatos de la misma oferta
-   terminan a la vez).
+   terminan a la vez). El correo que se le enseña en el mensaje de PsicoAlianza **no sale de lo
+   guardado**: sale de lo que devolvió la invitación en ese momento (punto siguiente).
 6. Le escribe por WhatsApp: el enlace que devolvió la invitación, su correo enmascarado, las
    instrucciones y **el plazo**, el mismo valor que se calculó antes de invitar y que viajó en
    la invitación. Si la invitación no trajo enlace, el mensaje solo dice que llegará por
    correo — ⚠️ y no anuncia el plazo, aunque corre igual (riesgo abierto; con EvaluaTest hoy
-   es inalcanzable). ⚠️ **El texto es el mismo para los dos proveedores** y sus instrucciones
-   son de EvaluaTest («Aplicar ahora», «regístrate»): con PsicoAlianza engañan, porque el
-   enlace personal entra directo a las tareas pendientes. El texto por proveedor es del 4b.
+   es inalcanzable). **El texto depende del proveedor resuelto** (decisión 49): con EvaluaTest,
+   el de siempre —«Aplicar ahora», «regístrate», «para completarla»— y el correo enmascarado es
+   el nuestro; **con PsicoAlianza**, el paso 1 dice que el enlace entra directo a las pruebas
+   pendientes, el paso 2 pide presentar todas las pruebas de la lista, el paso 4 pide
+   «completarlas todas», y el correo enmascarado es **el de registro que devolvió la
+   invitación** —el que PsicoAlianza ya tenía para ese documento, o el nuestro— porque es donde
+   llega su aviso. La condición es «el proveedor resuelto es PsicoAlianza»: la demo y cualquier
+   caso sin proveedor resuelto se quedan con el texto de EvaluaTest, y con EvaluaTest nunca se
+   enseña el correo de la bolsa, que con el desvío de pruebas es la dirección de QA. El aviso sin
+   enlace es el mismo para los dos.
 
 ### Si el arranque falla
 

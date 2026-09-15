@@ -52,7 +52,12 @@ ha confirmado (decisión 49).
 
 **El mensaje sin enlace** («📬 En breve recibirás un correo…») **no cambia**, para ningún proveedor.
 
-**La rama demo** sigue con el texto de EvaluaTest: su proveedor es `evaluatest` (§7 del flujo).
+**La rama demo** sigue con el texto de EvaluaTest (§7 del flujo). 🔴 **La condición es «el proveedor
+resuelto es PsicoAlianza», nunca «no es EvaluaTest»** (opinión previa): en la demo no se resuelve
+ningún proveedor, y con la forma negativa recibiría el texto de PsicoAlianza. Cualquier caso sin
+proveedor resuelto se queda con el texto de hoy. Lo mismo para el correo enmascarado. El condicional va
+en los tres puntos que cambian, dentro del mensaje actual, para que el texto de EvaluaTest no aparezca
+en el diff.
 
 ### 2 · El correo que se enmascara
 
@@ -64,11 +69,20 @@ ha confirmado (decisión 49).
 **Solo cambia lo que se enseña**: lo que se guarda en el candidato como correo de registro sigue con la
 regla de hoy.
 
+🔴 **El correo de la bolsa se usa solo con PsicoAlianza** (opinión previa): el adaptador de EvaluaTest
+también devuelve uno, y **con el desvío de correos de pruebas activo es la dirección de QA**. Usarlo con
+EvaluaTest enseñaría esa dirección en vez de la del candidato, cosa que hoy no pasa. Con su prueba.
+
 ### 3 · La validación de la conexión, por el resolvedor
 
 La ruta de validación del controlador de empresas deja de elegir a mano entre los dos adaptadores: pide
 al resolvedor **por proveedor** —el que llegue, con la misma comprobación explícita de desconocido del
-5b— y valida con ese adaptador. Mismo resultado para los dos.
+5b— y valida con ese adaptador. Mismo resultado para los dos. El controlador recibe el resolvedor en
+lugar del adaptador de EvaluaTest y **sigue recibiendo el de PsicoAlianza**, que usa el estado de sesión.
+
+⚠️ **Cambian dos montajes de pruebas, no afirmaciones** (opinión previa): el spec del controlador del
+5b y la prueba del modal del spec de paridad construyen el controlador a mano; reciben un resolvedor
+falso que devuelve los mismos dobles de hoy.
 
 **Lo demás no se recablea** (decisión 48, nota del 4b): el enlace de respaldo y las pruebas adicionales
 solo existen con EvaluaTest y ya están condicionados; las pruebas de la vacante son de EvaluaTest; el
@@ -77,7 +91,8 @@ estado de sesión solo existe con PsicoAlianza.
 ### 4 · Documentos
 
 `flujo-actual-etapa-psicometrica.md` §2: el mensaje por proveedor y el correo enmascarado, quitando el
-aviso de que las instrucciones engañan con PsicoAlianza que dejó el 4a.
+aviso de que las instrucciones engañan con PsicoAlianza que dejó el 4a, y **una línea en el punto 5**:
+el correo enmascarado de PsicoAlianza sale de la invitación, no de lo guardado.
 
 ## Los casos
 
@@ -124,6 +139,8 @@ sin commitear y todo al índice.
 - **Con PsicoAlianza, el correo enmascarado es el de registro devuelto** cuando difiere del nuestro, y
   el nuestro cuando coincide o no viene.
 - **La demo sigue con el texto de EvaluaTest.**
+- **EvaluaTest con el desvío de correos de pruebas activo** sigue enseñando el correo del candidato, no
+  el de QA.
 - **El aviso sin enlace no cambia** para ninguno.
 - **La validación de la conexión pide al resolvedor por proveedor**, y el proveedor desconocido se
   sigue rechazando sin validar.
