@@ -1330,7 +1330,9 @@ Se da por terminado cuando se cumplen las dos condiciones:
     **Dónde cae cada parte:** en el **paso 3**, una línea — la validación del adaptador **no llama a
     nadie** y da por buena la conexión que tenga correo y contraseña. **Toda la pantalla es del paso
     5**: la etiqueta, los tres estados, el botón y la operación que pregunta por el estado de la
-    sesión, que hoy no existe en el puerto.
+    sesión, que hoy no existe en el puerto. ⚠️ **Repartido de otra forma después** (2026-09-14): el
+    5b hizo solo la operación del backend; la etiqueta y sus tres estados son del paso 6.1 de la
+    etapa 3, y el botón llega con el acuñador (2c).
 
 45. **Lo que PsicoAlianza exige del candidato lo pasa el embudo tal cual, y el adaptador lo traduce
     y lo protege** (2026-09-14, decidido con el usuario sobre mediciones en producción de ese día;
@@ -2196,6 +2198,8 @@ Los números son de brief, no de orden, y no se renumeran. Del 2 al 3 son aditiv
 y llevan brief corto y una ronda; del 4 en adelante tocan el embudo o se ven, y llevan el
 tratamiento completo. **Con el 5 cerrado se puede probar en local de punta a punta**; el 6 va
 después, porque en local la conexión y la configuración de la oferta se pueden escribir a mano.
+El 6 se parte en **6.1 y 6.2**, con punto y no con letra, para no confundirlos con los pasos 6a y
+6b de la etapa 1, que la bitácora cita.
 **Repartido el 2026-09-13 (decisión 43):** el 2 y el 2b son independientes y pueden ir en paralelo;
 el 2c necesita a los dos y, además, las dos mediciones pendientes de la 43 y saber cómo se
 construye la imagen. El 2 y el 2b se escriben ya.
@@ -2209,10 +2213,11 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 2d | ✅ **HECHO el 2026-09-14.** El almacén guarda solo la cookie de 5 días y deja la corta en memoria (decisión 47) — brief `brief-etapa3-paso2d-cookie-de-sesion.md`. Verificado: 114 suites y 1.113 pruebas (1.104 pasan, 9 omitidas; 4 nuevas). Solo el almacén y dos pruebas; el cliente, el esquema y la rama manual, intactos. La huella es la tira cifrada de la base; la cookie de 5 días se reconoce por prefijo; lo guardado a mano no se limpia | Toca el almacén del paso 2 |
 | 3 | ✅ **HECHO el 2026-09-14.** El adaptador de PsicoAlianza contra el puerto psicométrico, con la invitación real de comprobación hecha — brief `brief-etapa3-paso3-adaptador-psicoalianza.md`, registro en *Paso 3* | Aditivo |
 | 4a | ✅ **HECHO el 2026-09-14.** **El resolvedor** (decisión 48): guardado de la oferta con la conexión que mande el portal, arranque por la conexión de la oferta escribiendo el proveedor que resolvió, cron por el proveedor del candidato agrupando por proveedor — brief `brief-etapa3-paso4a-resolvedor.md`. Verificado: 115 suites y 1.147 pruebas (1.138 pasan, 9 omitidas; 34 nuevas); el token del puerto ya no existe; ninguna afirmación de las pruebas existentes cambió, solo montajes y la prueba de cableado. ⚠️ **Riesgo residual aceptado**: una oferta cuya conexión congelada ya no está en la lista de la empresa **salta la etapa** en vez de resolver por empresa. Hoy no se alcanza —el portal no quita conexiones y al actualizar se conserva el identificador; la creación desde administración no declara conexión—, pero si alguien borra y recrea la conexión de EvaluaTest a mano, sus ofertas vivas se quedan sin prueba con solo un aviso en el registro | Embudo |
-| 4b | ✅ **Revisado el 2026-09-14, pendiente de commit.** **El mensaje de WhatsApp por proveedor** (decisión 49, texto aprobado) y la validación de la conexión por el resolvedor. Las demás llamadas fijas no necesitan recablearse (ver la 48) — brief `brief-etapa3-paso4b-mensaje-por-proveedor.md`. El condicional es «el proveedor resuelto es PsicoAlianza», así la demo y cualquier caso sin proveedor se quedan con el texto de hoy; el correo de la bolsa solo se enseña con PsicoAlianza, porque con EvaluaTest y el desvío activo es la dirección de QA. Pruebas que comparan los dos mensajes enteros | Embudo, visible |
+| 4b | ✅ **HECHO el 2026-09-14.** **El mensaje de WhatsApp por proveedor** (decisión 49, texto aprobado) y la validación de la conexión por el resolvedor. Las demás llamadas fijas no necesitan recablearse (ver la 48) — brief `brief-etapa3-paso4b-mensaje-por-proveedor.md`. El condicional es «el proveedor resuelto es PsicoAlianza», así la demo y cualquier caso sin proveedor se quedan con el texto de hoy; el correo de la bolsa solo se enseña con PsicoAlianza, porque con EvaluaTest y el desvío activo es la dirección de QA. Pruebas que comparan los dos mensajes enteros | Embudo, visible |
 | 5a | ✅ **HECHO el 2026-09-14.** **Embudo**: el documento, su tipo y el plazo en la invitación, la traducción del tipo y la limpieza del documento en el adaptador, y el motivo *sin documento* con su grupo en el portal (decisión 45) — brief `brief-etapa3-paso5a-embudo-psicoalianza.md`, opinión previa el 2026-09-14 | Embudo y portal |
 | 5b | ✅ **HECHO el 2026-09-14.** **Conexión**: guardar y validar la conexión de PsicoAlianza por proveedor, sin login y conservando la sesión, la ruta que pregunta si la sesión está viva (44), y no aceptar plazos con decimales en una empresa con PsicoAlianza (decisión 46) — brief `brief-etapa3-paso5b-conexion-psicoalianza.md` | Ruta de producción |
-| 6 | Portal: selector de proveedor, modal por proveedor, pruebas adicionales solo de EvaluaTest (decisiones 3 y 4) | Visible |
+| 6.1 | **Portal, Mi compañía**: el modal de la conexión por proveedor (46); la etiqueta del estado de sesión con sus tres estados (44), sin el botón de conectar, que llega con el 2c; la señal de «hay conexión», que hoy solo mira EvaluaTest, y los lectores que la 41 dejó leyendo campos de EvaluaTest; no aceptar plazos con decimales en una empresa con PsicoAlianza (46). El bloque y la ruta de validación que se llaman como EvaluaTest **no se renombran** salvo motivo concreto acordado con el usuario | Visible |
+| 6.2 | **Portal, la oferta**: el selector de proveedor, solo con más de una conexión (3); la conexión elegida, mandada al guardar la oferta y al pedir el selector y el estado de la vacante (48); las pruebas adicionales solo con EvaluaTest (4); el texto de los motivos nuevos de vacante no usable (ver *Opinión previa del paso 3*, en esta etapa). Va después del 6.1, que es quien deja guardar una conexión de PsicoAlianza desde el portal | Visible |
 
 **Antes del paso 2, fuera del código:** cuenta de PsicoAlianza para probar y **una sesión de esa
 cuenta pegada en el `.env` local** (decisión 42; cómo sacarla, en `../entorno-local.md`). Para el 2b
@@ -2781,7 +2786,7 @@ con mediciones de solo lectura ese mismo día. Todo está incorporado al brief.
 | El WhatsApp enseña nuestro correo enmascarado y PsicoAlianza avisa a otro | **Hereda el paso 4/5**, junto a las instrucciones de EvaluaTest del mismo mensaje |
 | Cambios sin commitear en la documentación | Eran del planificador; no se mezclan con el diff del paso |
 
-### Paso 3 — ✅ REVISADO (2026-09-14), pendiente de commit
+### Paso 3 — ✅ HECHO (2026-09-14)
 
 El adaptador de PsicoAlianza, solo backend. Implementa las cinco operaciones del puerto **sin
 registrarse en su token**, que sigue apuntando a EvaluaTest (con prueba). Por el camino, el cliente del

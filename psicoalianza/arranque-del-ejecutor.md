@@ -144,6 +144,11 @@ archivo. El resultado real va en el reporte. Si falla, el paso no está terminad
 comprobar que muerde: escribir un control negativo con las expectativas invertidas,
 verificar que falla, y borrarlo. Sin eso, un archivo de pruebas verde no dice nada.
 
+🔴 **El portal no tiene pruebas automáticas**: su verificación es solo la comprobación de tipos,
+que no dice nada de lo que ve una persona. Un paso que toca el portal trae en el brief **la lista
+de casos que se prueban a mano en local** —qué empresa, qué oferta, qué se espera ver—, el
+ejecutor los recorre y el reporte dice el resultado de cada uno.
+
 ## Qué entregar al terminar
 
 Un reporte **corto**:
