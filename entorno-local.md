@@ -287,14 +287,16 @@ se gasta de una corrida a otra.
 y ahí se queda; no va a ningún mensaje, captura de pantalla ni `.md`. Y **no va en ningún
 servidor**: la lista de antes del despliegue lo tiene como bloqueo.
 
-## La conexión de PsicoAlianza, a mano (hasta el paso 6 de la etapa 3)
+## La conexión de PsicoAlianza
 
-El portal todavía no sabe guardarla, así que en local se inserta en la base. **El backend ya
-sabe guardarla** desde el paso 5b —la ruta de *Mi compañía* acepta el bloque de credenciales
-con `provider: "psicoalianza"`—, pero hasta que el portal la mande (paso 6) este procedimiento
-sigue valiendo. Es la cuenta de
-PsicoAlianza de la empresa: correo y contraseña, **la contraseña cifrada con tu `SECRET_KEY`
-local**. Una contraseña cifrada en otra máquina no se descifra aquí.
+**Se conecta desde *Mi compañía*** (paso 6.1 de la etapa 3): en la pestaña del flujo, fila de
+PsicoAlianza, botón *Conectar*, con el correo y la contraseña de la cuenta. El backend cifra la
+contraseña al guardar con tu `SECRET_KEY` local. No entra en PsicoAlianza al guardar: que la
+sesión sirva lo dice la etiqueta de la fila.
+
+**Insertarla a mano en la base sigue sirviendo** si hace falta —por ejemplo, sin el portal
+levantado—. Es la cuenta de PsicoAlianza de la empresa: correo y contraseña, **la contraseña
+cifrada con tu `SECRET_KEY` local**. Una contraseña cifrada en otra máquina no se descifra aquí.
 
 1. Compilar el backend una vez (`npm run build`), porque el cifrado se toma de lo compilado.
 2. Cifrar la contraseña, desde `esscoti-backend`. `Read-Host` la pide sin que quede en el
@@ -376,6 +378,6 @@ ya la elige.
   real distinto por candidato**: allá un correo pertenece a una sola persona en toda la
   plataforma, así que el desvío de correos de pruebas de EvaluaTest no sirve.
 - **La conexión de PsicoAlianza de la empresa local** se guarda en la base, cifrada con la
-  `SECRET_KEY` local, como en producción: ver *La conexión de PsicoAlianza, a mano*, arriba.
+  `SECRET_KEY` local, como en producción: ver *La conexión de PsicoAlianza*, arriba.
   **No va en el `.env`**: en el `.env` va solo la sesión, que es otra cosa — la conexión dice
   *qué cuenta usa esta empresa*; la sesión, *ya estoy dentro*.

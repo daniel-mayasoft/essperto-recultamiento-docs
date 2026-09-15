@@ -8,7 +8,8 @@ leyendo la lista y "Puntaje mínimo" (paso 8b, decisiones 8 y 41), y el 2026-09-
 el tipo y el plazo en la invitación y el descarte por documento (paso 5a, decisión 45) y con la
 conexión de PsicoAlianza guardada, validada y consultada por el backend (paso 5b, decisiones 44 y
 46) y con el resolvedor que elige proveedor al guardar la oferta, al invitar y al consultar (paso
-4a, decisión 48). No es historia ni
+4a, decisión 48), y con *Mi compañía* por proveedor, la etiqueta de la sesión y el plazo en días
+enteros en la pantalla (paso 6.1, decisión 50). No es historia ni
 justificación: **los porqués están en la bitácora**, y aquí solo se apunta el número de
 decisión. Cuenta qué le pasa a una persona en cada caso.
 
@@ -50,26 +51,62 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
 ## 1 · La empresa se conecta y configura la oferta
 
 1. En *Mi compañía*, la sección de la prueba se titula *Conexión de pruebas psicométricas* y
-   muestra, si la conexión de EvaluaTest está configurada, **su nombre, el proveedor entre
-   paréntesis y el correo** —«EvaluaTest Medicall (EvaluaTest) — correo»—; si no, *sin proveedor
-   conectado*. El botón abre un modal con **nombre, correo y contraseña**: el nombre viene con el
-   de la conexión que haya, aunque esté incompleta, o con «EvaluaTest» si no hay ninguna; **la
-   contraseña viene siempre vacía y es obligatoria**, porque guardar valida contra EvaluaTest y
-   sin ella no puede — renombrar exige volver a teclearla (decisión 41). El portal valida
-   primero, recibe el identificador de empresa que EvaluaTest devuelve y solo entonces guarda,
-   mandando nombre, correo, contraseña e identificador. **El backend lo guarda como una conexión
-   con nombre** en la lista de la empresa —`id`, `name`, `provider` (`evaluatest`) y una bolsa
-   `credentials` con correo, contraseña cifrada e identificador— (decisiones 1 y 41). Un nombre
-   ausente o en blanco conserva el guardado, y si no hay, «EvaluaTest». **Ningún otro guardado de
-   la página manda ya la conexión**: solo el modal. El backend conserva su regla de tres casos
-   para ese bloque —correo y contraseña vacíos → se quita la conexión; correo con contraseña
-   vacía → se conserva la guardada; lo demás → se crea o se actualiza—, pero desde el portal ya
-   no se llega a quitar ni a mandar vacía: **no hay "desconectar"**. Sirve de vuelta el bloque
-   **derivado de la lista, sin contraseña** —de ahí sale el correo que se muestra— y la lista con
-   `id`, `name`, `provider` y `configured`. La contraseña no sale del backend.
+   debajo enseña **dos filas siempre, EvaluaTest y PsicoAlianza**, en ese orden (decisión 50).
+   Cada fila, si la conexión de ese proveedor está configurada, muestra **su nombre, el proveedor
+   entre paréntesis y el correo** —«EvaluaTest Medicall (EvaluaTest) — correo»— con el botón
+   *Editar conexión*; si está incompleta o no existe, «EvaluaTest — sin conectar» con el botón
+   *Conectar*. El correo sale **de la lista de conexiones**, que el backend sirve con el correo de
+   cada una; *Mi compañía* ya no lee el bloque derivado de EvaluaTest. Solo se puede tener una
+   conexión por proveedor, y **no hay "desconectar"**.
 
-   **El backend ya guarda, valida y consulta la conexión de PsicoAlianza; el portal todavía no la
-   manda** (paso 5b, decisión 46; la pantalla es del paso 6, y en local se inserta a mano):
+   Cada botón abre el modal **fijado al proveedor de su fila**, sin selector, con el proveedor en
+   el título y **nombre, correo y contraseña**: el nombre viene con el de la conexión de ese
+   proveedor, aunque esté incompleta, o con el del proveedor si no hay ninguna; el correo, el de
+   esa conexión o vacío; **la contraseña viene siempre vacía y es obligatoria** — renombrar exige
+   volver a teclearla (decisión 41). Al guardar, el portal manda **el proveedor en las dos
+   peticiones**, la validación y el guardado:
+
+   - **Con EvaluaTest**, valida contra EvaluaTest, exige el identificador de empresa que devuelve
+     —si no llega, *no se pudo identificar tu empresa*— y guarda con él. El correo no es
+     obligatorio en el formulario.
+   - **Con PsicoAlianza**, el correo **es obligatorio** en el formulario; la validación no entra en
+     PsicoAlianza (decisión 44) y no trae identificador, y se guarda sin él. Guardar PsicoAlianza no
+     toca la fila de EvaluaTest.
+
+   **El backend lo guarda como una conexión con nombre** en la lista de la empresa —`id`, `name`,
+   `provider` y una bolsa `credentials` con correo, contraseña cifrada y, con EvaluaTest, el
+   identificador— (decisiones 1, 41 y 46). Un nombre ausente o en blanco conserva el guardado, y si
+   no hay, el del proveedor. **Ningún otro guardado de la página manda la conexión**: solo el modal.
+   El backend conserva su regla de tres casos para ese bloque —correo y contraseña vacíos → se
+   quita la conexión; correo con contraseña vacía → se conserva la guardada; lo demás → se crea o
+   se actualiza—, pero desde el portal no se llega a quitar ni a mandar vacía. Sirve de vuelta el
+   bloque **derivado de la lista, sin contraseña**, que siguen leyendo las ofertas, y la lista con
+   `id`, `name`, `provider`, `email` y `configured`. La contraseña no sale del backend.
+
+   **La etiqueta de la sesión, solo en la fila de PsicoAlianza y solo con su conexión configurada.**
+   La fila pregunta el estado al cargar la página y después de guardar el modal, nunca en otro
+   momento, y solo cuenta la última respuesta pedida. Mientras llega, un indicador de carga;
+   `connected` → *Conectado*; `no_session` o `expired` → *«Sin conexión — las invitaciones a
+   PsicoAlianza no están saliendo y quienes ya están en la prueba pueden descartarse por
+   vencimiento. Avisa a soporte.»*; `no_connection` → nada, porque la fila ya dice *sin conectar*;
+   y si la petición falla, *No se pudo comprobar la sesión*. No dice que la etapa se omita, porque
+   con la conexión guardada no se omite (corrección de la 44), y no hay botón de conectar: llega
+   con el acuñador (2c).
+
+   **El plazo de la prueba** se configura en la pestaña de desarrollo de *Mi compañía*, que **solo
+   aparece añadiendo `mode=dev` a la dirección**: un reclutador normal no lo ve. Su texto ya no
+   nombra a EvaluaTest. Si la empresa tiene conexión de PsicoAlianza en la lista, completa o no, el
+   campo va de uno en uno y guardar la pestaña con decimales **no manda nada** y avisa de que con
+   PsicoAlianza el plazo va en días enteros; sin PsicoAlianza admite medios días, como siempre. Tres
+   guardados mandan la empresa entera, plazo incluido —esa pestaña, los interruptores de etapa del
+   flujo y el modal de credenciales de un portal de empleo—, y **cuando el backend los rechaza con
+   un 400 se enseña su mensaje** en vez de *error al actualizar*. Así, una empresa con 1,5 días
+   guardados que conecta PsicoAlianza ve por qué no puede pulsar un interruptor. ⚠️ Un plazo tecleado
+   y no guardado se queda en el formulario compartido y viaja con el siguiente interruptor, que el
+   backend rechaza con su mensaje (aceptado).
+
+   **La conexión de PsicoAlianza se guarda desde el portal, y el backend la valida y consulta así**
+   (paso 5b, decisión 46; pantalla del paso 6.1, decisión 50):
 
    - **Guardar por proveedor.** El mismo bloque del modal —que conserva su nombre de EvaluaTest,
      contrato con el portal de hoy— acepta `provider`: vacío o ausente es EvaluaTest, y un valor

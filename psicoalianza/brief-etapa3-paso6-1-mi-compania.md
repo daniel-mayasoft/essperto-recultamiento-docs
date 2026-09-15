@@ -27,8 +27,8 @@ Leer, en este orden:
    cambia §1.
 5. En el portal: la página de *Mi compañía* —la sección de la prueba psicométrica dentro de la pestaña
    del flujo, el modal de la conexión con su función de guardar, la pestaña de desarrollo con el campo
-   del plazo, la función que arma el cuerpo del guardado general y las dos que lo mandan (guardar esa
-   pestaña y los interruptores de etapa)—, el componente del aviso de proveedor con sus dos funciones
+   del plazo, la función que arma el cuerpo del guardado general y las tres que lo mandan (guardar esa
+   pestaña, los interruptores de etapa y el modal de credenciales de un portal de empleo)—, el componente del aviso de proveedor con sus dos funciones
    que buscan la conexión de EvaluaTest, el tipo `Tenant`, el cliente de la API (cómo expone el mensaje
    y el código de un rechazo) y los textos en español e inglés de `tenants.filters.psychometricConnection`
    y de `tenants.test.timingConfig`.
@@ -164,7 +164,10 @@ del backend.
 
 En español y en inglés: el nombre del proveedor PsicoAlianza junto al de EvaluaTest, *sin conectar*,
 *conectar*, los tres textos de la etiqueta y el mensaje del plazo. **Claves nuevas en inglés**; los
-textos que ve el usuario, en su idioma. Ningún texto existente cambia salvo el del campo del plazo.
+textos que ve el usuario, en su idioma. Ningún texto existente cambia salvo el del campo del plazo, y
+**se quita el que este paso deja sin uso**: *sin proveedor conectado*, en español y en inglés, que solo
+usaba la línea de antes (buscado en todo el portal en la revisión del diff, 2026-09-14). Dejarlo sería
+una limpieza pendiente.
 
 ## Los casos, persona por persona
 
@@ -241,10 +244,10 @@ con conexión. En local, *Conectado* dice que la sesión pegada sirve, no que la
 No es un fallo del paso. Es lo que hay que saber para leer el caso a mano 4.
 
 **6. El correo sale también por las demás rutas que sirven la empresa**: *Mi compañía*, crear, actualizar,
-el logo, el listado interno y la búsqueda por NIT (opinión previa). ⚠️ **La búsqueda por NIT, sin
-llamador conocido**: buscado el nombre del método en todo el backend fuera de las pruebas el 2026-09-14,
-solo aparece su definición. Una búsqueda no descarta un llamador indirecto: confírmalo antes de escribir
-código.
+el logo, el listado interno y la búsqueda por NIT (opinión previa). ✅ **La búsqueda por NIT no tiene
+llamadores**, confirmado el 2026-09-14 por el ejecutor y el planificador. Se buscó en todo el backend,
+fuera de las pruebas, el nombre del servicio de empresas y no solo el del método. Solo aparece donde se
+registra el módulo, en el controlador, que no la usa, y en tres comentarios. Por ahí el correo no sale.
 Es el correo de la cuenta del proveedor, que con EvaluaTest ya sale por el bloque derivado. **No es una
 contraseña**, y la comprobación de que la contraseña cifrada no sale se queda.
 
