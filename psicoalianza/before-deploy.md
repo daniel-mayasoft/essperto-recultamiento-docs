@@ -17,8 +17,9 @@ diff de documentación. Lo que está en la bitácora y no aquí, no se va a hace
 | 5b | **Secretos en texto plano en el despliegue de pruebas** (anotado el 2026-09-14, aplazado por el usuario hasta que todo funcione): el archivo de despliegue del servidor de pruebas lleva escritas claves de AWS, la contraseña de un correo, la clave privada de Firebase y la clave de los robots. Pasarlas a variables fuera del archivo y rotarlas si ese archivo se ha compartido | Equipo | ☐ |
 | 5c | **Sacar a la persona de prueba** de las vacantes activas de la cuenta del cliente en PsicoAlianza donde se la invitó para comprobar (aplazado por el usuario): la **5146** (tanda del 2026-09-14) y la **1135**, OPERARIO DE PRODUCCIÓN — MANISOL (invitación real de comprobación del paso 3, el mismo día) | Usuario | ☐ |
 | 6 | 🔴 **Bloqueo de la etapa 3**: PsicoAlianza no se despliega a ningún servidor sin el acuñador de sesión (paso 2c, decisión 43) y su aviso a soporte. Con la sesión pegada a mano (decisión 42) no: muere a los 5 días sin avisar y, con la decisión 36, dos días sin sesión descartan candidatos reales por vencimiento | Usuario | ☐ |
-| 7 | **La imagen del backend cambia** (decisión 43): Chromium dentro, de 300 a 500 MB más, y en el minuto del login la instancia puede doblar su memoria. Antes del brief del 2c: cómo se construye la imagen hoy, límite de memoria del contenedor y cuántas instancias corren. Antes de desplegar: probar la imagen nueva en el servidor de pruebas | Usuario y quien despliega | ☐ |
-| 7b | **La imagen del backend pasa de Alpine a Debian ligero, en su propio despliegue y antes de meter Chromium.** Leído el 2026-09-14: ninguna dependencia del backend se compila para el sistema y el código no ejecuta programas del sistema, así que el riesgo es bajo; lo que no se sabe leyendo se prueba. **Primero solo el cambio de sistema, sin Chrome**, al servidor de pruebas, y dejarlo correr un día comprobando: que arranca, que `npm test` pasa **dentro de la imagen**, la hora con la zona de Bogotá, el cron psicométrico, WhatsApp, S3 y los correos. Si algo falla, volver es cambiar la primera línea del Dockerfile. Chromium se añade después sobre esa imagen, y si se sigue la estrategia de imagen base (la de Sucomex), la base tiene que estar en el registro desde el que construya quien despliega | Quien despliega | ☐ |
+| 7 | **La imagen base del backend, en dos tiempos** (decisión 43; procedimiento en §4, abajo). Tiempo 1: Node 22 sobre Debian ligero, sin Chromium, un día en el servidor de pruebas. Tiempo 2: la misma base más Chromium, fuentes y Xvfb. Cada tiempo va **a mano y con el despliegue nocturno sin programar** | Usuario y quien despliega | ☐ |
+| 7b | **Medir el consumo de memoria del backend en el servidor de pruebas** antes del tiempo 2, y ponerle límite: el consumo medido más unos 600 MB, y memoria compartida de 1 GB, en los dos compose. Comando en §4 | Quien despliega | ☐ |
+| 7c | **Deuda aceptada el 2026-09-15**: Chromium corre **sin su aislamiento** (como root, dentro del contenedor del backend). Acotado a que el acuñador solo navega a PsicoAlianza y a los dominios del captcha. Activarlo es un paso propio: usuario propio en la imagen, cambio de dueño de los volúmenes de registros y un perfil de seguridad en los dos compose | Equipo, después | ☐ |
 | 8 | Configurar en los servidores las variables del proxy (`PROXY_HOST`, `PROXY_PORT`, `PROXY_LOGIN`, `PROXY_PASS`, protocolo) antes de que una empresa use PsicoAlianza. Sin ellas el backend arranca; falla al acuñar | Quien despliega | ☐ |
 | 8b | **Correr las pruebas a mano del portal** de `pruebas-a-mano.md`, en local y con la rama entera, y anotar el resultado de cada caso. Si alguno falla, no se despliega | Usuario | ☐ |
 | 9 | Configurar en los servidores las variables de PsicoAlianza antes de que una empresa la use: `PSICOALIANZA_BASE_URL` si no es la oficial, y comprobar que **`PSICOALIANZA_MANUAL_SESSION_ENABLED` no está encendida** ni hay cookies pegadas (paso 2 de la etapa 3). No bloquea desplegar ese paso solo | Quien despliega | ☐ |
@@ -132,3 +133,61 @@ desfase rompe algo distinto (levantado en la opinión previa del 8b, 2026-09-13)
 | **Backend nuevo con portal viejo** | El 8a se diseñó para convivir con ese portal. Solo se ven en crudo, unos minutos, los motivos de rechazo nuevos (pasos 7 y 33) |
 
 La segunda es claramente menos mala. Con la migración (1) antes de los dos.
+
+## 4 · La imagen base del backend, en dos tiempos (punto 7)
+
+**Por qué una base aparte.** El backend se construye con un `docker build` en el propio servidor,
+sin registro. Si Chromium se instalara en el Dockerfile del backend, la caché de capas lo
+reinstalaría —con la versión que Debian tenga ese día— cada vez que la imagen de Node se actualice,
+y la versión de Chromium se separaría de la que espera la librería que lo maneja **sin que nadie lo
+pida**. Con una base construida una vez y etiquetada, Chromium queda congelado hasta que alguien
+cambie la etiqueta a propósito.
+
+**Dónde está.** En el servidor, **junto a `deploy.sh`**, un archivo `Dockerfile.base`; no está en
+ningún repositorio, como el resto de esa carpeta, y la copia local es `.deploy/<servidor>/`. La
+etiqueta es una variable del script, `IMAGE_BACKEND_BASE`, como las demás imágenes. Los dos `deploy.sh`
+(pruebas y producción) construyen la base **solo si esa etiqueta no existe todavía en el servidor**,
+justo antes de construir el backend, y sin contexto de construcción porque el archivo no copia nada.
+Hay que subir `Dockerfile.base` con Moba y **pegar en el `deploy.sh` del servidor** las tres piezas de
+la copia local: la variable, la función y el `if` antes del `docker build` del backend — no
+sobrescribir el script del servidor sin comparar.
+
+**Cómo se enlazan.** La primera línea del Dockerfile del backend nombra la misma etiqueta que
+`IMAGE_BACKEND_BASE`. Si no coinciden, el `docker build` del backend **falla ruidoso** pidiendo una
+imagen que no existe: no hay forma de desplegar con la base equivocada sin enterarse.
+
+⚠️ **Los dos tiempos van a mano.** El despliegue nocturno (`schedule-deploy.sh`) reconstruye todo lo
+que haya en la rama de cada repositorio. Antes de cada tiempo, comprobar con `atq` que no hay ninguno
+programado, o el segundo tiempo entra solo una noche.
+
+### Tiempo 1 · Debian y Node 22, sin Chromium
+
+Etiqueta `selessia-node:22-debian-1`. Dos cambios a la vez —el sistema y la versión de Node, que dejó
+de tener soporte en abril de 2026—, aceptados porque las pruebas dentro de la imagen los delatan
+antes de correr un día y repetir el despliegue en dos tiempos cuesta más.
+
+1. En el backend, cambiar la primera línea del Dockerfile por esa etiqueta y commitear. **Después de
+   que el 2b esté commiteado**, en su propio commit.
+2. Desplegar el backend en el servidor de pruebas con `deploy.sh deploy selessia-backend`. El registro
+   tiene que decir que construyó la base.
+3. Dentro de la imagen, correr las pruebas: `docker compose exec selessia-backend npm test`.
+4. Dejarlo **un día** y comprobar: que arranca; **la hora con la zona de Bogotá** en los registros; el
+   cron psicométrico; WhatsApp; S3; los correos.
+5. Si algo falla, volver es cambiar la primera línea del Dockerfile a `node:20-alpine` y desplegar.
+
+### Tiempo 2 · Chromium, fuentes y Xvfb
+
+Etiqueta `selessia-node-chromium:22-debian-1`. Se escribe cuando el tiempo 1 lleve un día en verde:
+`Dockerfile.base` gana la instalación de `chromium`, `xvfb` y `fonts-liberation` (lo que probó el
+otro chat el 2026-09-14), y **las versiones instaladas se anotan en este documento** junto a la
+versión de la librería que las maneja, para comprobar el par la próxima vez que se reconstruya la
+base. `IMAGE_BACKEND_BASE` en el script y la primera línea del Dockerfile del backend cambian a la
+etiqueta nueva.
+
+Antes de este tiempo, el punto 7b: medir el consumo del backend en el servidor de pruebas con
+`docker stats --no-stream selessia-backend`, y en los dos compose ponerle al backend `mem_limit` (lo
+medido más unos 600 MB) y `shm_size: 1gb`. Sin la memoria compartida, Chromium se cae.
+
+**Después del tiempo 2, el backend puede acuñar sesiones** cuando exista el 2c. El acuñador necesita
+además un volumen con nombre para el perfil de Chromium y una carpeta para las capturas de los intentos
+fallidos; los dos se añaden a los compose con el brief del 2c.

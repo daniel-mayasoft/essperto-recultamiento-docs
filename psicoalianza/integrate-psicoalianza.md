@@ -1595,6 +1595,32 @@ Se da por terminado cuando se cumplen las dos condiciones:
     conocen EvaluaTest y ampliarlos es un paso propio), la creación desde administración (anotada en la
     40) y el modo demo.
 
+52. **El acuñador va en tres pasos, sobre una imagen base construida en el servidor, sin ventana por
+    defecto, con renovación anticipada y sin el aislamiento de Chromium** (2026-09-15, decidido con el
+    usuario al replantear el 2c con el despliegue delante; incorpora la revisión del chat que hizo el
+    login desde Docker). Concreta la 43 sin cambiarla.
+
+    | Qué | Decidido | Por qué |
+    | --- | --- | --- |
+    | **Dónde corre Chrome** | En el backend, como decía la 43 | Una sola instancia: el candado es trivial. Un contenedor aparte sería un servicio nuevo con su API; el robot-manager es de otro equipo |
+    | **La imagen** | Una **base propia**, `Dockerfile.base` junto a `deploy.sh` en cada servidor, construida allí mismo y solo cuando su etiqueta no existe; el backend la nombra en su primera línea. **En dos tiempos**: primero Node 22 sobre Debian ligero sin Chromium, un día en pruebas; después la misma base más Chromium de Debian, fuentes y Xvfb. Procedimiento en `before-deploy.md` §4 | Sin registro, la base construida una vez congela la versión de Chromium: instalarlo en el Dockerfile del backend la cambiaría sin que nadie lo pida cada vez que la imagen de Node se actualice. Node 22 porque Node 20 dejó de tener soporte en abril de 2026 y el primer tiempo ya obliga a probar dentro de la imagen |
+    | **Navegador** | Chromium de Debian, con la versión de la librería fijada a la que casa | Es lo probado el 2026-09-14. Chrome for Testing casaría versiones pero descarga el navegador de Google en cada construcción |
+    | **Ventana** | **Sin ventana por defecto**, con Xvfb en la base y un interruptor por variable | El 30% medido es sin ventana; el 1 de 1 con ventana no decide nada. El interruptor permite medir las dos variantes en el servidor de pruebas sin redesplegar |
+    | **Cuándo se acuña** | **Renovación anticipada** por una tarea diaria cuando la sesión guardada pasa de 4 días, más acuñado a demanda como respaldo cuando aun así muera | A los 4 días quedan 24 horas de sesión viva: los intentos pueden espaciarse horas sin que nadie espere. Un login cada 4 días por conexión cuesta centavos |
+    | **Cadencia** | **Ráfagas cortas de 3 intentos** con 25 segundos entre ellos y **horas entre ráfagas** para la renovación; una ráfaga más larga solo para la sesión ya muerta; tope diario de intentos por conexión y aviso a soporte al agotarlo. Números finales en el brief del 2c.2 | El captcha puntúa la reputación reciente y una ráfaga la gasta: la cuenta principal tras un día cargado dio 0 de 3 y la alterna fresca entró a la primera. Y un intento tarda de 18 a 35 segundos: ocho seguidos son ocho minutos, no cuatro |
+    | **Aislamiento de Chromium** | **Sin aislamiento, como root**, aceptado como deuda (`before-deploy.md` 7c). Mitigación: el acuñador solo permite navegar a PsicoAlianza y no comprueba la IP de salida | Activarlo exige usuario propio en la imagen, cambiar el dueño de los volúmenes de registros y un perfil de seguridad en los dos compose: un paso propio, después, para no mezclar dos cosas que pueden fallar en el mismo despliegue |
+    | **Límite de memoria** | El consumo actual del backend más unos 600 MB, y memoria compartida de 1 GB | El pico medido, 465 MB, es el contenedor entero de la prueba; en el backend va encima de lo que ya consume |
+
+    **Los tres pasos:** **2c.1**, el acuñador sin que nadie lo llame (un intento, la clasificación, los
+    reintentos dentro de una llamada, el guardado); **2c.2**, cuándo se acuña (la tarea diaria, la
+    demanda desde el cliente, el candado, el tope y el aviso a soporte — toca el embudo, tratamiento
+    completo); **2c.3**, el botón *Conectar* de *Mi compañía* con su ruta y la etiqueta revisada (50).
+
+    **Lo que el chat de Docker dejó anotado y el 2c.1 incorpora:** *permanecer conectado* **no** viene
+    marcado, contra lo que decía esta bitácora; los ficheros de candado del perfil y de la pantalla
+    virtual se borran antes de lanzar; la salida de Chromium no se vuelca al registro; y la cuenta
+    alterna es de aspirante y no sirve para probar más que el login.
+
 ## Falta de PsicoAlianza
 
 | #   | Qué                                               | Por qué importa                                                                  |
@@ -2310,8 +2336,11 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | --- | --- | --- |
 | 1 | ~~El módulo de captcha~~ **Descartado** (decisiones 25 y 43): no hay solucionador. El brief `brief-etapa3-paso1-modulo-captcha.md` queda como registro de la forma que el 2b copia | — |
 | 2 | ✅ **HECHO el 2026-09-13.** El cliente de PsicoAlianza **dado una sesión viva**: el almacén de sesión en la conexión de la empresa, la fuente manual del `.env` (decisión 42), el CSRF de las peticiones, las peticiones del contrato, *sesión caducada* como error propio y el registro sin cookies ni contraseñas; la lectura única de conexiones reconoce la de PsicoAlianza — brief `brief-etapa3-paso2-cliente-psicoalianza.md` | Aditivo |
-| 2b | El módulo `proxy`: puerto de *arrendar una IP*, adaptador de DataImpulse, errores propios, sin selector (decisión 43). Nada lo llama hasta el 2c | Aditivo |
-| 2c | El acuñador de sesión: Chrome sin ventana por el puerto de proxy, clasificador, reintentos, candado y tope, aviso a soporte; Chromium en la imagen del backend (decisión 43). **Espera las dos mediciones y el dato de la imagen** | Aditivo en código; **la imagen no** |
+| 2b | **En curso desde el 2026-09-15.** El módulo `proxy`: puerto de *arrendar una IP*, adaptador de DataImpulse, errores propios, sin selector (decisión 43). Nada lo llama hasta el 2c — brief `brief-etapa3-paso2b-modulo-proxy.md`, con la opinión previa incorporada | Aditivo |
+| 2c.0 | **Infraestructura, sin brief** (decisión 52): la imagen base del backend en dos tiempos, `before-deploy.md` §4. El `Dockerfile.base` y el `deploy.sh` del servidor de pruebas quedaron listos el 2026-09-15; falta la primera línea del Dockerfile del backend, en su commit, después del 2b | **La imagen** |
+| 2c.1 | El acuñador de sesión sin que nadie lo llame: Chromium por el puerto de proxy, clasificación, reintentos dentro de una llamada, guardado en el almacén (decisiones 43 y 52) — brief `brief-etapa3-paso2c-1-acunador-de-sesion.md` | Aditivo en código; una comprobación real contra la cuenta del cliente |
+| 2c.2 | Cuándo se acuña: la tarea diaria de renovación anticipada, la demanda desde el cliente al encontrar la sesión muerta, el candado, el tope diario y el aviso a soporte (52). Después del 2c.1 | Embudo |
+| 2c.3 | El botón *Conectar* de *Mi compañía*, su ruta y la etiqueta revisada (50). Después del 2c.2 | Visible |
 | 2d | ✅ **HECHO el 2026-09-14.** El almacén guarda solo la cookie de 5 días y deja la corta en memoria (decisión 47) — brief `brief-etapa3-paso2d-cookie-de-sesion.md`. Verificado: 114 suites y 1.113 pruebas (1.104 pasan, 9 omitidas; 4 nuevas). Solo el almacén y dos pruebas; el cliente, el esquema y la rama manual, intactos. La huella es la tira cifrada de la base; la cookie de 5 días se reconoce por prefijo; lo guardado a mano no se limpia | Toca el almacén del paso 2 |
 | 3 | ✅ **HECHO el 2026-09-14.** El adaptador de PsicoAlianza contra el puerto psicométrico, con la invitación real de comprobación hecha — brief `brief-etapa3-paso3-adaptador-psicoalianza.md`, registro en *Paso 3* | Aditivo |
 | 4a | ✅ **HECHO el 2026-09-14.** **El resolvedor** (decisión 48): guardado de la oferta con la conexión que mande el portal, arranque por la conexión de la oferta escribiendo el proveedor que resolvió, cron por el proveedor del candidato agrupando por proveedor — brief `brief-etapa3-paso4a-resolvedor.md`. Verificado: 115 suites y 1.147 pruebas (1.138 pasan, 9 omitidas; 34 nuevas); el token del puerto ya no existe; ninguna afirmación de las pruebas existentes cambió, solo montajes y la prueba de cableado. ⚠️ **Riesgo residual aceptado**: una oferta cuya conexión congelada ya no está en la lista de la empresa **salta la etapa** en vez de resolver por empresa. Hoy no se alcanza —el portal no quita conexiones y al actualizar se conserva el identificador; la creación desde administración no declara conexión—, pero si alguien borra y recrea la conexión de EvaluaTest a mano, sus ofertas vivas se quedan sin prueba con solo un aviso en el registro | Embudo |
