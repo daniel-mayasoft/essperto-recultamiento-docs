@@ -9,7 +9,8 @@ el tipo y el plazo en la invitación y el descarte por documento (paso 5a, decis
 conexión de PsicoAlianza guardada, validada y consultada por el backend (paso 5b, decisiones 44 y
 46) y con el resolvedor que elige proveedor al guardar la oferta, al invitar y al consultar (paso
 4a, decisión 48), y con *Mi compañía* por proveedor, la etiqueta de la sesión y el plazo en días
-enteros en la pantalla (paso 6.1, decisión 50). No es historia ni
+enteros en la pantalla (paso 6.1, decisión 50), y con la oferta que conserva su conexión al guardar
+(paso 6.2a, decisión 51). No es historia ni
 justificación: **los porqués están en la bitácora**, y aquí solo se apunta el número de
 decisión. Cuenta qué le pasa a una persona en cada caso.
 
@@ -140,10 +141,17 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
    vacante de la lista que el puerto devuelve, fija el **puntaje mínimo** (decisión 8; el campo
    guardado sigue siendo `minIGIScore`) y, opcionalmente, pruebas adicionales — estas últimas no
    pasan por el puerto: son exclusivas de EvaluaTest (decisión 4).
-3. Al guardar con la prueba activa, el backend **congela la conexión que mande el portal** en
-   el cuerpo —si no es de la empresa, rechazo con mensaje propio— y, si no manda ninguna (el
-   portal de hoy), **la que diga el resolvedor por la empresa**: una conexión, esa; dos, la de
-   EvaluaTest (decisión 48). Ya no busca siempre la de EvaluaTest. Con esa conexión comprueba
+3. Al guardar con la prueba activa y una vacante, el backend elige la conexión en este orden
+   (decisiones 48 y 51): **la que mande el portal** en el cuerpo —si no es de la empresa, rechazo
+   con mensaje propio—; si no manda ninguna (el portal de hoy y el agente de WhatsApp), **la ya
+   congelada en la oferta**, de modo que cambiar el puntaje no la mueve de proveedor; y solo si la
+   oferta no tiene ninguna congelada —de antes de la migración o creada desde administración—, **la
+   que diga el resolvedor por la empresa**: una conexión, esa; dos, la de EvaluaTest. **Si la
+   congelada ya no está en la empresa**, no se re-congela por la regla, porque no se sabe de qué
+   proveedor era la vacante: se rechaza antes de tocar al proveedor, con *la conexión de esta
+   oferta ya no está en tu empresa; elige una conexión y vuelve a guardar* si la empresa tiene
+   alguna, y con el mensaje de *conéctalo en Mi compañía* si no tiene ninguna. Una conexión vacía
+   en el cuerpo cuenta como ninguna. Con la conexión elegida comprueba
    **por su adaptador** que la vacante sigue sirviendo. **Si la empresa no tiene conexión, la
    comprobación falla antes de tocar al proveedor y la ruta rechaza con un mensaje propio**
    —conéctalo en Mi compañía antes de activar la prueba—, distinto del «no se pudo verificar,
@@ -157,6 +165,9 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
    vacante y avisa si dejó de servir; el selector de vacantes y esa comprobación aceptan una
    conexión opcional en la consulta y, sin ella, resuelven por la empresa. Las pruebas de la
    vacante siguen siendo de EvaluaTest (decisión 4).
+
+   ⚠️ Hasta el paso 6.2b, en local, editar desde la ficha una oferta congelada en PsicoAlianza y
+   elegirle otra vacante del selector —que lista EvaluaTest— comprueba ese número en PsicoAlianza.
 
    **Migración única, antes de desplegar este backend** (decisión 41): un script de consola
    crea la conexión de EvaluaTest de cada empresa a partir de su bloque viejo y rellena

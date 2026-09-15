@@ -7,6 +7,12 @@ decisión 51.** Toca **solo el backend**. El portal es el 6.2b.
 > el resolvedor, las dos llamadas del agente de WhatsApp a ese guardado, el servicio de la IA que redacta
 > ofertas (cómo encuentra la oferta que copia, cómo arma el borrador base y cómo sanea el borrador) y la
 > prueba de paridad que cubre el guardado.
+>
+> **Incorpora la opinión previa del ejecutor del 2026-09-15**, verificada contra el código por el
+> planificador: el mensaje de la congelada ausente cuando la empresa no tiene conexiones, la prueba de la
+> trampa 1 arreglada por su dato y no por su afirmación, la lectura de conexiones dentro del modo copia,
+> la explicación corregida del saneado, la prueba de *desde cero* sustituida por la revisión, y el caso
+> espejo que queda en local hasta el 6.2b. Marcado como «opinión previa» en su sitio.
 
 ## Antes de escribir una sola línea
 
@@ -61,13 +67,14 @@ que hoy se resuelve. El orden pasa a ser:
 | --- | --- |
 | **El cuerpo trae conexión** | Esa. Si no es de la empresa, el rechazo de hoy, *la conexión de pruebas psicométricas indicada no es de tu empresa*. **Sin cambios** |
 | **El cuerpo no trae, y la oferta tiene una congelada que sigue en la empresa** | **La congelada**. Hoy: la regla de la empresa |
-| **El cuerpo no trae, y la congelada ya no está en la empresa** | 🔴 **Rechazo con mensaje propio**: *La conexión de pruebas psicométricas de esta oferta ya no está en tu empresa. Elige una conexión y vuelve a guardar.* Hoy: la regla de la empresa, en silencio |
+| **El cuerpo no trae, la congelada ya no está, y la empresa tiene alguna conexión** | 🔴 **Rechazo con mensaje propio**: *La conexión de pruebas psicométricas de esta oferta ya no está en tu empresa. Elige una conexión y vuelve a guardar.* Hoy: la regla de la empresa, en silencio |
+| **El cuerpo no trae, la congelada ya no está, y la empresa no tiene ninguna conexión** | **El rechazo de hoy**, *conéctalo en Mi compañía antes de activar la prueba*, que es verdad: no hay conexión que elegir (opinión previa) |
 | **Ni el cuerpo ni la oferta traen conexión** (ofertas de antes de la migración, o creadas desde administración) | La regla de la empresa: una → esa; dos → EvaluaTest; ninguna → *conéctalo en Mi compañía*. **Sin cambios** |
 
 - **Desactivar la prueba no cambia**: sigue sin exigir conexión y conserva la congelada.
 - 🔴 **El rechazo de la congelada ausente va antes de comprobar la vacante** y **no toca al proveedor**.
-  No puede caer en el mensaje de *tu empresa no tiene un proveedor conectado*: esa empresa puede tener
-  conexiones, y el mensaje mentiría. Hoy nadie ve el texto: el modal del portal enseña su error genérico,
+  Con conexiones en la empresa, no puede caer en el mensaje de *tu empresa no tiene un proveedor
+  conectado*, que mentiría. Sin ninguna, es ese mensaje, y el nuevo sería el que mintiera. Hoy nadie ve el texto: el modal del portal enseña su error genérico,
   y el agente de WhatsApp el suyo. Existe para el registro y para el 6.2b.
 - **Nada más del guardado cambia**: la comprobación de la vacante, sus mensajes por proveedor, el código
   de evaluación, cómo se conservan el nombre, el código de perfil, el puntaje, las pruebas adicionales y la
@@ -94,14 +101,23 @@ la prueba, sea del proveedor que sea. Pasa a tomarla **solo si esa oferta es de 
 | Una conexión que ya no está en la empresa | **No**: no se sabe de qué proveedor era (48) |
 | No se pudo leer la lista de conexiones | **No**, con un aviso en el registro, **sin romper el borrador** |
 
-- Las conexiones se leen **una vez por borrador y solo en modo copia**, con la lectura única, que el
-  servicio de la IA ya tiene. El modo desde cero **no cambia** y no lee nada nuevo.
-- ⚠️ **Lo que pasa después, y es lo esperado**: con la vacante base vacía, el saneado del borrador **sigue
-  poniendo una vacante de EvaluaTest** si la empresa tiene EvaluaTest. Pone la que elija el modelo y, si no
-  elige, la primera de la lista, que viene ordenada por parecido con el cargo. Así, copiar una oferta de
-  PsicoAlianza da **la sugerencia de EvaluaTest de cualquier borrador**, no el número de la vacante de
-  PsicoAlianza. Vacante y proveedor quedan coherentes, y el reclutador podrá cambiar de conexión en el
-  6.2b. **El saneado no se toca.**
+- **Dónde** (opinión previa): las conexiones se leen **dentro de la función del modo copia**, que decide
+  ahí si la oferta copiada es de EvaluaTest y vacía la vacante base si no lo es. La función que convierte
+  la oferta en borrador base **no se vuelve asíncrona**. La del modo copia no recibe hoy la empresa: se le
+  pasa (es privada y tiene una sola llamada). Así el modo desde cero **no puede llegar a esa lectura, por
+  estructura**, y no lee nada nuevo.
+- ⚠️ **Lo que pasa después, y es lo esperado** (explicación corregida en la opinión previa): en modo copia
+  **el modelo no recibe la lista de vacantes de EvaluaTest**, solo la oferta base y lo que escribió el
+  reclutador. Con la vacante base vacía, el modelo devuelve nulo o un número que no casa, y el saneado
+  pone **la primera de la lista de vacantes de EvaluaTest parecidas al cargo**: hasta ocho del índice de
+  vacantes, o, si ese índice no encuentra ninguna, hasta cuarenta filtradas de la lista completa. Así,
+  copiar una oferta de PsicoAlianza da la vacante de EvaluaTest más parecida, no el número de PsicoAlianza.
+  Vacante y proveedor quedan coherentes, y el reclutador podrá cambiar de conexión en el 6.2b. **El saneado
+  no se toca.**
+- **Hoy el riesgo es más estrecho que el caso de arriba, pero existe**: el número de PsicoAlianza solo
+  acaba sugerido si coincide con una de esas vacantes parecidas. Y lo mismo vale hoy para una oferta de
+  EvaluaTest copiada, cuya vacante solo se conserva si está en esa lista: **eso es previo al paso y queda
+  fuera**.
 
 ## Los casos, persona por persona
 
@@ -114,7 +130,8 @@ la prueba, sea del proveedor que sea. Pasa a tomarla **solo si esa oferta es de 
 | Oferta congelada en EvaluaTest, empresa con las dos; sin mandar conexión | EvaluaTest | **Igual** |
 | Manda la conexión de PsicoAlianza en una oferta congelada en EvaluaTest | PsicoAlianza | **Igual** (el 6.2b lo usa para cambiar de proveedor) |
 | Manda una conexión que no es de la empresa | Rechazo | **Igual** |
-| La congelada ya no está en la empresa; sin mandar conexión | Re-congela por la regla, en silencio | **Rechazo con el mensaje nuevo, sin tocar al proveedor** |
+| La congelada ya no está, la empresa tiene alguna conexión; sin mandar conexión | Re-congela por la regla, en silencio | **Rechazo con el mensaje nuevo, sin tocar al proveedor** |
+| La congelada ya no está y la empresa no tiene ninguna conexión; sin mandar conexión | *Conéctalo en Mi compañía* | **Igual**, sin tocar al proveedor |
 | La congelada ya no está; manda una conexión de la empresa | Esa | **Igual** |
 | Oferta sin congelada, empresa con las dos | EvaluaTest | **Igual** |
 | Oferta sin congelada, empresa sin conexiones | *Conéctalo en Mi compañía* | **Igual** |
@@ -143,13 +160,14 @@ la prueba, sea del proveedor que sea. Pasa a tomarla **solo si esa oferta es de 
 
 ## 🔴 Las trampas
 
-**1. Una prueba existente afirma el fallo.** *Al cambiar el puntaje conserva la conexión y la bolsa del
+**1. Una prueba existente tiene mal un dato.** *Al cambiar el puntaje conserva la conexión y la bolsa del
 proveedor* congela una conexión que **no está en la empresa de la prueba**, guarda sin conexión y espera
-**la de la empresa**. Con este paso ese es el caso *la congelada ya no está*, y se rechaza. **Su
-afirmación cambia**: pasa a esperar el rechazo con el mensaje nuevo, y **la conservación de la bolsa del
-proveedor, que hoy también comprueba, no se pierde**. Tiene que seguir comprobada en esa prueba o en una
-nueva con la congelada presente. Es la única afirmación existente que cambia, y el reporte lo dice línea
-por línea.
+**la de la empresa**. Con este paso ese dato la convierte en el caso *la congelada ya no está*, y se
+rechazaría. **Se arregla el dato, no la afirmación** (opinión previa): la oferta congela la conexión que
+sí está en la empresa. Su título y sus tres afirmaciones quedan intactos. **Ninguna afirmación existente
+cambia**, y el reporte dice qué línea de datos cambió. El precio, aceptado: con una sola conexión esa
+prueba no distingue el antes del después; eso lo distinguen las nuevas de *congelada en PsicoAlianza con
+las dos* y de *congelada ausente*.
 
 **2. El mensaje de *sin proveedor conectado* es tentador.** El resolvedor ya lanza *sin conexión* cuando
 la congelada no está. Dejar que ese error caiga en el tratamiento de hoy daría *tu empresa no tiene un
@@ -166,7 +184,14 @@ la configuración de la prueba y la conexión congelada. Buscar la configuració
 que no hay nada que arreglar.
 
 **5. La lista de conexiones de la IA puede fallar.** Un borrador no puede romperse porque no se pudo leer
-la empresa: se sigue sin vacante base y se avisa en el registro.
+la empresa: se sigue sin vacante base y se avisa en el registro. Sin empresa no se llega: el borrador
+rechaza antes (opinión previa), así que el fallo solo puede venir de la base.
+
+**6. El caso espejo, que queda en local hasta el 6.2b. Anotado, no se arregla aquí** (opinión previa):
+una oferta congelada en PsicoAlianza que alguien edita desde la ficha y a la que le elige otra vacante.
+El selector lista las de EvaluaTest, porque el portal todavía no manda conexión, y el guardado comprobará
+ese número **en PsicoAlianza**. Solo se alcanza en local: en producción no hay ofertas en PsicoAlianza y
+la rama se despliega entera. Lo cierra el 6.2b, que manda la conexión al listar y al guardar.
 
 ## Lo que hay que preservar entero
 
@@ -196,10 +221,12 @@ las de hoy):
 - Congelada en PsicoAlianza, empresa con las dos, sin conexión en el cuerpo → **conserva PsicoAlianza** y
   comprueba la vacante **solo** por su adaptador.
 - Congelada en EvaluaTest, empresa con las dos, sin conexión en el cuerpo → EvaluaTest.
-- 🔴 Congelada ausente, sin conexión en el cuerpo → **rechazo con el mensaje nuevo** y **ningún adaptador
-  llamado**.
+- 🔴 Congelada ausente con alguna conexión en la empresa, sin conexión en el cuerpo → **rechazo con el
+  mensaje nuevo** y **ningún adaptador llamado**.
+- Congelada ausente y empresa sin conexiones, sin conexión en el cuerpo → **el rechazo de hoy**, *conéctalo
+  en Mi compañía*, y ningún adaptador llamado.
 - Congelada ausente, con una conexión de la empresa en el cuerpo → esa.
-- La prueba de la trampa 1, con su afirmación cambiada y la bolsa del proveedor todavía comprobada.
+- La prueba de la trampa 1, con su dato arreglado y sus afirmaciones intactas.
 - Las que ya existen de *sin conexión y con las dos → EvaluaTest* (oferta sin congelada) y de *conexión
   ajena → rechazo* **siguen pasando sin cambios**.
 
@@ -208,7 +235,10 @@ sin red; si ninguna sirve, dilo en la opinión previa):
 - Oferta copiada de EvaluaTest, sin congelada, de PsicoAlianza y con conexión ausente: la vacante base es la
   de la tabla del alcance 2.
 - Fallo al leer las conexiones → vacante base vacía y sin excepción.
-- Modo desde cero → no se leen conexiones.
+- **Sin prueba de *desde cero no lee conexiones*** (opinión previa): montar el borrador entero sin red pide
+  unas siete piezas falsas. Con la lectura dentro de la función del modo copia, lo garantiza la
+  estructura, y **el planificador lo comprueba al revisar el diff** leyendo que la única llamada a esa
+  función está en la rama de copia.
 
 ⚠️ Una prueba que pasa a la primera merece desconfianza: control negativo en la de *conserva PsicoAlianza*
 y en la de *oferta de PsicoAlianza no toma la vacante*. Borrarlo después y limpiar la caché de Jest.
@@ -222,7 +252,8 @@ Una vez sobre el conjunto: `npm run build` y `npm test` en el backend, con la ca
 1. **Qué cambió** y **qué se verificó**, con el resultado real.
 2. **Qué quedó fuera** y por qué.
 3. **Qué decisiones se tomaron que no estaban en este brief.**
-4. **La afirmación existente que cambió**, con sus líneas, y confirmación de que no se quitó ninguna otra.
+4. **La línea de datos que cambió** en la prueba de la trampa 1, y confirmación de que **ninguna afirmación
+   existente** cambió ni se quitó.
 5. **Confirmación de que el guardado con una sola conexión de EvaluaTest da lo mismo que hoy**, y de que
    el agente de WhatsApp y el portal no se tocaron.
 6. **Confirmación de que el diff no trae cambios de formato** ni comentarios nuevos en código, **y la lista
