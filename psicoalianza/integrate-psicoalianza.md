@@ -1531,6 +1531,62 @@ Se da por terminado cuando se cumplen las dos condiciones:
     dice que la etapa se omite (ver la corrección en la 44). Cuando llegue el botón del 2c, el texto se
     revisa.
 
+51. **La oferta conserva su conexión al guardar, se elige a propósito cuando hay dos, y nada que no
+    sea EvaluaTest arrastra pruebas ni vacantes de EvaluaTest** (2026-09-14, decidido con el usuario al
+    contrastar el paso 6.2 con el código; pasos 6.2a y 6.2b).
+
+    **Lo que se encontró**, leído del código ese día:
+
+    1. 🔴 **Guardar la configuración de la prueba sin mandar conexión re-congela por la empresa**, aunque
+       la oferta ya tenga una. Desde el 4a, sin conexión en el cuerpo se resuelve siempre por la regla de
+       la empresa (dos → EvaluaTest). Lo alcanzan hoy **el modal de la ficha de la oferta** al cambiar el
+       puntaje y **el agente de WhatsApp** al encender la prueba o cambiar el puntaje. Una oferta de
+       PsicoAlianza en una empresa con las dos pasaría a EvaluaTest con un número de vacante de
+       PsicoAlianza: casi siempre falla al comprobar la vacante, pero si ese número existe en EvaluaTest
+       queda apuntando a **otro cargo** sin error, el riesgo que la 48 descartó. Una prueba del guardado,
+       *al cambiar el puntaje conserva la conexión*, afirmaba justo lo contrario de su título.
+    2. **Las pruebas adicionales se piden siempre a EvaluaTest** con el número de vacante elegido: con
+       una vacante de PsicoAlianza preguntaría por otro cargo.
+    3. **Copiar una oferta en el portal no copia su conexión.**
+    4. **Al guardar se conservan el código de perfil y las pruebas adicionales** que no lleguen en el
+       cuerpo: una oferta que pasa a PsicoAlianza arrastraría los de EvaluaTest.
+    5. **El aviso de la vacante solo habla de EvaluaTest** y no conoce los motivos de PsicoAlianza.
+    6. **La IA que redacta ofertas, en modo copia**, toma el número de vacante de la oferta copiada, que
+       lee entera de la base, y lo valida contra la lista de EvaluaTest: una oferta de PsicoAlianza con un
+       número que exista en EvaluaTest sugeriría un cargo equivocado.
+
+    **Lo decidido:**
+
+    - ✅ **Al guardar, la conexión es la del cuerpo; si no llega, la congelada en la oferta; y solo sin
+      ninguna de las dos, la regla de la empresa.** Si la congelada ya no está en la empresa, se rechaza
+      en vez de re-congelar por la regla. Arregla el portal y el agente de WhatsApp a la vez. Paso 6.2a.
+    - ✅ **La IA en modo copia solo toma la vacante de una oferta de EvaluaTest**: conexión vacía (oferta
+      de antes de la migración) o conexión de EvaluaTest de la empresa. Paso 6.2a.
+    - ✅ **Oferta nueva en una empresa con las dos conexiones: ninguna viene elegida**, y el reclutador
+      elige antes de pasar de paso. Si la IA sugirió una vacante, que es siempre de EvaluaTest, viene
+      elegida EvaluaTest. Paso 6.2b.
+    - ✅ **Una oferta activa puede cambiar de conexión**, eligiendo otra vacante: cambiar de conexión
+      borra la vacante elegida. Quien ya está en la prueba se sigue consultando donde fue invitado (48).
+      Paso 6.2b.
+    - ✅ **Con PsicoAlianza, las pruebas adicionales no se piden ni se enseñan**, y al guardar se mandan
+      vacías, igual que el código de perfil. **Copiar una oferta copia su conexión.** Paso 6.2b.
+    - ✅ **Los textos del aviso de una vacante de PsicoAlianza, aprobados por el usuario**. Los de
+      EvaluaTest no cambian. Paso 6.2b.
+
+      | Motivo | Texto |
+      | --- | --- |
+      | Comprobando | «Verificando la vacante en PsicoAlianza…» |
+      | Completada | «Esta vacante está completada en PsicoAlianza y no sirve para invitar candidatos. Elige otra vacante.» |
+      | Suspendida | «Esta vacante está suspendida en PsicoAlianza y no sirve para invitar candidatos. Elige otra vacante o reactívala en PsicoAlianza.» |
+      | Archivada | «Esta vacante está archivada en PsicoAlianza. Elige otra vacante.» |
+      | Sin pruebas | «Esta vacante no tiene pruebas configuradas en PsicoAlianza: el candidato abriría el enlace sin nada que responder. Elige otra vacante o configúrale pruebas en PsicoAlianza.» |
+      | No encontrada | «No encontramos esta vacante en la cuenta de PsicoAlianza conectada. Elige otra vacante.» |
+      | No se pudo comprobar | «No se pudo verificar si esta vacante sigue activa en PsicoAlianza. Puede que esté bien; vuelve a intentarlo en un momento.» |
+
+    **Fuera, a sabiendas:** que el agente de WhatsApp o la IA sugieran vacantes de PsicoAlianza (hoy solo
+    conocen EvaluaTest y ampliarlos es un paso propio), la creación desde administración (anotada en la
+    40) y el modo demo.
+
 ## Falta de PsicoAlianza
 
 | #   | Qué                                               | Por qué importa                                                                  |
@@ -2255,7 +2311,8 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 5a | ✅ **HECHO el 2026-09-14.** **Embudo**: el documento, su tipo y el plazo en la invitación, la traducción del tipo y la limpieza del documento en el adaptador, y el motivo *sin documento* con su grupo en el portal (decisión 45) — brief `brief-etapa3-paso5a-embudo-psicoalianza.md`, opinión previa el 2026-09-14 | Embudo y portal |
 | 5b | ✅ **HECHO el 2026-09-14.** **Conexión**: guardar y validar la conexión de PsicoAlianza por proveedor, sin login y conservando la sesión, la ruta que pregunta si la sesión está viva (44), y no aceptar plazos con decimales en una empresa con PsicoAlianza (decisión 46) — brief `brief-etapa3-paso5b-conexion-psicoalianza.md` | Ruta de producción |
 | 6.1 | ✅ **Código HECHO y revisado el 2026-09-14; casos a mano pendientes** en `pruebas-a-mano.md`, que el usuario corre con la rama entera antes de desplegar. Verificado por el planificador: backend 115 suites y 1.158 pruebas (1.149 pasan, 9 omitidas; 1 nueva), portal con tipos limpios; ninguna afirmación existente quitada. **Portal, Mi compañía** (decisión 50): una fila por proveedor, cada una con su modal (46 y 50); la etiqueta del estado de sesión con sus tres estados (44), sin el botón de conectar, que llega con el 2c; los lectores de Mi compañía que la 41 dejó leyendo campos de EvaluaTest; el plazo en días enteros con PsicoAlianza y el mensaje del rechazo, también en los interruptores del flujo (46 y 50). **En el backend, aditivo**: la lista de conexiones servida gana el correo (50). El bloque y la ruta de validación que se llaman como EvaluaTest **no se renombran** salvo motivo concreto acordado con el usuario — brief `brief-etapa3-paso6-1-mi-compania.md` | Visible; backend aditivo |
-| 6.2 | **Portal, la oferta**: la señal de «hay conexión», que hoy solo mira EvaluaTest y decide si la ficha y el diálogo de crear enseñan los controles de la prueba; el selector de proveedor, solo con más de una conexión (3); la conexión elegida, mandada al guardar la oferta y al pedir el selector y el estado de la vacante (48); las pruebas adicionales solo con EvaluaTest (4); el texto de los motivos nuevos de vacante no usable (ver *Opinión previa del paso 3*, en esta etapa). Va después del 6.1, que es quien deja guardar una conexión de PsicoAlianza desde el portal | Visible |
+| 6.2a | **Backend** (decisión 51): el guardado de la configuración de la prueba conserva la conexión congelada cuando el cuerpo no trae una, y rechaza si ya no está en la empresa; la IA en modo copia solo toma la vacante de una oferta de EvaluaTest — brief `brief-etapa3-paso6-2a-conexion-de-la-oferta.md` | Toca el guardado de producción |
+| 6.2b | **Portal, la oferta** (decisión 51): la señal de «hay conexión», que hoy solo mira EvaluaTest y decide si la ficha y el diálogo de crear enseñan los controles de la prueba; el selector de proveedor, solo con más de una conexión (3); la conexión elegida, mandada al guardar la oferta y al pedir el selector y el estado de la vacante (48); las pruebas adicionales solo con EvaluaTest (4); el texto de los motivos nuevos de vacante no usable (ver *Opinión previa del paso 3*, en esta etapa). Además (decisión 51): ninguna conexión elegida por defecto con dos, cambiar de conexión borra la vacante, con PsicoAlianza el código de perfil y las pruebas adicionales se mandan vacíos, copiar una oferta copia su conexión, el aviso de oferta sin proveedor mira la conexión congelada, y los textos aprobados del aviso de la vacante. Va después del 6.1, que es quien deja guardar una conexión de PsicoAlianza desde el portal, y del 6.2a | Visible |
 
 **Antes del paso 2, fuera del código:** cuenta de PsicoAlianza para probar y **una sesión de esa
 cuenta pegada en el `.env` local** (decisión 42; cómo sacarla, en `../entorno-local.md`). Para el 2b
