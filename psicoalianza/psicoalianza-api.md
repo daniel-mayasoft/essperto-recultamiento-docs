@@ -133,8 +133,25 @@ y no depende del correo, así que la entrega por WhatsApp se sostiene.)*
   ⚠️ **La causa no está medida**: la diferencia probable es que esta vez el tablero se leyó
   **después** de pedir el enlace personal. En el tablero 1135 había además otras dos agendas en `2`.
   Para el adaptador es *sin terminar*, como cualquier estado que no sea finalizada.
-- `recomendacion`: `0` pendiente · `3` recomendado. Faltan los valores de "no
-  recomendado" y demás bandas — un candidato reprobado los revelará.
+- `recomendacion`: `0` pendiente · `1` no recomendado · `2` recomendado con sugerencias · `3`
+  recomendado · `4` avanzado. ✅ **Medido el 2026-09-16 en el tablero de una vacante con cuatro
+  pruebas**: **el número no significa lo mismo en cada prueba**. En IQ Factorial el `3` dice «Alto» y
+  el `4` «Avanzado»; en Ethikos, Ten DISC Plus y V&P Test el `3` dice «Recomendado». Y los cortes son
+  de cada prueba: un 45,55 en V&P Test salió `2` «Recomendado con sugerencias», mientras que un 43,25
+  en otra prueba (bloque D del 2026-09-14) salió `1` «No recomendado». **No se interpreta por número**:
+  se lee `estado_recomendacion` tal cual (decisión 58). Pueden aparecer más valores.
+- ✅ **`indice_talento` es el promedio ponderado de los `ajuste` con el `porcentaje` de cada prueba
+  en la vacante, redondeado a un decimal.** Medido el 2026-09-16 sobre tres personas del mismo tablero
+  (pesos 25, 40, 20 y 15): los tres índices calculados coinciden con los del tablero (84,1, 87,2 y
+  77,3). El peso de cada agenda se lee en `prueba.procesos_pruebas[]`, en la entrada cuyo `proceso_id`
+  es el de la agenda. Consecuencia: **una prueba muy baja queda tapada por el promedio** (un 45,55 con
+  índice 77,3).
+- ⏱️ **Calificar tarda**: el 2026-09-16, con una vacante de una prueba, el tablero siguió sin índice
+  unos **25 minutos** después de terminar la prueba; mientras tanto el adaptador la da como *en
+  progreso*.
+- ⚠️ **La ficha de una persona** (otra consulta, no la del tablero) **mezcla agendas de otras
+  vacantes**: trajo una quinta prueba de un proceso distinto. El tablero no mezcla (medido el
+  2026-09-14). Si algún día se usa la ficha, filtrar por `proceso_id`.
 - Etapa del candidato: solo se ha visto `9` "En pruebas". No se ha observado que avance.
 
 ## `GET /obtener-correo-usuario?documento={doc}` — ¿el documento ya tiene correo?

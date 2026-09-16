@@ -1816,6 +1816,29 @@ Se da por terminado cuando se cumplen las dos condiciones:
     ya»— y las tres del orquestador fallan sin el cambio. Lo que ve el candidato lo comprueba el usuario
     a mano en local con el simulador de WhatsApp.
 
+58. **El reclutador ve el resultado de la prueba psicométrica en el detalle del candidato —el ojo de
+    la tabla de candidatos—: puntaje, mínimo de la oferta, si aprobó y, con PsicoAlianza, cada prueba
+    con su peso, su nota y el texto de PsicoAlianza tal cual** (2026-09-16, decidido con el usuario).
+
+    **Lo que se vio:** probando en el servidor de pruebas, Daniel sacó 69,5 con un mínimo de 70 y se le
+    descartó. El reclutador solo vería ese número dentro del motivo del descarte; **a quien aprueba no
+    se le ve en ningún sitio, y además se borra**: el puntaje y el detalle por prueba viven en el estado
+    de la conversación, que se reinicia al pasar a la siguiente etapa y se vacía al terminar. Y el mismo
+    día se midió que el índice de PsicoAlianza es un promedio ponderado (`psicoalianza-api.md`): una
+    persona con 45,55 en una prueba y 77,3 de índice aprueba con un mínimo de 70 sin que nadie vea el 45.
+
+    | Qué | Decidido | Descartado |
+    | --- | --- | --- |
+    | **Dónde se guarda** | Un campo **permanente** de la participación, escrito en el veredicto, como ya lo son la fecha de la entrevista y los documentos enviados | Dentro del estado de la conversación: se borra al avanzar |
+    | **Qué decide** | **Nada nuevo.** El veredicto sigue siendo el índice contra el mínimo de la oferta (decidido el 2026-09-13/14); el detalle solo se enseña | Rechazar por una prueba baja: se habló y se deja para cuando un cliente lo pida |
+    | **Dónde se ve** | Un bloque en el detalle del candidato, junto al de ReTHUS | Una columna en la lista: la lista ya es ancha |
+    | **Cómo se enseña cada prueba** | Nombre, **peso**, nota y **el texto de PsicoAlianza tal cual** («Recomendado con sugerencias», «Alto», «Avanzado»). El único «aprobó / no aprobó» es el nuestro, en el encabezado | **Colores o aprobado/reprobado por prueba**: el mismo número dice cosas distintas en cada prueba y los cortes son de cada una, así que cualquier traducción sería inventada (ejemplos en la conversación del 2026-09-16, recogidos en `psicoalianza-api.md`) |
+    | **Con EvaluaTest** | Encabezado y, si se consultaron, las pruebas adicionales con aprobada o no. Sin peso: EvaluaTest no lo da | — |
+    | **Evaluados antes del cambio** | No se ven: no hay de dónde recuperar a los aprobados | Rellenar desde el motivo del descarte: solo cubriría a los reprobados |
+    | **Candidatos sin desbloquear** | Sin regla propia: el ojo solo aparece para quien está desbloqueado o se añadió a mano, y el bloque hereda esa puerta | — |
+
+    Brief: paso 9 de la etapa 3.
+
 ## Falta de PsicoAlianza
 
 | #   | Qué                                               | Por qué importa                                                                  |
@@ -2545,6 +2568,7 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 6.1 | ✅ **Código HECHO y revisado el 2026-09-14; casos a mano pendientes** en `pruebas-a-mano.md`, que el usuario corre con la rama entera antes de desplegar. Verificado por el planificador: backend 115 suites y 1.158 pruebas (1.149 pasan, 9 omitidas; 1 nueva), portal con tipos limpios; ninguna afirmación existente quitada. **Portal, Mi compañía** (decisión 50): una fila por proveedor, cada una con su modal (46 y 50); la etiqueta del estado de sesión con sus tres estados (44), sin el botón de conectar, que llega con el 2c; los lectores de Mi compañía que la 41 dejó leyendo campos de EvaluaTest; el plazo en días enteros con PsicoAlianza y el mensaje del rechazo, también en los interruptores del flujo (46 y 50). **En el backend, aditivo**: la lista de conexiones servida gana el correo (50). El bloque y la ruta de validación que se llaman como EvaluaTest **no se renombran** salvo motivo concreto acordado con el usuario — brief `brief-etapa3-paso6-1-mi-compania.md` | Visible; backend aditivo |
 | 6.2a | ✅ **HECHO y revisado el 2026-09-15.** Verificado por el planificador: backend 115 suites y 1.169 pruebas (1.160 pasan, 9 omitidas; 11 nuevas), con la caché limpia; ninguna afirmación existente cambiada, solo el dato de la prueba que congelaba una conexión inexistente; la lectura de conexiones de la IA solo en la rama de copia; una conexión vacía en el cuerpo cuenta como ninguna. **Backend** (decisión 51): el guardado de la configuración de la prueba conserva la conexión congelada cuando el cuerpo no trae una, y rechaza si ya no está en la empresa; la IA en modo copia solo toma la vacante de una oferta de EvaluaTest — brief `brief-etapa3-paso6-2a-conexion-de-la-oferta.md` | Toca el guardado de producción |
 | 6.2b | ✅ **Código HECHO y revisado el 2026-09-15; casos a mano pendientes** en `pruebas-a-mano.md`, que el usuario corre con la rama entera antes de desplegar. Verificado por el planificador: comprobación de tipos del portal limpia; backend sin cambios; las trampas del brief comprobadas en el diff. En la revisión se añadieron: el texto de vacante no usable por un motivo desconocido (aprobado por el usuario) y la espera a los datos de la empresa antes de copiar una oferta o preparar un borrador de la IA, con el error dentro de cada pantalla. **Portal, la oferta** (decisión 51): la señal de «hay conexión», que hoy solo mira EvaluaTest y decide si la ficha y el diálogo de crear enseñan los controles de la prueba; el selector de proveedor, solo con más de una conexión (3); la conexión elegida, mandada al guardar la oferta y al pedir el selector y el estado de la vacante (48); las pruebas adicionales solo con EvaluaTest (4); el texto de los motivos nuevos de vacante no usable (ver *Opinión previa del paso 3*, en esta etapa). Además (decisión 51): ninguna conexión elegida por defecto con dos, cambiar de conexión borra la vacante, con PsicoAlianza el código de perfil y las pruebas adicionales se mandan vacíos, copiar una oferta copia su conexión, el aviso de oferta sin proveedor mira la conexión congelada, y los textos aprobados del aviso de la vacante. Cierra el caso espejo que el 6.2a deja en local (su trampa 6): editar desde la ficha una oferta de PsicoAlianza lista vacantes de EvaluaTest. Va después del 6.1, que es quien deja guardar una conexión de PsicoAlianza desde el portal, y del 6.2a — brief `brief-etapa3-paso6-2b-la-oferta-por-proveedor.md` | Visible |
+| 9 | **Brief escrito el 2026-09-16, sin empezar.** El resultado psicométrico en el detalle del candidato (decisión 58): el adaptador de PsicoAlianza guarda el peso de cada prueba; el veredicto del cron escribe un resultado permanente en la participación; el portal lo enseña junto a ReTHUS. Se numera 9 porque la etapa 1 ya tiene pasos 7, 8a y 8b — brief `brief-etapa3-paso9-resultado-en-el-detalle.md` | Embudo (el veredicto) y visible |
 
 **Antes del paso 2, fuera del código:** cuenta de PsicoAlianza para probar y **una sesión de esa
 cuenta pegada en el `.env` local** (decisión 42; cómo sacarla, en `../entorno-local.md`). Para el 2b
