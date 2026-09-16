@@ -1783,6 +1783,39 @@ Se da por terminado cuando se cumplen las dos condiciones:
     los casos a mano de `pruebas-a-mano.md`, sección *Mi compañía — nombre bloqueado y contraseña
     guardada*. El texto del aviso, pendiente de que el usuario lo confirme al verlo.
 
+57. **Una empresa en modo demo puede pedir la prueba psicométrica real con un solo interruptor,
+    `demoMode.realPsychometrics`; el proveedor lo sigue eligiendo la oferta** (2026-09-16, decidido con
+    el usuario).
+
+    **Lo que se vio:** el usuario creó en local una oferta con la prueba de PsicoAlianza en Medicall, y
+    el candidato recibió el enlace `…evaluatest.com/vacante/DEMO-…`, el texto de EvaluaTest y, a los 45
+    segundos, «gracias por completar tu prueba» sin haber hecho nada ni recibido correo. No era un
+    defecto: Medicall tiene `demoMode.enabled` y la demo no pasa por el resolvedor (38 y 48), así que la
+    etapa fabrica un identificador, un enlace con forma de EvaluaTest y un resultado sintético, sin
+    mirar la conexión de la oferta. Pero con eso **no se puede probar la invitación real** sin apagar
+    la demo entera, y apagarla obliga a meter al candidato de otra forma, con la ventana horaria y el
+    lector de documentos reales.
+
+    | Qué | Decidido | Descartado |
+    | --- | --- | --- |
+    | **Forma** | **Un booleano** en el bloque de la demo, apagado por defecto: ausente o en falso, todo como hoy. Encendido, la etapa psicométrica deja de simularse **y el proveedor lo elige la conexión de la oferta**, como en una empresa real. Cédula, documentos, antecedentes y la inyección del candidato siguen simulados | **Dos interruptores, uno por proveedor** (propuesta del usuario): duplica la decisión que ya toma la conexión de la oferta (51), obliga a resolver el proveedor antes de decidir si se simula —una demo sin conexión no tendría a quién resolver—, y la combinación «EvaluaTest real, PsicoAlianza simulado» rompe: la simulación escribe `evaluatest` en el candidato y el cron preguntaría a EvaluaTest de verdad con un identificador inventado |
+    | **Dónde se mira** | En los tres sitios que hoy preguntan «¿es demo?» para esta etapa: el arranque (con su temporizador de 45 s), la sustitución de la consulta en el cron (que también gobierna el salto de pruebas adicionales) y «avanzar ya» de administración, que con el interruptor responde *no aplica* en esta etapa porque el resultado no es sintético | — |
+    | **Pantalla** | Ninguna: `demoMode` se sigue tocando a mano, como el resto del bloque | — |
+
+    **Lo que le pasa a Ana en Medicall con el interruptor encendido:** se crea la oferta y la demo la
+    inyecta como siempre; contesta las preguntas; al entrar a la etapa se invita de verdad en el
+    proveedor de la oferta y recibe el mensaje de ese proveedor con su enlace personal; el cron consulta
+    el tablero real y los fallos son los reales (sin conexión, sin correo o documento, sesión muerta).
+    ⚠️ El candidato de la demo tiene que llevar **un correo y una cédula propios**: con el correo nulo
+    de hoy la etapa lo descarta sin mensaje, y con la cédula de una persona real se la invitaría en la
+    cuenta del cliente.
+
+    ⚠️ **Escrito por el planificador a petición del usuario, sin revisión de otra persona.** Verificado
+    con la caché limpia: backend compila y pasan 132 suites y 1.348 pruebas (1.339, 9 omitidas), seis
+    nuevas —la función pura, el arranque real con la demo encendida, el ciclo mixto del cron y «avanzar
+    ya»— y las tres del orquestador fallan sin el cambio. Lo que ve el candidato lo comprueba el usuario
+    a mano en local con el simulador de WhatsApp.
+
 ## Falta de PsicoAlianza
 
 | #   | Qué                                               | Por qué importa                                                                  |

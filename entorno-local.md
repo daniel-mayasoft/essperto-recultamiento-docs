@@ -424,7 +424,24 @@ ya la elige.
 - **Probar la etapa psicométrica de punta a punta.** El candidato habla por WhatsApp, y aquí
   WhatsApp está apagado a propósito. Cómo se mete a un candidato en la etapa sin WhatsApp sigue
   sin anotarse aquí; qué tiene que tener la oferta para que la etapa use PsicoAlianza, sí (*Una
-  oferta con PsicoAlianza, a mano*).
+  oferta con PsicoAlianza, a mano*). **Con el simulador de WhatsApp y una empresa en modo demo sí
+  se puede** (decisión 57): la demo inyecta al candidato al crear la oferta y, con
+  `demoMode.realPsychometrics` en verdadero, la etapa invita de verdad en el proveedor de la oferta.
+  ⚠️ Una empresa demo sin ese interruptor simula la etapa entera: enlace `DEMO-…` de EvaluaTest y
+  «gracias por completar» a los 45 segundos, aunque la oferta sea de PsicoAlianza. Y el candidato de
+  la demo tiene que llevar tu cédula y un correo tuyo: con el correo nulo la etapa lo descarta sin
+  mensaje, y con una cédula ajena se invita a esa persona en la cuenta real.
+
+  ```js
+  db.tenants.updateOne(
+    { _id: ObjectId("<id de la empresa demo>") },
+    { $set: {
+      "demoMode.realPsychometrics": true,
+      "demoMode.candidate.documentId": "<tu cédula>",
+      "demoMode.candidate.email": "<tu correo>"
+    } }
+  )
+  ```
 - 🔴 **PsicoAlianza no tiene ambiente de pruebas.** Cada invitación hecha desde local le llega a
   una persona real en la cuenta real. Se prueba con documentos y correos propios, **un correo
   real distinto por candidato**: allá un correo pertenece a una sola persona en toda la

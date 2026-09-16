@@ -10,7 +10,7 @@ conexión de PsicoAlianza guardada, validada y consultada por el backend (paso 5
 46) y con el resolvedor que elige proveedor al guardar la oferta, al invitar y al consultar (paso
 4a, decisión 48), y con *Mi compañía* por proveedor, la etiqueta de la sesión y el plazo en días
 enteros en la pantalla (paso 6.1, decisión 50), y con la oferta que conserva su conexión al guardar
-(paso 6.2a, decisión 51). No es historia ni
+(paso 6.2a, decisión 51), y el 2026-09-16 con la demo que pide la prueba real (decisión 57). No es historia ni
 justificación: **los porqués están en la bitácora**, y aquí solo se apunta el número de
 decisión. Cuenta qué le pasa a una persona en cada caso.
 
@@ -342,8 +342,13 @@ que copia la configuración tal cual, o es de antes de la migración— y sigue.
 
 - **Fallo pasajero** (red, proveedor caído, sin código de evaluación, **la lectura del
   plazo o la resolución del proveedor**, que van antes de invitar): se le avisa al
-  candidato **una sola vez** —con un enlace de respaldo si se puede armar, o el aviso del
-  correo si no—, se le deja *esperando resultado externo* **sin identificador** y se guarda.
+  candidato **una sola vez** —con un enlace de respaldo si se puede armar, o si no con
+  «⏳ Estamos preparando tu prueba psicométrica. En cuanto esté lista, te enviaremos el enlace
+  por aquí y también a tu correo. Por ahora no tienes que hacer nada. ¡Mucho éxito! 🌟»,
+  aprobado por el usuario el 2026-09-16: el aviso de antes le mandaba buscar en spam un correo
+  que no se había enviado, y no promete tiempo porque la sesión puede tardar horas—, se le deja
+  *esperando resultado externo* **sin identificador** y se guarda. El aviso del correo de
+  siempre queda solo para la invitación que salió bien sin enlace (§2.6).
   El enlace de respaldo **solo existe con EvaluaTest resuelto** y lo arma **su adaptador**:
   con el código de evaluación guardado en la oferta si lo hay, y si no resolviéndolo por el
   cliente con la credencial de la empresa; el embudo ya no llama al cliente ni lee
@@ -495,7 +500,11 @@ reinvitaría a quien se invitó después del despliegue (registro del paso 6b).
 Una empresa marcada como demo en la base (sin pantalla) enseña el producto a un cliente
 potencial con una candidata configurada. La etapa psicométrica **no llama nunca a EvaluaTest**,
 **el puerto no sabe que existe la demo** y **la demo no pasa por el resolvedor** (decisiones
-38 y 48). Los cinco puntos:
+38 y 48). **Salvo que la empresa tenga `demoMode.realPsychometrics` encendido** (decisión 57):
+entonces los cinco puntos de abajo no aplican, la etapa va por §2 a §5 como en cualquier empresa
+—el proveedor lo elige la conexión de la oferta— y «avanzar ya» responde que no aplica en esta
+etapa; el resto de la demo (inyección del candidato, sin robots, cédula, documentos y antecedentes
+simulados) sigue igual. Los cinco puntos:
 
 1. **La invitación** (§2): en vez de resolver e invitar, fabrica un identificador
    determinístico y **positivo**, un enlace de apariencia normal que no lleva a ninguna prueba,
