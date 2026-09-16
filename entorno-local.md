@@ -206,7 +206,7 @@ arrendar una IP, que hoy nadie hace hasta la pieza que consigue la sesión (2c).
 | --- | --- | --- |
 | `PROXY_HOST` | `gw.dataimpulse.com` | El gateway de DataImpulse |
 | `PROXY_PORT` | `823` | HTTP; `824` para SOCKS5 |
-| `PROXY_LOGIN` | El login de la cuenta de DataImpulse, sin sufijos | El país y la sesión pegajosa los añade el módulo. ⚠️ **Admite parámetros pegados al login**: con `__asn.26611` la salida es siempre Claro, sin coste ni cambio de código. Sin eso, de diez arriendos medidos el 2026-09-15 **la mitad no eran móviles** (UNE EPM y Colombia Telecomunicaciones), y esas IPs puntúan como residenciales en el captcha |
+| `PROXY_LOGIN` | El login de la cuenta de DataImpulse **seguido de `__asn.26611`** | El país y la sesión pegajosa los añade el módulo detrás. El sufijo fija el operador en Claro, el único con el que se ha visto entrar; **medido el 2026-09-16** (bitácora, *Medición del operador del proxy*): sin él, cuatro de nueve arriendos salen por Claro y el resto por UNE, Movistar o WOM; con él, dieciséis de dieciséis. ⚠️ Vive en la configuración: si se rota el login, **conservar el sufijo**, o la tasa baja sin que nada falle |
 | `PROXY_PASS` | La contraseña de la cuenta | Tal cual, sin sufijos |
 | `PROXY_PROTOCOL` | vacía | `http` por defecto; `socks5` si se usa el puerto 824. ⚠️ **Para conseguir la sesión tiene que ser HTTP**: Chromium no autentica un proxy SOCKS5 por la autenticación de página, y la pieza termina como *sin configurar* nombrando esta variable |
 

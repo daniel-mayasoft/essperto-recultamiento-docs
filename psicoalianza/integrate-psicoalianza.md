@@ -1722,6 +1722,35 @@ Se da por terminado cuando se cumplen las dos condiciones:
     ⚠️ **En una máquina de desarrollo sin la sesión manual y con la ruta del navegador puesta, la tarea
     entra de verdad con la cuenta del cliente** cada hora que haga falta. Anotado en `../entorno-local.md`.
 
+55. **Quien cumple el plazo sin haber sido invitado nunca pasa a la siguiente etapa, y el reclutador
+    se entera: en el correo de candidato seleccionado y en la ficha del candidato. Para los dos
+    proveedores** (2026-09-16, decidido con el usuario; cierra A1/A5 de *Lo que hereda la etapa 3*).
+
+    **El hueco, comprobado en el código el 2026-09-15:** el vencimiento del cron solo alcanza a quien ya
+    tiene identificador en el proveedor. Quien quedó *esperando resultado externo* sin identificador
+    —la invitación falló por algo pasajero: sesión de PsicoAlianza muerta, proveedor caído, red— se
+    reintenta cada cinco minutos **sin plazo**, y el barrido de atascados mira otro estado. Es código
+    compartido del embudo: **hoy le pasa igual a EvaluaTest en producción**.
+
+    **Lo que le pasa a Ana:** termina las preguntas, la invitación falla, recibe el aviso del correo que
+    no llega. Si en el plazo de la empresa la invitación nunca se consigue, **pasa a la siguiente etapa
+    sin puntaje**, como ya pasa quien pertenece a una empresa sin proveedor conectado (40). Se descartó
+    descartarla: sería por no hacer algo que nunca le llegó, y el motivo de hoy —«no llegó el
+    resultado»— sería falso.
+
+    **El precio de pasarla, cubierto en el mismo paso:** el reclutador tiene que saberlo, en dos sitios
+    con precedente en el código —la novedad por oferta se descartó porque tres Anas se pisarían—:
+
+    | Dónde | Qué ve |
+    | --- | --- |
+    | El correo (o WhatsApp, según sus preferencias) de **candidato seleccionado**, que ya admite una lista de avisos | Un aviso: Ana llegó sin prueba psicométrica porque la invitación no pudo enviarse en el plazo |
+    | La **ficha del candidato** en el portal | Un distintivo «sin prueba psicométrica» junto a su etapa, con el motivo |
+
+    Los textos los aprueba el usuario en el brief. **Cubre a los dos proveedores**: arreglarlo solo para
+    PsicoAlianza sería una condición cuya única función es conservar un fallo conocido de EvaluaTest;
+    es un cambio de comportamiento en producción para EvaluaTest, aceptado a sabiendas. Va antes de
+    desplegar. Sin brief todavía.
+
 ## Falta de PsicoAlianza
 
 | #   | Qué                                               | Por qué importa                                                                  |
@@ -2741,6 +2770,33 @@ usar esas cookies **desde otra máquina y otra IP residencial, sin proxy ninguno
 
 📌 Las dos direcciones IP concretas quedaron en la salida del script y **no se copian aquí**: una es
 la IP doméstica de quien lo corrió, rotan las dos, y dentro de un mes no significan nada.
+
+### Medición del operador del proxy — ✅ SE FIJA POR CONFIGURACIÓN, SIN CÓDIGO (2026-09-16)
+
+Hecha por el planificador con `evidencia/operador-del-proxy.mjs`: arrienda IPs pegajosas con
+identificador nuevo cada vez, saca la IP de salida por un túnel cifrado (la primera versión preguntaba
+en HTTP plano y **una caché en el camino devolvía la misma respuesta veinte veces**: ojo si alguien la
+repite) y consulta aparte, sin proxy, el operador de cada IP. Ningún login; unos kilobytes por arriendo.
+
+| Tanda | Respondieron | IPs distintas | Claro/Comcel |
+| --- | --- | --- | --- |
+| Sin parámetro, como arrienda el módulo del 2b hoy | 9 de 10 | 9 | **4 de 9**; el resto UNE EPM, Colombia Telecomunicaciones (Movistar) y Partners (WOM) |
+| Con `__asn.26611` detrás del país | 10 de 10 | 9 | **10 de 10** |
+| Con `__asn.26611` **dentro del valor de `PROXY_LOGIN`**, y el módulo pegando detrás país y sesión —el orden exacto que produce el código de hoy— | 6 de 6 | 6 | **6 de 6** |
+
+**Lo que queda probado:** el parámetro fija el operador, y funciona puesto en la variable sin tocar el
+módulo. **El punto «fijar el operador» se cierra con una línea de configuración por entorno**
+(`before-deploy.md`, fila 8; `../entorno-local.md`), sin brief ni código.
+
+⚠️ **Lo que esta medición no confirma, y la 52 daba por hecho:** que las IPs de los otros operadores
+«no sean móviles». El servicio de consulta marca como **móviles** las nueve del control, también las de
+UNE y Movistar. Lo que sí está medido es que el único operador con el que se ha visto entrar es Claro
+(13 y 15 de septiembre), así que fijarlo quita variables, no garantiza la tasa.
+
+⚠️ **El precio de que viva en configuración:** quien rote el login de DataImpulse puede dejar caer el
+sufijo sin que nada falle ruidoso; la tasa bajaría en silencio. Está anotado en las dos tablas de
+variables. Si algún día se quiere una señal, la pieza puede registrar «operador fijado: sí/no» mirando
+si el login lleva `__asn.` — sin registrar el login, que es secreto. Sin paso.
 
 ### Paso 2 — ✅ HECHO (2026-09-13)
 
