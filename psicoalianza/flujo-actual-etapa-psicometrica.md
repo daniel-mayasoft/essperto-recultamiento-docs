@@ -91,15 +91,32 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
    bloque **derivado de la lista, sin contraseña**, que siguen leyendo las ofertas, y la lista con
    `id`, `name`, `provider`, `email` y `configured`. La contraseña no sale del backend.
 
-   **La etiqueta de la sesión, solo en la fila de PsicoAlianza y solo con su conexión configurada.**
-   La fila pregunta el estado al cargar la página y después de guardar el modal, nunca en otro
-   momento, y solo cuenta la última respuesta pedida. Mientras llega, un indicador de carga;
-   `connected` → *Conectado*; `no_session` o `expired` → *«Sin conexión — las invitaciones a
-   PsicoAlianza no están saliendo y quienes ya están en la prueba pueden descartarse por
-   vencimiento. Avisa a soporte.»*; `no_connection` → nada, porque la fila ya dice *sin conectar*;
-   y si la petición falla, *No se pudo comprobar la sesión*. No dice que la etapa se omita, porque
-   con la conexión guardada no se omite (corrección de la 44), y no hay botón de conectar: llega
-   con el acuñador (2c).
+   **La etiqueta de la sesión, solo en la fila de PsicoAlianza y solo con su conexión configurada**
+   (paso 2c.3, decisión 54). La fila pregunta el estado al cargar la página, después de guardar el
+   modal y después de pulsar *Conectar*, y solo cuenta la última respuesta pedida. La etiqueta **no
+   decide nada**: elige el texto con lo que la ruta de estado dice además de `status`, en este orden,
+   la primera que aplica gana:
+
+   | # | Condición | Texto | Botón *Conectar* |
+   | --- | --- | --- | --- |
+   | 1 | Mientras llega la respuesta | Indicador de carga | Apagado |
+   | 2 | `status` es `connected` | «Conectado» (chip verde) | No se muestra |
+   | 3 | Hay ráfaga en curso | «Conectando…», con indicador | Apagado |
+   | 4 | Bloqueada por credenciales | «Conexión fallida — PsicoAlianza rechazó el correo o la contraseña. Revísalos y guarda de nuevo.» (aviso amarillo) | Apagado |
+   | 5 | Tope de intentos alcanzado | «Error de conexión — contacta a soporte.» (aviso rojo) | Apagado |
+   | 6 | Ha habido algún intento | «Conexión fallida — vuelve a intentarlo.» (aviso amarillo) | Encendido |
+   | 7 | No ha habido ninguno | «Pendiente de conexión — pulsa Conectar para conectar ahora.» (aviso amarillo) | Encendido |
+   | 8 | La petición falla | «No se pudo comprobar la sesión» | No se muestra |
+
+   «Conectado» gana sobre cualquier fallo guardado: un desenlace viejo con la sesión de hoy viva es
+   *Conectado*, y con la renovación anticipada en curso también, porque las invitaciones salen.
+   `no_connection` → nada, porque la fila ya dice *sin conectar*. **Pulsar *Conectar*** llama a la
+   ruta de escritura de abajo y pinta su respuesta; **mientras la respuesta diga que hay ráfaga en
+   curso, la fila vuelve a pedir el estado cada cinco segundos** hasta que deje de haberla —también
+   al cargar la página o al guardar el modal si la respuesta ya viene así—, con tope de doce minutos,
+   y se para al salir de la pantalla. El botón no adivina si arrancó: si el candado lo tiene otra
+   empresa, la respuesta lo dice y la fila queda en el texto 6 o 7. Toda la sección de etapas está
+   detrás del permiso de editar la empresa, así que quien solo puede leer no ve la fila ni el botón.
 
    **El plazo de la prueba** se configura en la pestaña de desarrollo de *Mi compañía*, que **solo
    aparece añadiendo `mode=dev` a la dirección**: un reclutador normal no lo ve. Su texto ya no
@@ -138,8 +155,18 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
    - **El estado de la sesión.** Una ruta de solo lectura bajo *Mi compañía* responde `connected`,
      `no_session`, `expired` o `no_connection`, comprobando de verdad con la petición barata del
      cliente y **sin acuñar nada**; primero resuelve la conexión, así que con la sesión manual
-     encendida una empresa sin PsicoAlianza sale `no_connection` y no «conectada». El botón para
-     conectar llega con el acuñador (2c).
+     encendida una empresa sin PsicoAlianza sale `no_connection` y no «conectada». **Desde el
+     2c.3 responde además cuatro datos** al lado de `status`, leídos del servicio de renovación:
+     `bursting` (hay ráfaga en curso para esa empresa), `blockedByCredentials` (el último desenlace
+     fue *credenciales rechazadas*), `capReached` (los intentos de la ventana viva llegan al tope,
+     con el mismo cálculo que decide si arranca una ráfaga) y `attempted` (hay algún desenlace
+     guardado). Con `no_connection` los cuatro van en falso y no se lee nada más.
+   - **Conectar.** Una ruta de escritura bajo *Mi compañía*, con el permiso de editar la empresa,
+     pide una sesión al servicio de renovación con el motivo *botón*, **saltando la espera entre
+     ráfagas y sin liberar el bloqueo ni saltar el tope**, y responde lo mismo que la ruta de estado
+     leído justo después: como el candado se toma antes de la primera espera, `bursting` ya viene
+     en verdadero si la ráfaga arrancó. Con la sesión manual encendida no arranca nada y la
+     respuesta lo refleja.
    - **Plazo en días enteros.** Al crear o editar la empresa, un plazo de la prueba con decimales
      se rechaza si la empresa tiene —o va a tener en esa misma petición— conexión de PsicoAlianza,
      mirando la lista resultante. Con EvaluaTest se sigue aceptando. Es la mitad de producto de la

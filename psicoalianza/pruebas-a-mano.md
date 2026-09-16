@@ -29,8 +29,8 @@ Brief: `brief-etapa3-paso6-1-mi-compania.md`. El número de caso es el del brief
 | 8 | 9 | Pestaña de desarrollo (`mode=dev`): plazo 1,5 y guardar | No se manda; aviso de días enteros | ☐ |
 | 9 | 10 | Plazo 2 y guardar | Se guarda | ☐ |
 | 10 | 4 | Sesión válida pegada e interruptor de la sesión manual encendido; recargar | Carga, y luego la etiqueta verde *Conectado* | ☐ |
-| 11 | 6 | Pegar una cookie inventada, **reiniciar el backend** y recargar | El aviso amarillo de *Sin conexión* con el texto aprobado | ☐ |
-| 12 | 5 | Apagar el interruptor, **reiniciar el backend** y recargar | El mismo aviso | ☐ |
+| 11 | 6 | Pegar una cookie inventada, **reiniciar el backend** y recargar | Desde el 2c.3 el texto lo elige la regla: con la conexión recién guardada y **ningún desenlace guardado** en la base, el aviso amarillo «Pendiente de conexión — pulsa Conectar para conectar ahora.» con el botón *Conectar* encendido. Con la manual encendida el botón no arranca nada (ver 2c.3, caso 1) | ☐ |
+| 12 | 5 | Apagar el interruptor, **reiniciar el backend** y recargar | El mismo aviso si sigue sin desenlace guardado; si la tarea de la hora ya intentó, el texto que toque a ese desenlace (ver la tabla del 2c.3) | ☐ |
 | 13 | 7 | Volver a la sesión válida y reiniciar; en las herramientas del navegador, **bloquear solo la petición del estado de sesión**, y recargar | «No se pudo comprobar la sesión», nunca *Sin conexión* | ☐ |
 | 14 | 8 | Quitar el bloqueo; *Editar conexión* de PsicoAlianza, cambiar solo el nombre y reteclear la contraseña | Cambia el nombre y la etiqueta se vuelve a pedir | ☐ |
 | 15 | 13 | ~~Abrir una oferta de esa empresa~~ | **Sustituido** por la sección del paso 6.2b, que ya está hecho | — |
@@ -70,3 +70,32 @@ PsicoAlianza, y para el caso 8 las de los estados que se puedan preparar.
 | 16 | 1 | Solo EvaluaTest | Crear una oferta con prueba; abrirla y cambiar el puntaje | ⚠️ **No se puede correr sin cuenta** | ☐ |
 | 17 | Revisión del diff | Solo PsicoAlianza, con la oferta del orden 1 | En las herramientas del navegador, **bloquear solo la petición de la empresa** (`/tenants/my-tenant`) del listado de ofertas; recargar y copiar la oferta con prueba | Sale el error del listado y **no se abre el diálogo**; nunca un diálogo con la prueba sin vacante | ☐ |
 | 18 | Revisión del diff | Igual | Con la petición de la empresa todavía bloqueada, recargar el listado, *Crear con IA*, escribir una descripción y generar | El error sale **dentro del diálogo de la IA**, que sigue abierto **con la descripción escrita**; no se abre el diálogo de crear. Sin cuenta real de EvaluaTest la IA no sugiere prueba, pero el fallo se ve igual | ☐ |
+
+## Paso 2c.3 — la etiqueta por estado y el botón *Conectar*
+
+Brief: `brief-etapa3-paso2c-3-boton-conectar.md`. El número de caso es el del brief. Una empresa con
+PsicoAlianza conectada. Varios estados se preparan **escribiendo en la base**, en la sesión de la
+conexión de PsicoAlianza (`psychometricConnections.$[].session`), el desenlace del último intento
+(`lastAttemptOutcome`) o los contadores de la ventana (`attemptWindowStartedAt`, `attemptsInWindow`);
+**no hace falta reiniciar el backend**: la ruta lee la base en cada petición. **Ninguno consigue una
+sesión real**: en los casos 7 y 10, la ruta del navegador va vacía en el `.env` para que la pieza
+termine en *sin configurar* sin lanzar nada.
+
+| Orden | Caso | Cómo se prepara | Qué se hace | Qué se tiene que ver | Resultado |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 1 | Sesión manual **encendida** y válida | Recargar *Mi compañía* | «Conectado», sin botón | ☐ |
+| 2 | 2 | Manual **apagada**; en la base, sin cookies (`encryptedCookies` nulo) y sin desenlace (`lastAttemptOutcome` nulo) | Recargar | «Pendiente de conexión — pulsa Conectar para conectar ahora.» y el botón encendido | ☐ |
+| 3 | 3 | Igual, con `lastAttemptOutcome: "bad_credentials"` | Recargar | «Conexión fallida — PsicoAlianza rechazó el correo o la contraseña. Revísalos y guarda de nuevo.», botón apagado | ☐ |
+| 4 | 4 | Igual, con `lastAttemptOutcome: "attempts_exhausted"` | Recargar | «Conexión fallida — vuelve a intentarlo.», botón encendido | ☐ |
+| 5 | 5 | Igual, con `attemptsInWindow: 20` y `attemptWindowStartedAt` **de hace una hora** | Recargar | «Error de conexión — contacta a soporte.» en rojo, botón apagado | ☐ |
+| 6 | 6 | Igual, con `attemptsInWindow: 20` y `attemptWindowStartedAt` **de hace dos días** | Recargar | «Conexión fallida — vuelve a intentarlo.» (la ventana venció), botón encendido | ☐ |
+| 7 | 7 | El caso 4, **con `PSICOALIANZA_CHROMIUM_PATH` vacía** en el `.env` (reiniciar el backend una vez para eso) | Pulsar *Conectar* | «Conectando…» un instante y luego «Conexión fallida — vuelve a intentarlo.» (la pieza termina en *sin configurar*, que no bloquea); nada se lanzó. En el registro del backend, la ráfaga con ese desenlace y el aviso de la variable | ☐ |
+| 8 | 8 | El caso 3 | El botón no se ve encendido; llamar la ruta `POST /tenants/my-tenant/psicoalianza/connect` a mano | La respuesta trae `bursting: false` y `blockedByCredentials: true`; **en la base, `lastAttemptOutcome` sigue en `bad_credentials`**: el bloqueo no se liberó | ☐ |
+| 9 | 9 | El caso 4; en las herramientas del navegador, **bloquear solo la petición del estado** (`session-status`) | Recargar | «No se pudo comprobar la sesión», sin botón | ☐ |
+| 10 | 10 | El caso 4, con la ruta del navegador vacía | *Editar conexión*, reteclear la contraseña y guardar | La etiqueta se vuelve a pedir: «Conectando…» brevísimo o directamente «Conexión fallida — vuelve a intentarlo.»; en la base, `lastAttemptOutcome` pasó por nulo (el guardado libera el bloqueo) y quedó en `not_configured` | ☐ |
+| 11 | 11 | Un usuario con un rol que **no puede editar la empresa** | Abrir *Mi compañía* | **No ve la sección de etapas** ni la fila de PsicoAlianza: toda la sección está detrás del permiso de editar; el botón hereda esa puerta (opinión previa del 2c.3) | ☐ |
+| 12 | Revisión del diff | Manual apagada; en la base, sin cookies y sin desenlace; **`PSICOALIANZA_CHROMIUM_PATH` apuntando a un ejecutable que tarde** en responder. Si no se puede preparar, se omite y se anota | Pulsar *Conectar* y, mientras dice «Conectando…», ir a otra pantalla del portal | En la pestaña de red del navegador, **ninguna petición más** al estado de sesión (`session-status`) tras salir | ☐ |
+
+**Lo que no se prueba en local, a sabiendas:** «Conectando…» durante minutos y el paso a «Conectado» por
+una ráfaga real. Es la comprobación real del punto 7d de `before-deploy.md`, en el servidor de pruebas,
+y desde este paso se hace **desde la pantalla**: guardar la conexión o pulsar *Conectar*.
