@@ -116,3 +116,23 @@ rama. ⚠️ Los casos con EvaluaTest hacen **un login real** contra EvaluaTest 
 | 6 | Con PsicoAlianza configurada | *Editar* en PsicoAlianza y guardar sin tocar la contraseña | Se guarda; la etiqueta se vuelve a pedir y dispara el intento de sesión como al guardar (2c.2) | ☐ |
 | 7 | Igual | En las herramientas del navegador, pestaña de red: abrir *Mi compañía* y el modal | **Ninguna respuesta trae la contraseña**, ni cifrada ni en claro | ☐ |
 | 8 | Cualquiera, pestaña del flujo | Recorrer las filas de *Recopilación de candidatos*, *Análisis de compatibilidad*, *Prueba psicométrica* y *Verificación de cumplimiento* | Todas con el mismo patrón: **nombre en negrita** — Configurado — detalle, o — Sin configurar; y todos los botones dicen **Editar** (el único *Conectar* es el de la sesión de PsicoAlianza) | ☐ |
+
+## Paso 9 — el resultado psicométrico en el detalle del candidato
+
+Brief: `brief-etapa3-paso9-resultado-en-el-detalle.md`; decisión 58. Se corren en el **servidor de pruebas
+con la rama entera**. Los casos 1 a 7 se preparan **escribiendo el campo `psychometricResult` en la base**,
+en la participación de un candidato **desbloqueado** (con el ojo en la tabla); solo el 8 usa un veredicto
+real. Forma del campo: `provider` (`psicoalianza` o `evaluatest`), `score`, `minScore`, `passed`,
+`decidedAt` y `tests`, una lista donde cada prueba lleva `name`, `weight`, `score`, `recommendationText` y
+`approved` (lo que un proveedor no da, `null`). La consulta la da el planificador.
+
+| # | Cómo se prepara | Qué se hace | Qué se tiene que ver | Resultado |
+| --- | --- | --- | --- | --- |
+| 1 | Resultado de PsicoAlianza con cuatro pruebas (pesos 25, 40, 20, 15; notas 90,29, 84, 71,57 y 45,55; textos «Recomendado», «Alto», «Recomendado con sugerencias», «Recomendado con sugerencias»), puntaje 77,3, mínimo 70, *aprobó* | Abrir el ojo | Bloque *Prueba psicométrica* junto al de ReTHUS, con el mismo borde; «PsicoAlianza · fecha y hora»; «**Puntaje 77,3** · mínimo de la oferta 70» y el chip verde «Aprobó». La tabla *Prueba · Peso · Nota · Resultado* con «25 %», «90,29» y los cuatro textos tal cual, **sin colores ni iconos** en *Resultado* | ☐ |
+| 2 | Igual, con `passed` en falso | Abrir el ojo | El chip rojo «No aprobó»; es el único aprobado o no aprobado del bloque | ☐ |
+| 3 | El caso 1 con `weight` nulo en una prueba | Abrir el ojo | «—» en la celda del peso de esa prueba, sin «%» | ☐ |
+| 4 | Resultado de EvaluaTest con dos pruebas adicionales, una con `approved` verdadero y otra falso; `passed` falso | Abrir el ojo | Encabezado con «EvaluaTest» y «No aprobó»; debajo, la lista «nombre · Aprobada» y «nombre · No aprobada»; **sin tabla de pesos** | ☐ |
+| 5 | Resultado con `tests` vacío | Abrir el ojo | Solo el encabezado | ☐ |
+| 6 | Candidato sin el campo | Abrir el ojo | Sin bloque; el resto del modal como siempre | ☐ |
+| 7 | Portal en inglés, con el caso 1 | Abrir el ojo | *Psychometric test*, *Score*, *offer minimum*, *Passed*, columnas *Test · Weight · Score · Result*; la nota con punto decimal (90.29) y la fecha en formato inglés. Los textos de resultado de PsicoAlianza **siguen en español** (son dato) | ☐ |
+| 8 | Veredicto real: un candidato de una oferta de PsicoAlianza que termina su prueba | Esperar el veredicto del cron (hasta ~25 minutos de calificación más la pasada) y abrir el ojo | El bloque con el índice del tablero, el mínimo de la oferta y cada prueba con su peso de la vacante; **si aprueba, seguir viéndolo** con el candidato en la etapa siguiente | ☐ |

@@ -475,6 +475,27 @@ un único ayudante: el cron nunca pisa el correo de registro que escribió la in
 El descarte archiva la etapa donde cayó; el portal la lee de ahí y solo deduce por el motivo
 en registros viejos (decisión 17).
 
+**El veredicto deja escrito el resultado para el reclutador** (decisión 58, paso 9). Con
+`finished`, después de decidir —puntaje y, si se pidieron, pruebas adicionales— y **antes** del
+mensaje y de aprobar o descartar, se escribe en la participación el resultado psicométrico
+**sustituyendo el anterior**: proveedor, puntaje, mínimo aplicado (con el valor por defecto si la
+oferta no lo tenía), si aprobó y la fecha. Las pruebas dependen del proveedor:
+
+- **PsicoAlianza**: cada prueba **de la consulta de esta pasada** —no de la bolsa acumulada— con su
+  nombre, su **peso en la vacante**, su nota y el texto de PsicoAlianza tal cual. El peso lo lee el
+  adaptador de la entrada de la prueba cuyo proceso es el de la agenda, nunca la primera; sin entrada o
+  sin número, nulo. Peso y nota se aceptan como número o texto con un número.
+- **EvaluaTest**: las pruebas adicionales **solo si se consultaron en esta pasada**, aprobada o no
+  **como las leyó el veredicto** (*sin dato* queda como no aprobada). Con puntaje bajo no se consultan
+  y la lista va vacía.
+- **Demo simulada**: el puntaje sintético con EvaluaTest y sin pruebas.
+
+No se escribe en ningún otro desenlace: vencimiento, descarte del proveedor, en progreso, no aparece,
+no se pudo consultar, reintento del arranque, ni cuando falla la consulta de las pruebas adicionales
+(la persona sigue esperando y lo escribe la pasada que las consiga). No lleva guardado propio: viaja
+con el de aprobar o descartar, que copia la participación entera también en el reintento por
+conflicto. Nada del veredicto cambia por esto.
+
 ## 6 · Lo que queda escrito en el candidato
 
 Seis campos con nombre neutro más una bolsa (decisión 15, paso 6b). **Al escribir, siempre
@@ -491,6 +512,23 @@ los nuevos; al leer, el nuevo y si está vacío el viejo.** Solo dos se leen:
 
 Los seis campos viejos con prefijo `evaluatest` siguen en el esquema, solo se leen. La
 compatibilidad caduca sola: nadie está a mitad de prueba más que el plazo.
+
+**Y uno permanente en la participación, fuera del estado de la conversación** (decisión 58, paso 9):
+`psychometricResult`, al nivel de la fecha de la entrevista y de los documentos enviados. Lo escribe el
+veredicto (§5) y **lo lee el portal** en el detalle del candidato (§8). Vive fuera porque aprobar
+reinicia el estado de la conversación o lo deja en nulo, y ahí el resultado se borraría al avanzar.
+Nace nulo: quien se evaluó antes del paso 9 no lo tiene y no se rellena. Ningún dato suyo es obligatorio
+en el esquema, para que un resultado incompleto no pueda impedir el guardado del veredicto. Reiniciar
+a alguien con la caja de pruebas de WhatsApp no lo toca: queda el anterior hasta un veredicto nuevo.
+
+| Dato | Qué es |
+| --- | --- |
+| `provider` | El proveedor guardado en el candidato |
+| `score` | El puntaje que decidió el veredicto (el mismo número, también con la decisión 37 sin arreglar) |
+| `minScore` | El mínimo aplicado en ese veredicto |
+| `passed` | El veredicto entero: puntaje y pruebas adicionales |
+| `decidedAt` | Cuándo se dio |
+| `tests[]` | `name`; con PsicoAlianza `weight`, `score` y `recommendationText`; con EvaluaTest `approved`. Lo que un proveedor no da, nulo |
 
 🔴 **Sin vuelta atrás**: la versión anterior del backend no lee los campos nuevos y
 reinvitaría a quien se invitó después del despliegue (registro del paso 6b).
@@ -546,7 +584,16 @@ con credenciales usa las suyas para elegir vacante. La demo **se queda como est�
   advertencia si la tiene activa y se está omitiendo—, con enlace a *Mi compañía* solo para quien
   puede editar la empresa (decisión 40). **Con la conexión de la oferta ya no configurada y otra en
   la empresa**, el aviso de §1 punto 4 junto a los controles, para repararla o desactivarla.
-- **Lo que no ve**: nada de los campos del candidato de §6 (el portal no los lee).
+- **Detalle del candidato** (el ojo de la tabla de candidatos; decisión 58, paso 9): si la
+  participación tiene resultado, un bloque *Prueba psicométrica* junto al de ReTHUS y con su forma.
+  Encabezado con el proveedor y la fecha, *Puntaje*, *mínimo de la oferta* y el único «Aprobó» o «No
+  aprobó» del bloque, en verde o rojo. Con PsicoAlianza, una tabla *Prueba · Peso · Nota · Resultado*
+  con el texto de PsicoAlianza tal cual, sin colores; con EvaluaTest, la lista de pruebas adicionales
+  con *Aprobada* o *No aprobada*; sin pruebas, solo el encabezado. Números y fecha en el idioma elegido
+  en el portal; un dato nulo, «—». No tiene condición de visibilidad propia: el ojo solo aparece para
+  candidatos desbloqueados o añadidos a mano.
+- **Lo que no ve**: nada de los campos del candidato dentro del estado de la conversación de §6 (el
+  portal no los lee), ni el resultado de quien se evaluó antes del paso 9.
 
 ## 9 · Lo que este flujo todavía arrastra, con su paso
 

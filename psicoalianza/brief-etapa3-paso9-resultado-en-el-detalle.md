@@ -320,3 +320,36 @@ Verificado por el planificador en el código antes de contestar.
 Se puede empezar en cuanto la documentación esté commiteada. ⚠️ **Los textos del alcance 6 siguen
 pendientes de aprobación del usuario**: el backend puede empezar; el portal, con los textos que el
 brief propone, y si el usuario los cambia se sustituyen.
+
+## Revisión del diff (2026-09-16) — ✅ aprobado sin arreglos
+
+Verificado por el planificador sobre el conjunto, con la caché de Jest limpia: **backend, compila, 133
+suites y 1.372 pruebas (1.363 pasan, 9 omitidas)**, 24 pruebas y una suite más que antes del paso;
+**portal, tipos limpios**. Todo en el índice en los tres repositorios, sin nada fuera.
+
+**Control negativo del planificador**: quitando la escritura del resultado en el veredicto y la
+declaración del campo en el esquema, **fallan 12 pruebas** del cron y del esquema; restaurado después,
+sin diferencias fuera del índice.
+
+**Lo comprobado en el código:**
+
+- El veredicto escribe el resultado después de decidir y antes del mensaje y de aprobar o descartar; no
+  se toca ninguna rama del veredicto, ni los mensajes, ni los motivos, ni la escritura de la cola.
+- Las pruebas de PsicoAlianza salen de la consulta de la pasada; las adicionales de EvaluaTest, solo si
+  se consultaron, con *sin dato* como no aprobada; el proveedor, el del candidato (la demo queda en
+  EvaluaTest).
+- El peso se elige por el proceso de la agenda, admite número o texto con número, y nulo en lo demás.
+- La prueba de «sigue después de aprobar» usa el aprobar real hacia una etapa conversacional y hacia el
+  final; la del esquema crea documentos con el esquema real (trampa 2).
+- **Ninguna afirmación existente se quitó ni se relajó**: la comparación entera de la bolsa del
+  adaptador se amplió con el peso.
+- Sin comentarios nuevos en código, identificadores en inglés, textos del portal en los dos idiomas con
+  los del brief; el nombre del proveedor reutiliza el texto que ya existe en *Mi compañía*.
+- Documentación en el mismo diff: flujo actual §5, §6 y §8, y la sección del paso 9 en
+  `pruebas-a-mano.md`.
+
+**Anotado, sin acción:** el adaptador y el armado del resultado tienen cada uno su conversión «número o
+texto con número» casi idéntica. Son seis líneas en dos capas distintas; no compensa una pieza compartida.
+
+**Pendiente:** los casos a mano del paso 9, que corre el usuario en el servidor de pruebas con la rama
+entera, y la aprobación de los textos del alcance 6 (ya escritos como los propuso el brief).
