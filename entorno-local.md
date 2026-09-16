@@ -166,13 +166,14 @@ El resto tiene valor por defecto y no hace falta tocarlo.
 
 - **Pegada a mano**, la de emergencia y la de hoy: ver la sección *La sesión de PsicoAlianza, a
   mano*, más abajo.
-- **Acuñada por el backend con Chrome por proxy móvil**, la oficial. El acuñador existe en el
-  código desde el paso 2c.1 y **todavía nadie lo llama**: ni el cron, ni el cliente al encontrar la
-  sesión muerta, ni un botón (2c.2 y 2c.3). Necesita en el `.env` la cuenta del proxy (DataImpulse)
-  con las cinco variables del módulo de proxy (paso 2b) y las tres del acuñador, todas en las tablas
-  de abajo, y Chrome instalado en la máquina. Sin estas variables el backend arranca y falla solo al
-  acuñar. **Dispararlo a mano en local**: no hay ruta ni tarea; se hace como la tanda de
-  comprobaciones del paso 3, con un script fuera de los repositorios que monte el acuñador compilado
+- **Conseguida por el backend con Chrome por proxy móvil**, la oficial. La pieza que consigue la
+  sesión existe en el código desde el paso 2c.1 y **todavía nadie la llama**: ni el cron, ni el
+  cliente al encontrar la sesión muerta, ni un botón (2c.2 y 2c.3). Necesita en el `.env` la cuenta
+  del proxy (DataImpulse) con las cinco variables del módulo de proxy (paso 2b) y las tres de la
+  pieza, todas en las tablas de abajo, y Chrome instalado en la máquina. Sin estas variables el
+  backend arranca y falla solo al conseguir la sesión. **Dispararla a mano en local**: no hay ruta ni
+  tarea; se hace como la tanda de comprobaciones del paso 3, con un script fuera de los repositorios
+  que monte la pieza compilada
   (`dist/`) con una lectura de conexiones falsa —las credenciales de la cuenta principal, leídas del
   `.env` sin imprimirlas— y un almacén falso que solo imprima nombres de cookies. Reglas: un solo
   intento por llamada, al menos una hora entre fallos, tope de tres al día, parar al primer éxito o
@@ -190,7 +191,7 @@ backend arranca igual.
 
 Las cinco variables del proxy móvil (paso 2b de la etapa 3, decisión 43). Ninguna es
 obligatoria y una línea vacía cuenta como ausente: sin ellas el backend arranca y falla solo al
-arrendar una IP, que hoy nadie hace hasta el acuñador (2c).
+arrendar una IP, que hoy nadie hace hasta la pieza que consigue la sesión (2c).
 
 | Variable | Valor local | Nota |
 | --- | --- | --- |
@@ -198,10 +199,10 @@ arrendar una IP, que hoy nadie hace hasta el acuñador (2c).
 | `PROXY_PORT` | `823` | HTTP; `824` para SOCKS5 |
 | `PROXY_LOGIN` | El login de la cuenta de DataImpulse, sin sufijos | El país y la sesión pegajosa los añade el módulo. ⚠️ **Admite parámetros pegados al login**: con `__asn.26611` la salida es siempre Claro, sin coste ni cambio de código. Sin eso, de diez arriendos medidos el 2026-09-15 **la mitad no eran móviles** (UNE EPM y Colombia Telecomunicaciones), y esas IPs puntúan como residenciales en el captcha |
 | `PROXY_PASS` | La contraseña de la cuenta | Tal cual, sin sufijos |
-| `PROXY_PROTOCOL` | vacía | `http` por defecto; `socks5` si se usa el puerto 824. ⚠️ **Para el acuñador tiene que ser HTTP**: Chromium no autentica un proxy SOCKS5 por la autenticación de página, y el acuñador termina como *sin configurar* nombrando esta variable |
+| `PROXY_PROTOCOL` | vacía | `http` por defecto; `socks5` si se usa el puerto 824. ⚠️ **Para conseguir la sesión tiene que ser HTTP**: Chromium no autentica un proxy SOCKS5 por la autenticación de página, y la pieza termina como *sin configurar* nombrando esta variable |
 
-Las tres variables del acuñador de sesión (paso 2c.1). Ninguna es obligatoria y una línea vacía
-cuenta como ausente: sin las dos primeras el acuñador termina como *sin configurar* nombrando la
+Las tres variables de la pieza que consigue la sesión (paso 2c.1). Ninguna es obligatoria y una línea
+vacía cuenta como ausente: sin las dos primeras la pieza termina como *sin configurar* nombrando la
 variable, sin arrendar IP ni lanzar nada.
 
 | Variable | Valor local | Nota |
@@ -278,7 +279,7 @@ atrás.
 
 ## La sesión de PsicoAlianza, a mano (decisión 42: emergencia y local)
 
-Hasta que exista el acuñador (paso 2c), el backend local **no hace login en PsicoAlianza**: usa
+Hasta que el 2c.2 la llame, el backend local **no hace login en PsicoAlianza** por su cuenta: usa
 una sesión que tú abres en el navegador y pegas en el `.env`. Después, sigue sirviendo como red
 de emergencia. Dura **5 días**; cuando el backend empiece a fallar con *sesión de PsicoAlianza
 caducada*, se repite esto.

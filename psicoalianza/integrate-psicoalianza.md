@@ -91,19 +91,17 @@ invitar y consultar resultados— y agregar su formulario de conexión en los aj
 la empresa. Al terminarla, un candidato de una empresa configurada con PsicoAlianza
 recibe su enlace y el sistema lee su resultado.
 
-### Etapa 4 · Los datos que PsicoAlianza exige y no siempre tenemos
+### Etapa 4 · Los datos que PsicoAlianza exige y no siempre tenemos — ❌ DESCARTADA (2026-09-15)
 
-Para invitar a alguien, PsicoAlianza exige su número de documento y su correo. El
-sistema los toma de lo que publica el portal de empleo, y a veces no vienen.
+~~Para invitar a alguien, PsicoAlianza exige su número de documento y su correo. El
+sistema los toma de lo que publica el portal de empleo, y a veces no vienen.~~
 
-Cuando falte el documento, se le pide al candidato por WhatsApp en vez de descartarlo:
-descartar no deja rastro y pierde gente que sí servía. El correo es el caso más
-delicado — hoy, si el candidato no tiene, el sistema usa uno interno, porque el enlace
-de verdad le llega por WhatsApp; con PsicoAlianza hay que confirmar si su invitación
-funciona igual o si el correo es imprescindible.
+~~Cuando falte el documento, se le pide al candidato por WhatsApp en vez de descartarlo:
+descartar no deja rastro y pierde gente que sí servía.~~
 
-Va en una etapa aparte porque toca la conversación con el candidato, que hoy funciona
-y es lo más delicado de mover.
+🔴 **Descartada por el usuario el 2026-09-15: al candidato no se le pide el documento.**
+Ver la decisión 53. Lo que queda vivo de esta etapa —avisarle al reclutador de quien se
+descartó por documento— está ahí, y el correo ya lo resolvió la decisión 33.
 
 ### Etapa 5 · Validación de punta a punta y salida a producción
 
@@ -1640,6 +1638,38 @@ Se da por terminado cuando se cumplen las dos condiciones:
     marcado, contra lo que decía esta bitácora; los ficheros de candado del perfil y de la pantalla
     virtual se borran antes de lanzar; la salida de Chromium no se vuelca al registro; y la cuenta
     alterna es de aspirante y no sirve para probar más que el login.
+
+53. **Al candidato no se le pide el documento; el hueco se le avisa al reclutador. Y la creación de
+    ofertas desde administración pasa a comprobar conexión y vacante** (2026-09-15, decidido con el
+    usuario tras contrastar los tres puntos con el código y medir la base).
+
+    **De dónde sale el documento, leído del código ese día:** de lo que manda el robot del portal de
+    empleo con cada candidato nuevo; si no viene en el aviso, del perfil que ese mismo robot leyó de
+    la ficha del portal; y en la carga masiva o el alta manual, de lo que escribe el reclutador. **En
+    ningún caso se le pregunta al candidato**, y la foto de la cédula llega mucho después, en la etapa
+    de verificación.
+
+    - 🔴 **La etapa 4 del plan queda descartada.** Pedirle el número de cédula por WhatsApp a alguien
+      que ya dio sus datos en el portal **se parece a una estafa**, y esa es la razón del usuario. Encaja
+      además con la decisión 31, que ya decía que no se le pregunta nada sobre su documento.
+    - ✅ **Lo que sí se hará, como pendiente menor: avisarle al reclutador.** Hoy quien no trae
+      documento se descarta en silencio (45) y él no se entera de que perdió a alguien que podía
+      completar desde el portal, donde el campo ya existe. **Medido**: de 33 personas que han pasado
+      por la etapa, **una** sin documento, y unas once con un nombre de ciudad en ese campo. Sin paso
+      todavía; el texto lo aprueba el usuario.
+    - ✅ **La creación desde administración pasa a aceptar la conexión y a comprobar la vacante**, por
+      el mismo guardado que usa el portal desde el 6.2a. Hoy copia la configuración de la prueba **tal
+      cual**, sin comprobar nada, y su formato de entrada **ni siquiera admite decir con qué conexión**:
+      en una empresa con las dos, la etapa resolvería por la regla y elegiría EvaluaTest con un número
+      de vacante que puede ser de PsicoAlianza — el riesgo de *otro cargo* que la 48 descartó, por una
+      puerta que quedó abierta. **Decidido**: si la prueba no se puede validar, **se rechaza la creación
+      entera**, con el mismo mensaje que ve un reclutador; y **con dos conexiones configuradas, la
+      llamada tiene que decir cuál** (con una sola, no hace falta).
+
+      **Medido en la base el 2026-09-15**: **tres** ofertas creadas así en toda la historia, **las tres
+      con la prueba activa** —o sea, cada uso pasa por esa puerta—, todas cerradas o canceladas, en dos
+      empresas de un solo proveedor, y **cero personas esperando resultado** en ellas. Así que el
+      arreglo **no repara nada existente**: cierra la puerta hacia adelante. Sin paso todavía.
 
 ## Falta de PsicoAlianza
 

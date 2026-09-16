@@ -62,9 +62,9 @@ funciona la etapa hoy, de punta a punta, está en
 
 Hay además un **módulo de proxy**, `src/proxy/`, al nivel de los demás módulos: un puerto sin
 proveedor que arrienda una IP (país, tipo y adherencia) y devuelve cómo conectarse al proxy, con
-DataImpulse como único adaptador. Su único consumidor es el **acuñador de sesión de PsicoAlianza**,
+DataImpulse como único adaptador. Su único consumidor es la **pieza que consigue la sesión de PsicoAlianza**,
 en la subcarpeta `psicoalianza/` de la capa psicométrica: lanza Chromium por esa IP, entra con la
-conexión de la empresa y guarda la sesión; existe en el código y **nadie lo llama todavía**.
+conexión de la empresa y guarda la sesión; existe en el código y **nadie la llama todavía**.
 
 ## Al leer el código
 
