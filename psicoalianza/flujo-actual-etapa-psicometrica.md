@@ -48,6 +48,13 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
   no existe la cuenta compartida del entorno** (decisión 34).
 - **El cron**: cada 5 minutos consulta resultados por el adaptador de cada proveedor y decide el
   veredicto.
+- **La renovación de la sesión de PsicoAlianza** (paso 2c.2, decisión 54): un servicio de la
+  subcarpeta de PsicoAlianza que decide *cuándo* se consigue una sesión —una tarea cada hora que
+  renueva a los cuatro días o cuando la comprobación barata la ve muerta, y a demanda cuando el
+  adaptador encuentra la sesión caducada o alguien guarda la conexión— con una sola ráfaga a la vez
+  en todo el backend, tope por ventana de 24 horas y correo a los desarrolladores; la pieza que
+  entra con Chromium por el proxy móvil es la del 2c.1. Con la sesión manual del `.env` encendida no
+  hace nada.
 
 ## 1 · La empresa se conecta y configura la oferta
 
@@ -117,7 +124,13 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
      conexión con la que se activó. Al reconstruir se parte de la conexión guardada y se pisan
      solo correo y contraseña —el identificador de empresa, solo con EvaluaTest—: **renombrar la
      conexión de PsicoAlianza conserva su sesión acuñada** y cualquier otro campo de la bolsa. Sin
-     nombre nace como «PsicoAlianza».
+     nombre nace como «PsicoAlianza». **Y si la conexión de PsicoAlianza que queda guardada está
+     completa, después de que la base escriba se dispara por detrás un intento de conseguir la
+     sesión** (paso 2c.2, decisión 54): se libera el bloqueo por credenciales rechazadas y sale una
+     ráfaga saltando la hora de espera, sin saltar el tope. La respuesta al portal no cambia ni
+     espera; renombrar también dispara; crear la empresa con la conexión no dispara (su primera
+     sesión la consigue la tarea de la hora). **La etiqueta de hoy todavía no lo enseña**: sigue
+     leyendo la comprobación barata, y «Conectando…» y los textos por desenlace llegan con el 2c.3.
    - **Validar sin login.** La misma ruta de validación acepta `provider`; con PsicoAlianza responde
      por su adaptador **sin llamar a nadie** —válida si trae correo y contraseña, sin identificador
      de empresa— porque validar sería acuñar una sesión y un captcha rechazado acusaría a la
@@ -308,7 +321,12 @@ que copia la configuración tal cual, o es de antes de la migración— y sigue.
   cuando el endpoint falla (decisión 39). 🔴 **Con PsicoAlianza, una sesión muerta o ausente cae
   aquí**, y la etapa no se omite: el aviso dice que la prueba llegará por correo y no llega, y como
   el vencimiento (§4) solo se mira a quien ya tiene identificador, la persona espera **sin plazo**
-  hasta que vuelva la sesión (corrección de la decisión 44).
+  hasta que vuelva la sesión (corrección de la decisión 44). **Desde el 2c.2, esa sesión muerta
+  dispara la renovación** (decisión 54): el adaptador pide una sesión por fuera —sin esperar— y deja
+  subir el fallo pasajero igual; la renovación arrienda una IP móvil, entra con Chromium y guarda la
+  sesión, y en el primer tick del cron con sesión nueva la persona recibe su enlace. Si la
+  renovación no la consigue —captcha, tope, credenciales rechazadas—, la persona sigue esperando
+  sin plazo hasta el paso A1/A5, que no cambia aquí.
 - **Fallo permanente** (vacante sin nombre guardado): el arranque **deja salir la excepción**
   y actúa el mecanismo de la casa para cualquier etapa que falla al arrancar: correo de
   alerta a soporte, vuelta a la cola, hasta tres intentos y descarte con el motivo de
@@ -372,7 +390,10 @@ cada oferta:
 plazo descarta gente por vencimiento sin que nadie haya conseguido preguntar. Y el adaptador
 no distingue *tablero vacío* de *petición fallida* — el arreglo es del cliente y no tiene paso.
 La empresa sin conexión con gente ya esperando cae aquí, con el error *sin conexión* en el
-registro, hasta que el plazo la descarte (decisión 40; medido el 2026-09-12: hoy nadie).
+registro, hasta que el plazo la descarte (decisión 40; medido el 2026-09-12: hoy nadie). **Con
+PsicoAlianza, `query_failed` por sesión caducada dispara la renovación** (paso 2c.2, decisión 54):
+el adaptador pide una sesión por fuera antes de devolverlo, la pasada no espera, y el tick siguiente
+encuentra la sesión nueva si la ráfaga entró.
 
 ## 4 · Dentro del bucle, por candidato, en este orden
 

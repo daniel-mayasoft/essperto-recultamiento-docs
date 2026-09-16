@@ -167,18 +167,27 @@ El resto tiene valor por defecto y no hace falta tocarlo.
 - **Pegada a mano**, la de emergencia y la de hoy: ver la sección *La sesión de PsicoAlianza, a
   mano*, más abajo.
 - **Conseguida por el backend con Chrome por proxy móvil**, la oficial. La pieza que consigue la
-  sesión existe en el código desde el paso 2c.1 y **todavía nadie la llama**: ni el cron, ni el
-  cliente al encontrar la sesión muerta, ni un botón (2c.2 y 2c.3). Necesita en el `.env` la cuenta
-  del proxy (DataImpulse) con las cinco variables del módulo de proxy (paso 2b) y las tres de la
-  pieza, todas en las tablas de abajo, y Chrome instalado en la máquina. Sin estas variables el
-  backend arranca y falla solo al conseguir la sesión. **Dispararla a mano en local**: no hay ruta ni
-  tarea; se hace como la tanda de comprobaciones del paso 3, con un script fuera de los repositorios
-  que monte la pieza compilada
-  (`dist/`) con una lectura de conexiones falsa —las credenciales de la cuenta principal, leídas del
-  `.env` sin imprimirlas— y un almacén falso que solo imprima nombres de cookies. Reglas: un solo
-  intento por llamada, al menos una hora entre fallos, tope de tres al día, parar al primer éxito o
-  ante *bloqueada*, *credenciales rechazadas* o *sin cookie de recuerdo*; y **no pulsar «cerrar
-  sesión» en PsicoAlianza** mientras tanto, que invalida todas las sesiones.
+  sesión existe desde el paso 2c.1 y **desde el 2c.2 la llama la renovación** (decisión 54): una
+  tarea al minuto 17 de cada hora que renueva la sesión a los cuatro días o cuando la ve muerta, el
+  adaptador al encontrar la sesión caducada al invitar o al consultar, y el guardado de la conexión
+  de PsicoAlianza desde *Mi compañía*. Necesita en el `.env` la cuenta del proxy (DataImpulse) con
+  las cinco variables del módulo de proxy (paso 2b) y las tres de la pieza, todas en las tablas de
+  abajo, y Chrome instalado en la máquina. Sin estas variables el backend arranca y falla solo al
+  conseguir la sesión.
+
+  🔴 **En una máquina de desarrollo sin la sesión manual encendida y con la ruta del navegador
+  puesta, la tarea entra de verdad con la cuenta del cliente** cada hora que haga falta, y cada
+  intento gasta reputación de esa cuenta en el captcha. No es un fallo: es lo que hace. Quien
+  levante el backend en su máquina tiene que elegir: o la sesión manual encendida (con ella nada de
+  la renovación hace nada), o `PSICOALIANZA_CHROMIUM_PATH` vacía (la renovación termina como *sin
+  configurar* sin arrendar ni lanzar). **Dispararla a mano en local**, si hace falta: guardar la
+  conexión de PsicoAlianza desde *Mi compañía* dispara una ráfaga por detrás; o el script fuera de
+  los repositorios de la tanda del paso 3, que monte la pieza compilada (`dist/`) con una lectura de
+  conexiones falsa —las credenciales de la cuenta principal, leídas del `.env` sin imprimirlas— y
+  un almacén falso que solo imprima nombres de cookies. Reglas: un solo intento por llamada, al
+  menos una hora entre fallos, tope de tres al día, parar al primer éxito o ante *credenciales
+  rechazadas* o *sin cookie de recuerdo*; y **no pulsar «cerrar sesión» en PsicoAlianza** mientras
+  tanto, que invalida todas las sesiones.
 
 Las tres variables de PsicoAlianza (paso 2 de la etapa 3). Ninguna es obligatoria: sin ellas el
 backend arranca igual.
@@ -210,6 +219,17 @@ variable, sin arrendar IP ni lanzar nada.
 | `PSICOALIANZA_CHROMIUM_PATH` | `C:/Program Files/Google/Chrome/Application/chrome.exe` | En local, el Chrome instalado; en el servidor, `/usr/bin/chromium` |
 | `PSICOALIANZA_LOGIN_DIR` | Una carpeta **fuera de los repositorios** | Dentro van el perfil persistente de Chrome (`profile/`) y las capturas de los intentos que no entran |
 | `PSICOALIANZA_LOGIN_HEADLESS` | vacía | **Con ventana por defecto** (cambiado el 2026-09-15: ese día, sin ventana entró 0 de 4 y con ventana 2 de 2). En Linux la ventana se dibuja sobre una pantalla virtual Xvfb; en Windows es una ventana de verdad y **ya no termina como *error***. Con `true`, sin ventana |
+
+Las cuatro variables de la renovación de la sesión (paso 2c.2, decisión 54). Opcionales, con valor
+por defecto; una línea vacía cuenta como el valor por defecto; cero, negativos y decimales se
+rechazan al arrancar.
+
+| Variable | Valor local | Nota |
+| --- | --- | --- |
+| `PSICOALIANZA_LOGIN_ATTEMPTS_PER_BURST` | vacía | `3` intentos por ráfaga |
+| `PSICOALIANZA_LOGIN_BURST_COOLDOWN_MINUTES` | vacía | `60` minutos entre ráfagas; el guardado de la conexión salta esta espera |
+| `PSICOALIANZA_LOGIN_ATTEMPTS_PER_WINDOW` | vacía | `20` intentos por ventana de 24 horas, contando todos los de cada ráfaga; al llegar, correo a `ALERT_SUPPORT_EMAILS` |
+| `PSICOALIANZA_SESSION_RENEWAL_DAYS` | vacía | Renovar cuando la sesión guardada pasa de `4` días |
 
 **SolveCaptcha:** ya no hace falta (decisión 25 descartada).
 

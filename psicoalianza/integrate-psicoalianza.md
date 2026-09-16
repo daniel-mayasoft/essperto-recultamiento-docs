@@ -1671,6 +1671,57 @@ Se da por terminado cuando se cumplen las dos condiciones:
       empresas de un solo proveedor, y **cero personas esperando resultado** en ellas. Así que el
       arreglo **no repara nada existente**: cierra la puerta hacia adelante. Sin paso todavía.
 
+54. **La sesión se renueva cada hora si hace falta, la pasada del cron nunca la espera, y guardar la
+    conexión dispara el intento** (2026-09-15, decidido con el usuario al escribir el brief del 2c.2,
+    contrastando la 52 con el código). Concreta la 43 y la 52 y las corrige donde dicen otra cosa.
+
+    | Qué | Decidido | Qué corrige |
+    | --- | --- | --- |
+    | **Cuándo se mira** | **Una tarea cada hora**, por conexión de PsicoAlianza: si la sesión pasa de cuatro días o no existe, ráfaga; si no, la comprobación barata de vida (44) y ráfaga solo si está muerta. Si la comprobación falla por red, nada: gastar un intento por un parpadeo gasta reputación | La 52 decía «tarea diaria»: una ráfaga al día no da segunda oportunidad dentro de las 24 horas de margen y contradice sus propias «horas entre ráfagas» |
+    | **La sesión muerta a mitad de pasada** | **La pasada no espera.** El adaptador dispara la ráfaga por fuera y deja subir el fallo pasajero (al invitar) o devuelve *no se pudo consultar* (al consultar), como hoy. El tick siguiente encuentra la sesión | La 43 decía «la consulta se repite en la misma pasada»: bloquearía el cron de uno a diez minutos, y varias ofertas de la misma empresa pelearían por el candado |
+    | **Tamaño de ráfaga** | **Una sola, de tres intentos**, configurable, para renovación y para sesión muerta; **al menos una hora** entre ráfagas | La 52 pedía una ráfaga más larga para la sesión muerta: gasta la reputación que la propia 52 dice cuidar |
+    | **Credenciales rechazadas** | **Parar esa conexión** hasta que alguien guarde credenciales en *Mi compañía* o pulse *Conectar* (2c.3). Con la misma contraseña, reintentar no sirve y pega contra la cuenta del cliente. Correo a los desarrolladores. ⚠️ **Corregido el mismo día en la opinión previa del 2c.2**: la primera versión paraba también ante *bloqueada*, pero ese desenlace de la pieza es el **límite temporal** del sitio («demasiados intentos»), que se levanta solo en minutos; pararlo hasta reteclear una contraseña que estaba bien castigaba de más. *Bloqueada* se trata como *agotó los intentos*: cuenta, espera la hora, y la siguiente ráfaga sale sola | — |
+    | **Guardar la conexión dispara un intento** | Guardar responde al instante, como manda la 44; por detrás sale una ráfaga saltando la hora de espera (no el tope), y libera el bloqueo anterior | — |
+    | **La primera conexión se consigue sola** | Una conexión recién guardada, sin sesión, se conecta por la tarea o por el disparo del guardado, sin que nadie pulse nada. El botón del 2c.3 pasa a ser «no quiero esperar» | La 44 preveía el botón como único sitio donde se consigue una sesión |
+    | **Tope** | **Veinte intentos por ventana de 24 horas** por conexión, contando todos los intentos de cada ráfaga; aplica también al botón. Al llegar, correo a los desarrolladores. La ventana empieza en el primer intento, no a medianoche: sin zona horaria que acordar | La 43 decía «logins por día» |
+    | **Candado** | **En memoria, uno para todo el backend**: una sola ráfaga a la vez, de una sola empresa; quien lo encuentra tomado no encola, vuelve a pedir en su siguiente tick | La 43 lo ponía en la base: con una instancia (52) sobra, y un candado en la base necesita el reseteo-si-se-atasca que ya falló con los robots |
+    | **Números** | 3 por ráfaga, 60 minutos entre ráfagas, 20 por ventana, renovar a los 4 días — **todos por variable**, con esos valores por defecto | La tasa del modo con ventana no está medida (corrección de la 52): un número en código obligaría a redesplegar para corregirlo |
+
+    **Lo que le pasa a Marta**, reclutadora: guarda correo y contraseña a las 10:00; se guarda al
+    instante; por detrás el backend entra; recarga a los dos minutos y ve *Conectado* (etiqueta del
+    2c.3). Cuatro días después la tarea renueva sin que nadie lo note. **A Ana**, candidata que
+    termina las preguntas la noche en que la sesión murió antes de tiempo: la invitación falla, recibe
+    el aviso del correo que no llega, el fallo dispara la ráfaga, y en el primer tick con sesión nueva
+    le llega su enlace. Pierde media hora, no el proceso — mientras no exista A1/A5, sigue esperando sin
+    plazo si la renovación no lo consigue.
+
+    **«Soporte» es el buzón de los desarrolladores** (`ALERT_SUPPORT_EMAILS`), el que recibe los fallos
+    de publicación; nadie de la empresa cliente lo ve. Por eso el problema que el reclutador sí puede
+    arreglar —la contraseña— se le enseña a él en la etiqueta, y el que no —captcha todo el día,
+    variables que faltan— va al correo. El correo sale cuando una ráfaga no consigue sesión **y** el
+    desenlace cambió respecto al anterior o con esa ráfaga se tocó el tope; así *sin configurar* avisa
+    una vez y no cada hora.
+
+    ✅ **Textos de la etiqueta de *Mi compañía*, aprobados por el usuario el 2026-09-15**, para el 2c.3
+    (sustituyen al texto provisional de la 50 en los estados que cubren):
+
+    | Estado | Texto | Botón *Conectar* |
+    | --- | --- | --- |
+    | Intento en curso | «Conectando…» | Apagado |
+    | Entró | «Conectado» | — |
+    | PsicoAlianza rechazó las credenciales | «Conexión fallida — PsicoAlianza rechazó el correo o la contraseña. Revísalos y guarda de nuevo.» | Apagado |
+    | Falló por otra causa | «Conexión fallida — vuelve a intentarlo.» | Encendido |
+    | Tope alcanzado | «Error de conexión — contacta a soporte.» | Apagado |
+
+    **Para que la pantalla pueda leer eso**, el 2c.2 guarda en la sesión de la conexión el inicio y la
+    cuenta de la ventana de intentos, la fecha del último y su desenlace; «conexión parada» se deduce
+    del desenlace —*credenciales rechazadas*, y solo ese—, no es un campo. Lo único que no está en la
+    base es si hay una ráfaga en curso, que el
+    servicio expone. **Con la sesión manual del `.env` encendida (42), nada de esto hace nada.**
+
+    ⚠️ **En una máquina de desarrollo sin la sesión manual y con la ruta del navegador puesta, la tarea
+    entra de verdad con la cuenta del cliente** cada hora que haga falta. Anotado en `../entorno-local.md`.
+
 ## Falta de PsicoAlianza
 
 | #   | Qué                                               | Por qué importa                                                                  |
@@ -2389,7 +2440,7 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 2b | ✅ **HECHO y revisado el 2026-09-15.** El módulo `proxy`: puerto de *arrendar una IP*, adaptador de DataImpulse, errores propios, sin selector (decisión 43). Nada lo llama hasta el 2c — brief `brief-etapa3-paso2b-modulo-proxy.md`, con la opinión previa incorporada. Verificado por el planificador: 117 suites y 1.197 pruebas (1.188 pasan, 9 omitidas; 23 nuevas), con la caché limpia; ningún módulo lo importa; el esquema de entorno gana cinco variables opcionales que admiten vacío. ⚠️ **La forma rotativa (sin `__sid.`) no está medida**: es la convención de DataImpulse; el 2c solo usa pegajosa | Aditivo |
 | 2c.0 | **Infraestructura, sin brief** (decisión 52): la imagen base del backend en dos tiempos, `before-deploy.md` §4. El `Dockerfile.base` y el `deploy.sh` del servidor de pruebas quedaron listos el 2026-09-15; falta la primera línea del Dockerfile del backend, en su commit, después del 2b | **La imagen** |
 | 2c.1 | ✅ **HECHO y revisado el 2026-09-15.** La pieza que consigue la sesión, sin que nadie la llame: Chromium por el puerto de proxy, clasificación de cada intento, reintentos dentro de una llamada, guardado en el almacén (decisiones 43 y 52) — brief `brief-etapa3-paso2c-1-acunador-de-sesion.md` (el nombre del archivo conserva la palabra vieja para no romper los enlaces). Verificado por el planificador: 121 suites y 1.234 pruebas (1.225 pasan, 9 omitidas), con la caché limpia; ninguna afirmación existente quitada; nadie la llama. En la revisión se arreglaron el navegador que quedaba huérfano al vencer el tiempo límite y el mensaje de error que se perdía. ⚠️ **Falta la comprobación real**, que pasa al servidor de pruebas (punto 7d de `before-deploy.md`): el modo con ventana entró dos veces, pero siempre con el script de la prueba, nunca por este código | Aditivo en código; una comprobación real contra la cuenta del cliente |
-| 2c.2 | Cuándo se consigue la sesión: la tarea diaria de renovación anticipada, la demanda desde el cliente al encontrar la sesión muerta, el candado, el tope diario y el aviso a soporte (52). ⚠️ **Su cadencia no puede apoyarse en el 30% medido** (ver la corrección de la 52), y conviene fijar antes el operador del proxy. Después del 2c.1 | Embudo |
+| 2c.2 | ✅ **HECHO y revisado el 2026-09-15.** Cuándo se consigue la sesión (decisión 54): la tarea de **cada hora** (minuto 17) que renueva a los cuatro días o cuando la comprobación barata la ve muerta, el disparo por fuera desde el adaptador al invitar y al consultar, el disparo desde el guardado de la conexión de PsicoAlianza en *Mi compañía*, el candado en memoria —uno para todo el backend—, el tope por ventana de 24 horas y el correo a los desarrolladores. Cuatro campos nuevos en la sesión de la conexión y cuatro variables opcionales con valor por defecto — brief `brief-etapa3-paso2c-2-cuando-se-consigue-la-sesion.md`, con la opinión previa y las dos rondas de revisión. Verificado por el planificador: 123 suites y 1.281 pruebas (1.272 pasan, 9 omitidas), con la caché limpia; ninguna afirmación existente quitada; el orquestador no se toca. En la revisión se arreglaron el candado que se tomaba después de la primera espera (dos Chromium posibles) y el disparo del guardado que saltaba también al guardar EvaluaTest. Números por variable: la cadencia **no** se apoya en el 30% (corrección de la 52), y por eso **no esperó** a que se fije el operador del proxy. ⚠️ **La comprobación real** es el punto 7d de `before-deploy.md`, ahora por el código de producción | Embudo y una ruta de producción |
 | 2c.3 | El botón *Conectar* de *Mi compañía*, su ruta y la etiqueta revisada (50). Después del 2c.2 | Visible |
 | 2d | ✅ **HECHO el 2026-09-14.** El almacén guarda solo la cookie de 5 días y deja la corta en memoria (decisión 47) — brief `brief-etapa3-paso2d-cookie-de-sesion.md`. Verificado: 114 suites y 1.113 pruebas (1.104 pasan, 9 omitidas; 4 nuevas). Solo el almacén y dos pruebas; el cliente, el esquema y la rama manual, intactos. La huella es la tira cifrada de la base; la cookie de 5 días se reconoce por prefijo; lo guardado a mano no se limpia | Toca el almacén del paso 2 |
 | 3 | ✅ **HECHO el 2026-09-14.** El adaptador de PsicoAlianza contra el puerto psicométrico, con la invitación real de comprobación hecha — brief `brief-etapa3-paso3-adaptador-psicoalianza.md`, registro en *Paso 3* | Aditivo |

@@ -64,7 +64,11 @@ Hay además un **módulo de proxy**, `src/proxy/`, al nivel de los demás módul
 proveedor que arrienda una IP (país, tipo y adherencia) y devuelve cómo conectarse al proxy, con
 DataImpulse como único adaptador. Su único consumidor es la **pieza que consigue la sesión de PsicoAlianza**,
 en la subcarpeta `psicoalianza/` de la capa psicométrica: lanza Chromium por esa IP, entra con la
-conexión de la empresa y guarda la sesión; existe en el código y **nadie la llama todavía**.
+conexión de la empresa y guarda la sesión. **La llama la renovación de la sesión**, en esa misma
+subcarpeta: una tarea cada hora que renueva a los cuatro días o cuando la ve muerta, y a demanda
+desde el adaptador (sesión caducada al invitar o al consultar) y desde el guardado de la conexión
+en Mi compañía; una sola ráfaga a la vez, tope por ventana de 24 horas y correo a los
+desarrolladores. Con la sesión manual del `.env` encendida, nada de eso hace nada.
 
 ## Al leer el código
 
