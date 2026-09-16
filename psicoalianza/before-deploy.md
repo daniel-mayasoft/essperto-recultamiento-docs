@@ -17,7 +17,7 @@ diff de documentación. Lo que está en la bitácora y no aquí, no se va a hace
 | 5b | **Secretos en texto plano en el despliegue de pruebas** (anotado el 2026-09-14, aplazado por el usuario hasta que todo funcione): el archivo de despliegue del servidor de pruebas lleva escritas claves de AWS, la contraseña de un correo, la clave privada de Firebase y la clave de los robots. Pasarlas a variables fuera del archivo y rotarlas si ese archivo se ha compartido | Equipo | ☐ |
 | 5c | **Sacar a la persona de prueba** de las vacantes activas de la cuenta del cliente en PsicoAlianza donde se la invitó para comprobar (aplazado por el usuario): la **5146** (tanda del 2026-09-14) y la **1135**, OPERARIO DE PRODUCCIÓN — MANISOL (invitación real de comprobación del paso 3, el mismo día) | Usuario | ☐ |
 | 6 | 🔴 **Bloqueo de la etapa 3**: PsicoAlianza no se despliega a ningún servidor sin la pieza que consigue la sesión (paso 2c, decisión 43), con quien la llame y su aviso a soporte. Con la sesión pegada a mano (decisión 42) no: muere a los 5 días sin avisar y, con la decisión 36, dos días sin sesión descartan candidatos reales por vencimiento. **Estado: en lo que depende del código, el bloqueo queda levantado** — el 2c.1 (la pieza), el 2c.2 (quién la llama: la tarea de cada hora, los disparos del adaptador y del guardado, el tope y el correo a los desarrolladores) y el 2c.3 (la etiqueta por estado y el botón *Conectar* de *Mi compañía*) están. **Lo que sigue faltando es la infraestructura** (7, 7b, 7d) **y las variables** (8) | Usuario | ☐ |
-| 7 | **La imagen base del backend, en dos tiempos** (decisión 43; procedimiento en §4, abajo). Tiempo 1: Node 22 sobre Debian ligero, sin Chromium, un día en el servidor de pruebas. Tiempo 2: la misma base más Chromium, fuentes y Xvfb. Cada tiempo va **a mano y con el despliegue nocturno sin programar** | Usuario y quien despliega | ☐ |
+| 7 | **La imagen base del backend, en dos tiempos** (decisión 43; procedimiento en §4, abajo). Tiempo 1: Node 22 sobre Debian ligero, sin Chromium, un día en el servidor de pruebas. Tiempo 2: la misma base más Chromium, fuentes y Xvfb. Cada tiempo va **a mano y con el despliegue nocturno sin programar**. **Estado: tiempo 1 desplegado en pruebas el 2026-09-16, en su día de prueba** (§4); producción cambiará de imagen al fusionar `develop` en `main` | Usuario y quien despliega | ☐ |
 | 7b | **Medir el consumo de memoria del backend en el servidor de pruebas** antes del tiempo 2, y ponerle límite: el consumo medido más unos 600 MB, y memoria compartida de 1 GB, en los dos compose. Comando en §4 | Quien despliega | ☐ |
 | 7c | **Deuda aceptada el 2026-09-15**: Chromium corre **sin su aislamiento** (como root, dentro del contenedor del backend). Acotado a que la pieza solo navega a PsicoAlianza y a los dominios del captcha. Activarlo es un paso propio: usuario propio en la imagen, cambio de dueño de los volúmenes de registros y un perfil de seguridad en los dos compose | Equipo, después | ☐ |
 | 7d | **La comprobación real de la pieza que consigue la sesión se hace en el servidor de pruebas, no en local** (decidido por el usuario el 2026-09-15). Después del tiempo 2, y con las variables del punto 8 puestas: un intento, y si falla, al menos una hora antes del siguiente. Procedimiento en §4 | Usuario y quien despliega | ☐ |
@@ -176,6 +176,33 @@ antes de correr un día y repetir el despliegue en dos tiempos cuesta más.
    cron psicométrico; WhatsApp; S3; los correos.
 5. Si algo falla, volver es cambiar la primera línea del Dockerfile a `node:20-alpine` y desplegar.
 
+**En pruebas, desplegado el 2026-09-16 a las 07:34** (comprobado con el usuario desde la consola del
+servidor). Antes: el script del servidor tiene la variable y la función de la base, igual que la copia
+local; `Dockerfile.base` idéntico; ningún despliegue programado; el constructor de imágenes en uso es
+el controlador `docker` (hay otro, `docker-container`, inactivo: **no activarlo**, no vería la base).
+El cambio de la primera línea entró **directo en `develop`** (la rama que despliega pruebas; `main`
+despliega producción), en un commit solo, sin nada de PsicoAlianza.
+
+| Comprobación | Resultado |
+| --- | --- |
+| Imagen base | Construida en ese despliegue, 234 MB |
+| Dentro del contenedor | Node 22.23.2 —la misma versión con la que entró la prueba de Chromium en Docker—, Debian 13.6, hora `-05` |
+| Registros | Arranca; las tareas programadas y el cron psicométrico corren, con la hora de Colombia |
+| Pruebas dentro de la imagen | 110 suites y 935 pruebas (926 pasan, 9 omitidas): las de `develop`, no las de la rama |
+| Memoria | 113,9 MB antes, con Alpine; 186,2 MB después, **recién arrancado y justo tras correr las pruebas dentro**: no son comparables, se vuelve a medir con el día cumplido para el 7b |
+
+⚠️ **El servidor estaba unos veinte commits atrás de `develop`**, así que ese despliegue metió también
+arreglos ajenos (recordatorios, teléfonos, Qdrant, RETHUS, archivado en Pandapé) y reinició el portal y
+el lector de correos. Si algo falla en el día, **no es automático atribuirlo a Debian**: se vuelve a
+Alpine y, si el fallo sigue, era de esos arreglos.
+
+**Pendiente para cerrar el tiempo 1**, con el día cumplido: WhatsApp, S3 y correos funcionando, y la
+memoria medida otra vez.
+
+⚠️ **Producción cambia de imagen cuando `develop` se fusione en `main`.** Su `deploy.sh` ya construye la
+base, así que ese despliegue será Debian **aunque no traiga PsicoAlianza**. Quien despliegue producción
+tiene que saberlo, y comprobar antes en ese servidor lo mismo que se comprobó en pruebas.
+
 ### Tiempo 2 · Chromium, fuentes y Xvfb
 
 Etiqueta `selessia-node-chromium:22-debian-1`. Se escribe cuando el tiempo 1 lleve un día en verde:
@@ -188,6 +215,12 @@ etiqueta nueva.
 Antes de este tiempo, el punto 7b: medir el consumo del backend en el servidor de pruebas con
 `docker stats --no-stream selessia-backend`, y en los dos compose ponerle al backend `mem_limit` (lo
 medido más unos 600 MB) y `shm_size: 1gb`. Sin la memoria compartida, Chromium se cae.
+
+🔴 **Y `init: true` en el backend de los dos compose** (anotado el 2026-09-16 al revisar el despliegue).
+El contenedor arranca con `npm` como primer proceso, y `npm` no recoge los procesos huérfanos: cuando un
+intento de login vence y se corta por la fuerza, los subprocesos de Chromium quedan como zombis y se
+acumulan intento tras intento. La prueba en Docker no lo podía ver porque hacía un login y terminaba.
+`init: true` le pone al contenedor un proceso inicial que sí los recoge.
 
 **Después del tiempo 2, el backend puede conseguir sesiones** cuando el 2c.2 lo llame, y el tiempo 2
 es obligatorio para ello: desde el 2026-09-15 el modo por defecto es **con ventana**, que en Linux
