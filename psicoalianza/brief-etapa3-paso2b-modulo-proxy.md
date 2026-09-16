@@ -40,11 +40,11 @@ cuadra con el código, gana el código y hay que decirlo.
 
 ## El caso
 
-Dentro de poco, el acuñador de sesión (paso 2c) tendrá que entrar a PsicoAlianza con un navegador
+Dentro de poco, la pieza que consigue la sesión (paso 2c) tendrá que entrar a PsicoAlianza con un navegador
 que salga por una IP móvil colombiana, porque desde cualquier otra IP el captcha lo rechaza. Para
 eso le pedirá a este módulo: *«una IP móvil de Colombia, pegajosa con este identificador»*, y el
 módulo le devolverá **cómo conectarse al proxy** para salir por ella: protocolo, host, puerto,
-usuario y contraseña, ya armados. El acuñador no sabe que detrás hay DataImpulse ni cómo se codifica
+usuario y contraseña, ya armados. La pieza que consigue la sesión no sabe que detrás hay DataImpulse ni cómo se codifica
 el país en el usuario.
 
 **Hoy nadie lo llama.** Es un paso aditivo: no puede romper nada. Brief corto, una ronda.
@@ -126,7 +126,7 @@ navegador al conectarse, en el 2c. Este módulo es puro: recibe una petición y 
   salida, ni el login. Es el 2c.
 - **Ninguna petición HTTP.** El módulo no comprueba que el proxy responda ni que la IP sea móvil ni
   colombiana: eso solo se ve al usarla.
-- **Ningún reintento, candado, tope diario ni aviso a soporte.** Son protecciones del acuñador, no
+- **Ningún reintento, candado, tope diario ni aviso a soporte.** Son protecciones de la pieza que consigue la sesión, no
   del arriendo.
 - **Ningún otro proveedor**, ni variable para elegirlo, ni otro tipo de IP.
 - **No se importa el módulo** en ningún otro, tampoco en el de la aplicación.
@@ -198,7 +198,7 @@ Las de `arranque-del-ejecutor.md`. Las que más se han incumplido en este frente
     en la tabla del `.env` del backend, las cinco, junto a las de PsicoAlianza.
   - `before-deploy.md` — la fila 8 gana `PROXY_PROTOCOL` en su lista, con la nota de que es opcional.
   - `../CLAUDE.md` — en *Dónde está lo importante*, **una frase**: el módulo de proxy existe, con su
-    puerto sin proveedor, y nadie lo llama hasta el acuñador.
+    puerto sin proveedor, y nadie lo llama hasta la pieza que consigue la sesión.
 
 ## Pruebas
 

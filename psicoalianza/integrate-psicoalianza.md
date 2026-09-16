@@ -437,7 +437,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
     el login **sí** necesita un navegador real saliendo por IP móvil, porque el solucionador
     no entra, y ese navegador **corre en el backend**, a sabiendas de lo que esta decisión
     decía de Alpine. La mitad del *por HTTP* se queda, y es la que importa: el navegador
-    **solo acuña la sesión**, menos de un minuto cada varios días; todo el trabajo contra
+    **solo consigue la sesión**, menos de un minuto cada varios días; todo el trabajo contra
     PsicoAlianza sigue siendo HTTP con cookies. Robot-manager fue referencia, no destino.
 25. ~~**El captcha vive en su propio módulo, con puerto y adaptador**~~ **DESCARTADA el
     2026-09-13 (decisión 43)**: no hay módulo de captcha, porque no hay solucionador. El
@@ -1133,7 +1133,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
     (decisión 43). La sesión a mano se queda como **red de emergencia y para local**, no como
     "mientras tanto".
 43. **El login de PsicoAlianza lo hace un Chrome sin ventana saliendo por IP móvil, dentro
-    del backend, y solo para acuñar la sesión; el proxy es un módulo propio con puerto y
+    del backend, y solo para conseguir la sesión; el proxy es un módulo propio con puerto y
     adaptador** (2026-09-13, decidido con el usuario tras la prueba con proxy móvil). Es el
     **camino oficial**. Revierte a medias la 24, descarta la 25 y confirma la 26.
 
@@ -1151,11 +1151,11 @@ Se da por terminado cuando se cumplen las dos condiciones:
     | Pieza | Dónde | Qué hace |
     | --- | --- | --- |
     | **Módulo `proxy`** | Nuevo, al nivel de los demás módulos | Un puerto con una operación, *arrendar una IP*: recibe país, tipo de IP y adherencia (pegajosa con un identificador que **genera quien llama**, o rotativa); devuelve protocolo, host, puerto, usuario y contraseña como datos estructurados, más hasta cuándo vale. Un adaptador por proveedor —DataImpulse hoy—, que es solo cómo se codifican país y sesión en las credenciales. Errores propios: *sin configurar* (al arrendar, no al arrancar) y *petición no soportada* (antes de tocar nada). Sin selector de proveedor mientras haya uno: cambiarlo es un adaptador y una línea |
-    | **Almacén de sesión** | En la conexión de la empresa, en la base | Las cookies (`ats_session`, `remember_web_<hash>`) cifradas como la contraseña, cuándo se acuñaron, cuándo se vieron vivas, y si hay un login en curso desde cuándo. No en memoria ni en el `.env`: sobrevive reinicios y todas las instancias comparten un login |
+    | **Almacén de sesión** | En la conexión de la empresa, en la base | Las cookies (`ats_session`, `remember_web_<hash>`) cifradas como la contraseña, cuándo se consiguieron, cuándo se vieron vivas, y si hay un login en curso desde cuándo. No en memoria ni en el `.env`: sobrevive reinicios y todas las instancias comparten un login |
     | **Cliente dado una sesión** | Capa psicométrica, PsicoAlianza | HTTP con las cookies del almacén; CSRF fresco antes de cada envío; guarda las cookies reemitidas; si lo mandan al login, lanza *sesión caducada* y no insiste |
-    | **Acuñador de sesión** | Capa psicométrica, PsicoAlianza | Pide al puerto de proxy una IP móvil pegajosa con identificador nuevo; lanza Chrome sin ventana por esa IP, sin la marca de automatización; va a `/login`, escribe, hace clic; clasifica el resultado —*entró*, *captcha rechazado*, *credenciales rechazadas*, *bloqueada*, *desconocido*— con captura en los fallos; guarda las cookies. Reintentos: rechazo de captcha → otro arriendo y repetir hasta N; bloqueo o credenciales → parar en seco |
+    | **La pieza que consigue la sesión** | Capa psicométrica, PsicoAlianza | Pide al puerto de proxy una IP móvil pegajosa con identificador nuevo; lanza Chrome por esa IP —con ventana desde la corrección de la 52—, sin la marca de automatización; va a `/login`, escribe, hace clic; clasifica el resultado —*entró*, *captcha rechazado*, *credenciales rechazadas*, *bloqueada*, *desconocido*— con captura en los fallos; guarda las cookies. Reintentos: rechazo de captcha → otro arriendo y repetir hasta N; bloqueo o credenciales → parar en seco |
 
-    🔴 **Corregido el 2026-09-14: el acuñador NO bloquea imágenes, CSS ni fuentes.** Esta decisión lo
+    🔴 **Corregido el 2026-09-14: la pieza que consigue la sesión NO bloquea imágenes, CSS ni fuentes.** Esta decisión lo
     pedía para gastar menos proxy, y la medición del otro chat (`proxy-login.md`) desmonta las dos
     mitades de ese razonamiento:
 
@@ -1174,9 +1174,9 @@ Se da por terminado cuando se cumplen las dos condiciones:
     | **Fuente manual** | La de la 42 | Red de emergencia y local: pegar cookies a mano |
 
     **Lo que le pasa a una candidata.** El cron consulta su resultado por HTTP. Si la sesión
-    murió, el cliente lanza *sesión caducada*, el acuñador entra en menos de un minuto, guarda
-    las cookies y la consulta se repite en la misma pasada. Ella no nota nada. Si el acuñador
-    agota sus intentos, esa pasada termina en *no se pudo consultar* —ya tolerado— y se avisa a
+    murió, el cliente lanza *sesión caducada*, la pieza que consigue la sesión entra en menos de un
+    minuto, guarda las cookies y la consulta se repite en la misma pasada. Ella no nota nada. Si esa
+    pieza agota sus intentos, esa pasada termina en *no se pudo consultar* —ya tolerado— y se avisa a
     soporte, porque con la 36 el plazo sigue corriendo: **dos días sin sesión son descartes
     reales**, y el aviso tiene que llegar a alguien que sepa pegar una sesión a mano (42).
 
@@ -1203,19 +1203,19 @@ Se da por terminado cuando se cumplen las dos condiciones:
     | 🔴 **Navegadores en ese servidor** | **Ya hay dos**: los dos robot-manager corren sin ventana, con **3 GB y 2 GB** de límite, clave de solucionador de captcha y **líneas de proxy ya cableadas** (hoy comentadas) |
 
     🔴 **Ese último punto cambia el cuadro, y la decisión de meter Chrome en el backend se tomó
-    sin verlo.** El acuñador no estrena nada en ese servidor: **la infraestructura de navegador ya
+    sin verlo.** La pieza que consigue la sesión no estrena nada en ese servidor: **la infraestructura de navegador ya
     existe al lado**, dimensionada para ello. Como una sola instancia del backend, el candado de
     «un login a la vez» no tiene que coordinar procesos, pero el precio de Alpine sigue ahí. **Se
     replantea con el usuario antes de escribir el brief del 2c**; lo decidido sigue siendo el
     backend hasta que él diga otra cosa.
 
-    ✅ **Las dos mediciones que bloqueaban el brief del acuñador están hechas** —la cruzada de IP el
+    ✅ **Las dos mediciones que bloqueaban el brief de la pieza que consigue la sesión están hechas** —la cruzada de IP el
     2026-09-13 y la tasa el 2026-09-14—, así que **la medición ya no bloquea el 2c**. Lo que sigue
     faltando para escribirlo es el dato de la imagen del backend, y conviene cerrar antes la
     comparación con ventana (abajo). Las dos, para el registro:
 
-    1. ✅ ~~Que la sesión acuñada por IP móvil sirva desde otra IP.~~ **MEDIDA Y CONFIRMADA**: sirve.
-       Era el supuesto que sostenía toda la arquitectura —acuñar por móvil y trabajar por HTTP desde
+    1. ✅ ~~Que la sesión conseguida por IP móvil sirva desde otra IP.~~ **MEDIDA Y CONFIRMADA**: sirve.
+       Era el supuesto que sostenía toda la arquitectura —entrar por móvil y trabajar por HTTP desde
        el servidor— y el único que, de haber salido mal, habría obligado a que el backend saliera por
        el proxy en **todas** las peticiones, con el gasto disparado.
     2. 🔴 **La tasa sin ventana**, N de N, para escribir la política de reintentos con un número.
@@ -1242,8 +1242,8 @@ Se da por terminado cuando se cumplen las dos condiciones:
        ⚠️ **Lo que NO queda probado: que el perfil persistente mejore la tasa.** 4 contra 2 sobre diez
        intentos es demasiado poco para afirmarlo; haría falta del orden de treinta o cuarenta por
        variante. Lo que **sí** está medido es que **abarata el login**: los tiempos caen a la mitad
-       porque la página de login llega cacheada. Como además no cuesta nada adoptarlo, **el acuñador
-       del paso 2c usa perfil persistente**, por los tiempos, no por la tasa.
+       porque la página de login llega cacheada. Como además no cuesta nada adoptarlo, **la pieza del paso
+       2c usa perfil persistente**, por los tiempos, no por la tasa.
 
        ✅ **La cifra que faltaba para dimensionar los reintentos: alrededor de un 30% por intento.**
        De ahí sale la política del 2c: con ese número hacen falta **unos cinco intentos para entrar
@@ -1284,7 +1284,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
     sitio del proveedor por IP móvil para pasar su protección contra robots, con la cuenta de
     gerencia del cliente—. Si PsicoAlianza lo nota, la cuenta expuesta es la del cliente. Sigue
     sin hacerse lo más barato: **preguntarle a PsicoAlianza** si tienen usuario de integración o
-    pueden eximir una IP; si contestan que sí, el acuñador y el proxy sobran.
+    pueden eximir una IP; si contestan que sí, esa pieza y el proxy sobran.
 
 44. **Validar la conexión de PsicoAlianza no hace login. Lo que se le enseña al reclutador es el
     estado de la sesión** (2026-09-14, decidido con el usuario). Es un cambio de comportamiento
@@ -1296,14 +1296,14 @@ Se da por terminado cuando se cumplen las dos condiciones:
     solo al pulsar guardar en ese modal —configurar, cambiar contraseña o **renombrar la conexión**,
     que obliga a reteclear la contraseña (41)—, así que es raro y con EvaluaTest tarda un segundo.
 
-    **Por qué con PsicoAlianza no sirve.** Validar allí es acuñar una sesión: Chrome, proxy móvil y
+    **Por qué con PsicoAlianza no sirve.** Validar allí es conseguir una sesión: Chrome, proxy móvil y
     captcha. Tres motivos, en orden de peso:
 
     1. 🔴 **El mensaje acusaría a quien no tiene la culpa.** Si el captcha rechaza, el reclutador lee
        *credenciales inválidas* con su contraseña bien escrita, la vuelve a teclear, vuelve a fallar
        y concluye que la cuenta está rota. Es el fallo silencioso de siempre: el error señala la
        causa equivocada.
-    2. **Ataría el paso 3 al acuñador** (2c), que espera la medición de la tasa, y bloquearía justo
+    2. **Ataría el paso 3 a la pieza que consigue la sesión** (2c), que espera la medición de la tasa, y bloquearía justo
        lo que se quería desbloquear al aparcar el proxy.
     3. **La espera**, de quince a treinta segundos con el formulario colgado (ver la corrección de
        tiempos en la 26). Es el motivo más débil de los tres.
@@ -1318,7 +1318,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
     | Se está comprobando | Un indicador de carga, un segundo |
     | No hay, o ya no sirve | **Sin conexión**, con el aviso de que la etapa se está omitiendo (decisión 40) y **un botón explícito para conectar** |
 
-    Ese botón es el único sitio donde se acuña, con su espera **pedida a propósito** en vez de un
+    Ese botón es el único sitio donde se consigue una sesión, con su espera **pedida a propósito** en vez de un
     formulario bloqueado, y si falla puede decir la verdad —*no se pudo conectar, reintenta*— sin
     acusar a las credenciales.
 
@@ -1332,7 +1332,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
     5**: la etiqueta, los tres estados, el botón y la operación que pregunta por el estado de la
     sesión, que hoy no existe en el puerto. ⚠️ **Repartido de otra forma después** (2026-09-14): el
     5b hizo solo la operación del backend; la etiqueta y sus tres estados son del paso 6.1 de la
-    etapa 3, y el botón llega con el acuñador (2c).
+    etapa 3, y el botón llega con la pieza que consigue la sesión (2c).
 
     🔴 **Y el aviso de la tabla está mal: con la conexión guardada y la sesión muerta, la etapa NO se
     omite** (comprobado en el código del embudo el 2026-09-14). La 40 solo omite cuando no hay
@@ -1419,8 +1419,8 @@ Se da por terminado cuando se cumplen las dos condiciones:
     la corta no hace falta persistirla: al reiniciar, la primera petición va solo con la de 5 días y
     PsicoAlianza reautentica.
 
-    **Regla**: el almacén escribe en la base **solo cuando cambia la cookie de 5 días** —al acuñar
-    (2c), o si PsicoAlianza la reemitiera, que no se ha visto—; la corta reemitida va a **memoria del
+    **Regla**: el almacén escribe en la base **solo cuando cambia la cookie de 5 días** —al conseguir
+    una sesión (2c), o si PsicoAlianza la reemitiera, que no se ha visto—; la corta reemitida va a **memoria del
     proceso, por empresa**. «Visto vivo» se escribe donde hoy: en la comprobación explícita y junto a
     esa escritura rara de la cookie de 5 días. La sesión pegada del `.env` no cambia, y sigue siendo
     una sola copia global. **La huella de la copia es la tira cifrada tal como está en la base**, sin
@@ -1429,8 +1429,8 @@ Se da por terminado cuando se cumplen las dos condiciones:
     sobrevive a un reinicio: coherente, y el `.env` local pide las dos.
 
     🔴 **La copia en memoria recuerda de qué valor guardado nació**: si al leer la base el valor es
-    otro —el acuñador guardó una sesión nueva, o se quitó la conexión—, la copia se descarta. Sin eso,
-    una sesión recién acuñada perdería contra una corta vieja en memoria.
+    otro —se guardó una sesión nueva, o se quitó la conexión—, la copia se descarta. Sin eso,
+    una sesión recién conseguida perdería contra una corta vieja en memoria.
 
     **Lo que no cambia**: el cliente sigue diciendo «guarda estas cookies» y el almacén decide qué va a
     dónde; el esquema es el mismo; hay una sola instancia del backend (leído del despliegue), y con
@@ -1595,26 +1595,46 @@ Se da por terminado cuando se cumplen las dos condiciones:
     conocen EvaluaTest y ampliarlos es un paso propio), la creación desde administración (anotada en la
     40) y el modo demo.
 
-52. **El acuñador va en tres pasos, sobre una imagen base construida en el servidor, sin ventana por
-    defecto, con renovación anticipada y sin el aislamiento de Chromium** (2026-09-15, decidido con el
-    usuario al replantear el 2c con el despliegue delante; incorpora la revisión del chat que hizo el
-    login desde Docker). Concreta la 43 sin cambiarla.
+52. **Conseguir la sesión va en tres pasos, sobre una imagen base construida en el servidor, con
+    ventana por defecto, con renovación anticipada y sin el aislamiento de Chromium** (2026-09-15,
+    decidido con el usuario al replantear el 2c con el despliegue delante; incorpora la revisión del
+    chat que hizo el login desde Docker). Concreta la 43 sin cambiarla.
+
+    ⚠️ **Vocabulario, decidido por el usuario el 2026-09-15**: se dice **conseguir la sesión** y **la
+    pieza que consigue la sesión**, no «acuñar» ni «acuñador». Los identificadores del código siguen
+    en inglés y no cambian; la fecha de acuñado guardada en la base tampoco, porque es un campo
+    persistido y renombrarlo rompería la integración en silencio. Aplicado en esta bitácora y en los
+    briefs vivos; los briefs de pasos ya cerrados se quedan como están.
 
     | Qué | Decidido | Por qué |
     | --- | --- | --- |
     | **Dónde corre Chrome** | En el backend, como decía la 43 | Una sola instancia: el candado es trivial. Un contenedor aparte sería un servicio nuevo con su API; el robot-manager es de otro equipo |
     | **La imagen** | Una **base propia**, `Dockerfile.base` junto a `deploy.sh` en cada servidor, construida allí mismo y solo cuando su etiqueta no existe; el backend la nombra en su primera línea. **En dos tiempos**: primero Node 22 sobre Debian ligero sin Chromium, un día en pruebas; después la misma base más Chromium de Debian, fuentes y Xvfb. Procedimiento en `before-deploy.md` §4 | Sin registro, la base construida una vez congela la versión de Chromium: instalarlo en el Dockerfile del backend la cambiaría sin que nadie lo pida cada vez que la imagen de Node se actualice. Node 22 porque Node 20 dejó de tener soporte en abril de 2026 y el primer tiempo ya obliga a probar dentro de la imagen |
     | **Navegador** | Chromium de Debian, con la versión de la librería fijada a la que casa | Es lo probado el 2026-09-14. Chrome for Testing casaría versiones pero descarga el navegador de Google en cada construcción |
-    | **Ventana** | **Sin ventana por defecto**, con Xvfb en la base y un interruptor por variable | El 30% medido es sin ventana; el 1 de 1 con ventana no decide nada. El interruptor permite medir las dos variantes en el servidor de pruebas sin redesplegar |
-    | **Cuándo se acuña** | **Renovación anticipada** por una tarea diaria cuando la sesión guardada pasa de 4 días, más acuñado a demanda como respaldo cuando aun así muera | A los 4 días quedan 24 horas de sesión viva: los intentos pueden espaciarse horas sin que nadie espere. Un login cada 4 días por conexión cuesta centavos |
+    | **Ventana** | 🔴 **Con ventana por defecto** (corregido el 2026-09-15, ver abajo), con Xvfb en la base y un interruptor por variable para medir sin ventana | Ese día, sin ventana entró 0 de 4 en Windows y con ventana 2 de 2 en Docker, la segunda con la cuenta principal y con el listado de vacantes respondiendo después desde fuera. El interruptor permite medir las dos variantes en el servidor de pruebas sin redesplegar |
+    | **Cuándo se consigue** | **Renovación anticipada** por una tarea diaria cuando la sesión guardada pasa de 4 días, más conseguirla a demanda como respaldo cuando aun así muera | A los 4 días quedan 24 horas de sesión viva: los intentos pueden espaciarse horas sin que nadie espere. Un login cada 4 días por conexión cuesta centavos |
     | **Cadencia** | **Ráfagas cortas de 3 intentos** con 25 segundos entre ellos y **horas entre ráfagas** para la renovación; una ráfaga más larga solo para la sesión ya muerta; tope diario de intentos por conexión y aviso a soporte al agotarlo. Números finales en el brief del 2c.2 | El captcha puntúa la reputación reciente y una ráfaga la gasta: la cuenta principal tras un día cargado dio 0 de 3 y la alterna fresca entró a la primera. Y un intento tarda de 18 a 35 segundos: ocho seguidos son ocho minutos, no cuatro |
-    | **Aislamiento de Chromium** | **Sin aislamiento, como root**, aceptado como deuda (`before-deploy.md` 7c). Mitigación: el acuñador solo permite navegar a PsicoAlianza y no comprueba la IP de salida | Activarlo exige usuario propio en la imagen, cambiar el dueño de los volúmenes de registros y un perfil de seguridad en los dos compose: un paso propio, después, para no mezclar dos cosas que pueden fallar en el mismo despliegue |
+    | **Aislamiento de Chromium** | **Sin aislamiento, como root**, aceptado como deuda (`before-deploy.md` 7c). Mitigación: la pieza solo permite navegar a PsicoAlianza y no comprueba la IP de salida | Activarlo exige usuario propio en la imagen, cambiar el dueño de los volúmenes de registros y un perfil de seguridad en los dos compose: un paso propio, después, para no mezclar dos cosas que pueden fallar en el mismo despliegue |
     | **Límite de memoria** | El consumo actual del backend más unos 600 MB, y memoria compartida de 1 GB | El pico medido, 465 MB, es el contenedor entero de la prueba; en el backend va encima de lo que ya consume |
 
-    **Los tres pasos:** **2c.1**, el acuñador sin que nadie lo llame (un intento, la clasificación, los
-    reintentos dentro de una llamada, el guardado); **2c.2**, cuándo se acuña (la tarea diaria, la
+    **Los tres pasos:** **2c.1**, la pieza sin que nadie la llame (un intento, la clasificación, los
+    reintentos dentro de una llamada, el guardado); **2c.2**, cuándo se consigue la sesión (la tarea diaria, la
     demanda desde el cliente, el candado, el tope y el aviso a soporte — toca el embudo, tratamiento
     completo); **2c.3**, el botón *Conectar* de *Mi compañía* con su ruta y la etiqueta revisada (50).
+
+    🔴 **Corrección del 2026-09-15, con el 2c.1 ya escrito: el defecto pasa a ser con ventana**, y lo
+    aprobó el usuario sobre lo medido ese día (0 de 4 sin ventana, 2 de 2 con ventana). Arrastra dos
+    cosas que el 2c.2 tiene que tener delante:
+
+    - ⚠️ **La tasa del modo que ahora es el oficial no está medida.** El 30% por intento de más arriba
+      se midió, según esta bitácora, sin ventana, y con un script que **no está en `evidencia/`**; los
+      dos que sí están corren con ventana. Así que la política de reintentos del 2c.2 **no puede
+      apoyarse en ese número**.
+    - 🔴 **La mitad de las IPs del proxy no son móviles** (medido el 2026-09-15: cinco de diez salieron
+      por operadores fijos, que puntúan como residenciales y en su día dieron cero). Fijar el operador
+      no cuesta nada y va pegado al login de la cuenta del proxy, pero **el módulo del 2b no lo hace
+      hoy**, así que la tasa real de la pieza será peor que la medida. Meterlo es un paso pequeño
+      propio y **conviene antes del 2c.2**, porque la cadencia depende de la tasa.
 
     **Lo que el chat de Docker dejó anotado y el 2c.1 incorpora:** *permanecer conectado* **no** viene
     marcado, contra lo que decía esta bitácora; los ficheros de candado del perfil y de la pantalla
@@ -2338,8 +2358,8 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 2 | ✅ **HECHO el 2026-09-13.** El cliente de PsicoAlianza **dado una sesión viva**: el almacén de sesión en la conexión de la empresa, la fuente manual del `.env` (decisión 42), el CSRF de las peticiones, las peticiones del contrato, *sesión caducada* como error propio y el registro sin cookies ni contraseñas; la lectura única de conexiones reconoce la de PsicoAlianza — brief `brief-etapa3-paso2-cliente-psicoalianza.md` | Aditivo |
 | 2b | ✅ **HECHO y revisado el 2026-09-15.** El módulo `proxy`: puerto de *arrendar una IP*, adaptador de DataImpulse, errores propios, sin selector (decisión 43). Nada lo llama hasta el 2c — brief `brief-etapa3-paso2b-modulo-proxy.md`, con la opinión previa incorporada. Verificado por el planificador: 117 suites y 1.197 pruebas (1.188 pasan, 9 omitidas; 23 nuevas), con la caché limpia; ningún módulo lo importa; el esquema de entorno gana cinco variables opcionales que admiten vacío. ⚠️ **La forma rotativa (sin `__sid.`) no está medida**: es la convención de DataImpulse; el 2c solo usa pegajosa | Aditivo |
 | 2c.0 | **Infraestructura, sin brief** (decisión 52): la imagen base del backend en dos tiempos, `before-deploy.md` §4. El `Dockerfile.base` y el `deploy.sh` del servidor de pruebas quedaron listos el 2026-09-15; falta la primera línea del Dockerfile del backend, en su commit, después del 2b | **La imagen** |
-| 2c.1 | El acuñador de sesión sin que nadie lo llame: Chromium por el puerto de proxy, clasificación, reintentos dentro de una llamada, guardado en el almacén (decisiones 43 y 52) — brief `brief-etapa3-paso2c-1-acunador-de-sesion.md` | Aditivo en código; una comprobación real contra la cuenta del cliente |
-| 2c.2 | Cuándo se acuña: la tarea diaria de renovación anticipada, la demanda desde el cliente al encontrar la sesión muerta, el candado, el tope diario y el aviso a soporte (52). Después del 2c.1 | Embudo |
+| 2c.1 | ✅ **HECHO y revisado el 2026-09-15.** La pieza que consigue la sesión, sin que nadie la llame: Chromium por el puerto de proxy, clasificación de cada intento, reintentos dentro de una llamada, guardado en el almacén (decisiones 43 y 52) — brief `brief-etapa3-paso2c-1-acunador-de-sesion.md` (el nombre del archivo conserva la palabra vieja para no romper los enlaces). Verificado por el planificador: 121 suites y 1.234 pruebas (1.225 pasan, 9 omitidas), con la caché limpia; ninguna afirmación existente quitada; nadie la llama. En la revisión se arreglaron el navegador que quedaba huérfano al vencer el tiempo límite y el mensaje de error que se perdía. ⚠️ **Falta la comprobación real**, que pasa al servidor de pruebas (punto 7d de `before-deploy.md`): el modo con ventana entró dos veces, pero siempre con el script de la prueba, nunca por este código | Aditivo en código; una comprobación real contra la cuenta del cliente |
+| 2c.2 | Cuándo se consigue la sesión: la tarea diaria de renovación anticipada, la demanda desde el cliente al encontrar la sesión muerta, el candado, el tope diario y el aviso a soporte (52). ⚠️ **Su cadencia no puede apoyarse en el 30% medido** (ver la corrección de la 52), y conviene fijar antes el operador del proxy. Después del 2c.1 | Embudo |
 | 2c.3 | El botón *Conectar* de *Mi compañía*, su ruta y la etiqueta revisada (50). Después del 2c.2 | Visible |
 | 2d | ✅ **HECHO el 2026-09-14.** El almacén guarda solo la cookie de 5 días y deja la corta en memoria (decisión 47) — brief `brief-etapa3-paso2d-cookie-de-sesion.md`. Verificado: 114 suites y 1.113 pruebas (1.104 pasan, 9 omitidas; 4 nuevas). Solo el almacén y dos pruebas; el cliente, el esquema y la rama manual, intactos. La huella es la tira cifrada de la base; la cookie de 5 días se reconoce por prefijo; lo guardado a mano no se limpia | Toca el almacén del paso 2 |
 | 3 | ✅ **HECHO el 2026-09-14.** El adaptador de PsicoAlianza contra el puerto psicométrico, con la invitación real de comprobación hecha — brief `brief-etapa3-paso3-adaptador-psicoalianza.md`, registro en *Paso 3* | Aditivo |
@@ -2397,7 +2417,7 @@ Levantado leyendo el código y `psicoalianza-api.md`. Cada punto cae en el paso 
   2026-09-13 verificando la opinión previa del paso 2). La ruta que guarda una conexión **reconstruye
   el objeto con los campos que conoce** y descarta el resto: hoy solo toca la de EvaluaTest, así que
   no rompe nada, pero el día que guarde la de PsicoAlianza, **renombrar la conexión tiraría la sesión
-  acuñada** y el acuñador gastaría un login de proxy móvil para nada.
+  conseguida** y habría que gastar otro login de proxy móvil para nada.
 - **El documento** (pasos 3 y 5). La invitación del puerto ya prevé el número de documento, pero el
   arranque no lo pasa (comprobado leyendo la única llamada). Nuestro tipo de documento es texto libre
   y de PsicoAlianza solo se conoce el identificador de CC. Sin documento se descarta (decisión 33), y
@@ -2607,7 +2627,7 @@ del reporte del usuario:
 el endurecimiento. Corrige el riesgo del 2026-09-09 que decía "no volver por esta vía".
 
 **Lo que esta medición no dice, y falta:** si la sesión sirve desde otra IP que la que la creó, y
-la tasa exacta. Las dos están en la decisión 43 como condición del brief del acuñador.
+la tasa exacta. Las dos están en la decisión 43 como condición del brief de la pieza que consigue la sesión.
 
 ✅ **Decidido el 2026-09-13, y cierra el bloqueo: el proxy móvil es el camino oficial** (decisión
 43), todo en el backend. El login humano (42) queda como red de emergencia y para local.
@@ -2617,7 +2637,7 @@ la tasa exacta. Las dos están en la decisión 43 como condición del brief del 
 La medición que sostenía toda la arquitectura de la decisión 43, y salió bien. Script
 `test-cross-ip.mjs`, del chat de mediciones.
 
-**Qué se hizo:** acuñar una sesión entrando por **IP móvil colombiana** con el proxy, y después
+**Qué se hizo:** conseguir una sesión entrando por **IP móvil colombiana** con el proxy, y después
 usar esas cookies **desde otra máquina y otra IP residencial, sin proxy ninguno**.
 
 | Qué se mandó desde la otra IP | Resultado |
@@ -2628,12 +2648,12 @@ usar esas cookies **desde otra máquina y otra IP residencial, sin proxy ninguno
 
 **Lo que queda probado, y es el permiso para construir el 2c como está diseñado:**
 
-- **PsicoAlianza no ata la sesión a la IP que la creó.** El navegador acuña por móvil y el backend
+- **PsicoAlianza no ata la sesión a la IP que la creó.** El navegador entra por móvil y el backend
   trabaja por HTTP desde la IP del servidor. Si esto hubiera salido mal, el backend tendría que
   salir por el proxy en **todas** las peticiones y el gasto dejaría de ser casi cero.
 - **La cookie de *permanecer conectado* reautentica sola**, y ahora está comprobado **desde otra
   IP**. Confirma A13 y la decisión 26 por observación y no por lectura de su documentación, y
-  significa que al acuñador le basta con guardar esa cookie para sobrevivir a la caducidad de la
+  significa que a la pieza que consigue la sesión le basta con guardar esa cookie para sobrevivir a la caducidad de la
   sesión corta.
 
 ⚠️ **Lo que no dice:** cuánto dura de verdad. Que reautentique hoy no mide los cinco días.
@@ -2762,7 +2782,7 @@ vacantes activas, solo lectura, sin login ni captcha:
 
 **La cookie de 5 días basta sola para trabajar**: con la corta vencida o ausente, PsicoAlianza
 reautentica y responde con datos. Eso hace viable **guardar en la base solo esa cookie, escrita al
-acuñar, y dejar la corta en memoria**: casi cero escrituras. ⚠️ **No se puede usar la cookie corta
+conseguir la sesión, y dejar la corta en memoria**: casi cero escrituras. ⚠️ **No se puede usar la cookie corta
 nueva como prueba de nada**: el control negativo también la recibe, porque el servidor abre una
 sesión anónima a cualquiera. La prueba son las vacantes.
 
@@ -2771,8 +2791,9 @@ las tres formas **supuestas** de sesión muerta que heredó el paso 3 del paso 2
 —redirección al login y 419— siguen sin verse.
 
 ✅ **DECIDIDO por el usuario el 2026-09-14: se adopta.** En la base se guarda **solo la cookie de
-*permanecer conectado***, escrita al acuñar; la corta vive en memoria y, si se pierde o vence, la de
-5 días reautentica. Con la de 5 días vencida, la petición falla como *sesión caducada* y toca acuñar.
+*permanecer conectado***, escrita al conseguir la sesión; la corta vive en memoria y, si se pierde o
+vence, la de 5 días reautentica. Con la de 5 días vencida, la petición falla como *sesión caducada* y
+hay que conseguir otra.
 ✅ **Y va en un cambio pequeño propio, antes del 2c** (decidido por el usuario el mismo día): toca el
 almacén de sesión del paso 2, que está cerrado, y así el 2c lo encuentra resuelto. Su brief lo
 escribe este planificador, después de proponerlo entero.
@@ -2914,7 +2935,7 @@ con mediciones de solo lectura ese mismo día. Todo está incorporado al brief.
 | Nadie tenía asignado que el embudo pase el plazo | **Asignado al paso 5**, junto al documento. Y el 4 no puede mandar ninguna empresa a PsicoAlianza antes del 5 |
 | Quien no aparece en el tablero tras invitar se quedaba atascado para siempre | **Decidido por el usuario**: error permanente, comparando el documento sin espacios. **Amplía la decisión 39** |
 | Los motivos de «no usable» llegan tal cual al portal, con la bolsa entera | Aceptado: motivos con nombre fijo y bolsa casi vacía. El texto que ve el reclutador, paso 6 |
-| Sesión caducada en la consulta acaba como *no se pudo consultar* | Correcto hoy. **Hereda el 2c**: el reintento tras acuñar va dentro del adaptador o del cliente, no en el cron |
+| Sesión caducada en la consulta acaba como *no se pudo consultar* | Correcto hoy. **Hereda el 2c**: el reintento tras conseguir la sesión va dentro del adaptador o del cliente, no en el cron |
 | El WhatsApp enseña nuestro correo enmascarado y PsicoAlianza avisa a otro | **Hereda el paso 4/5**, junto a las instrucciones de EvaluaTest del mismo mensaje |
 | Cambios sin commitear en la documentación | Eran del planificador; no se mezclan con el diff del paso |
 

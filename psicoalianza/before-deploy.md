@@ -20,7 +20,8 @@ diff de documentación. Lo que está en la bitácora y no aquí, no se va a hace
 | 7 | **La imagen base del backend, en dos tiempos** (decisión 43; procedimiento en §4, abajo). Tiempo 1: Node 22 sobre Debian ligero, sin Chromium, un día en el servidor de pruebas. Tiempo 2: la misma base más Chromium, fuentes y Xvfb. Cada tiempo va **a mano y con el despliegue nocturno sin programar** | Usuario y quien despliega | ☐ |
 | 7b | **Medir el consumo de memoria del backend en el servidor de pruebas** antes del tiempo 2, y ponerle límite: el consumo medido más unos 600 MB, y memoria compartida de 1 GB, en los dos compose. Comando en §4 | Quien despliega | ☐ |
 | 7c | **Deuda aceptada el 2026-09-15**: Chromium corre **sin su aislamiento** (como root, dentro del contenedor del backend). Acotado a que el acuñador solo navega a PsicoAlianza y a los dominios del captcha. Activarlo es un paso propio: usuario propio en la imagen, cambio de dueño de los volúmenes de registros y un perfil de seguridad en los dos compose | Equipo, después | ☐ |
-| 8 | Configurar en los servidores las variables del proxy (`PROXY_HOST`, `PROXY_PORT`, `PROXY_LOGIN`, `PROXY_PASS`, y `PROXY_PROTOCOL`, opcional: `http` si no se pone, `socks5` con el puerto 824) antes de que una empresa use PsicoAlianza. Sin ellas el backend arranca; falla al acuñar | Quien despliega | ☐ |
+| 7d | **La comprobación real del acuñador se hace en el servidor de pruebas, no en local** (decidido por el usuario el 2026-09-15). Después del tiempo 2, y con las variables del punto 8 puestas: un intento, y si falla, al menos una hora antes del siguiente. Procedimiento en §4 | Usuario y quien despliega | ☐ |
+| 8 | Configurar en los servidores las variables del proxy (`PROXY_HOST`, `PROXY_PORT`, `PROXY_LOGIN`, `PROXY_PASS`, y `PROXY_PROTOCOL`, opcional: `http` si no se pone; **para el acuñador tiene que ser HTTP**, con `socks5` termina como *sin configurar*) y las tres del acuñador (paso 2c.1): `PSICOALIANZA_CHROMIUM_PATH=/usr/bin/chromium`, `PSICOALIANZA_LOGIN_DIR` apuntando al volumen del §4 (por ejemplo `/var/lib/psicoalianza-login`) y `PSICOALIANZA_LOGIN_HEADLESS` sin poner (**con ventana sobre Xvfb**, que es la forma que entró; `true` solo para medir sin ventana). Todo antes de que una empresa use PsicoAlianza. Sin ellas el backend arranca; falla al acuñar | Quien despliega | ☐ |
 | 8b | **Correr las pruebas a mano del portal** de `pruebas-a-mano.md`, en local y con la rama entera, y anotar el resultado de cada caso. Si alguno falla, no se despliega | Usuario | ☐ |
 | 9 | Configurar en los servidores las variables de PsicoAlianza antes de que una empresa la use: `PSICOALIANZA_BASE_URL` si no es la oficial, y comprobar que **`PSICOALIANZA_MANUAL_SESSION_ENABLED` no está encendida** ni hay cookies pegadas (paso 2 de la etapa 3). No bloquea desplegar ese paso solo | Quien despliega | ☐ |
 
@@ -188,6 +189,28 @@ Antes de este tiempo, el punto 7b: medir el consumo del backend en el servidor d
 `docker stats --no-stream selessia-backend`, y en los dos compose ponerle al backend `mem_limit` (lo
 medido más unos 600 MB) y `shm_size: 1gb`. Sin la memoria compartida, Chromium se cae.
 
-**Después del tiempo 2, el backend puede acuñar sesiones** cuando exista el 2c. El acuñador necesita
-además un volumen con nombre para el perfil de Chromium y una carpeta para las capturas de los intentos
-fallidos; los dos se añaden a los compose con el brief del 2c.
+**Después del tiempo 2, el backend puede acuñar sesiones** cuando el 2c.2 lo llame, y el tiempo 2 es
+obligatorio para acuñar: desde el 2026-09-15 el modo por defecto es **con ventana**, que en Linux
+necesita Xvfb en la imagen.
+
+**La comprobación real del acuñador (punto 7d).** Nadie lo llama todavía —eso llega con el 2c.2 y el
+2c.3—, así que el intento se dispara a mano **dentro del contenedor del backend**: un script
+desechable que monte el acuñador ya compilado, con una lectura de conexiones falsa que tome las
+credenciales del entorno y un almacén falso que solo imprima nombres de cookies. Se borra al
+terminar. Reglas, medidas el 2026-09-15: **un intento por llamada**; si sale *captcha rechazado*,
+al menos una hora antes del siguiente; ante *bloqueada*, *credenciales rechazadas* o *sin cookie de
+recuerdo*, parar en seco ese día. Entró significa que la clasificación es *entró* **y** que el
+listado de vacantes responde con esas cookies desde fuera del servidor, sin proxy.
+
+⚠️ **Lo que todavía no se ha probado y esta comprobación cierra:** el modo con ventana entró dos
+veces, pero siempre con el script de la prueba (`../../psicoalianza-xvfb-login/`), **nunca por el
+código del acuñador**. En Windows ese modo se quedó sin probar porque el usuario decidió llevarlo al
+servidor.
+
+**Lo que el compose del backend necesita para el acuñador** (paso 2c.1): un **volumen con nombre**
+montado en la ruta de
+`PSICOALIANZA_LOGIN_DIR`; el acuñador crea dentro `profile/` (el perfil persistente de Chromium, que
+abarata el login a la mitad) y deja ahí las capturas `login-attempt-<fecha>.png` de los intentos que no
+entran. Volumen con nombre y no una carpeta del servidor montada: el perfil lleva ficheros de candado y
+sockets que Chromium necesita poder crear. El volumen conserva el perfil entre despliegues; borrarlo es
+empezar con un perfil sin reputación de Google. Las capturas se limpian a mano.
