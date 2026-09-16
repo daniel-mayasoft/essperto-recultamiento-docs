@@ -60,19 +60,22 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
 
 1. En *Mi compañía*, la sección de la prueba se titula *Conexión de pruebas psicométricas* y
    debajo enseña **dos filas siempre, EvaluaTest y PsicoAlianza**, en ese orden (decisión 50).
-   Cada fila, si la conexión de ese proveedor está configurada, muestra **su nombre, el proveedor
-   entre paréntesis y el correo** —«EvaluaTest Medicall (EvaluaTest) — correo»— con el botón
-   *Editar conexión*; si está incompleta o no existe, «EvaluaTest — sin conectar» con el botón
-   *Conectar*. El correo sale **de la lista de conexiones**, que el backend sirve con el correo de
+   Cada fila sigue el patrón del resto de la pestaña del flujo (2026-09-16): si la conexión de ese
+   proveedor está configurada, «**EvaluaTest** — Configurado — correo»; si está incompleta o no
+   existe, «**EvaluaTest** — Sin configurar». El botón dice siempre *Editar*: *Conectar* es solo el
+   de la sesión de PsicoAlianza (2c.3). El nombre de la conexión ya no se enseña. El correo sale **de la lista de conexiones**, que el backend sirve con el correo de
    cada una; *Mi compañía* ya no lee el bloque derivado de EvaluaTest. Solo se puede tener una
    conexión por proveedor, y **no hay "desconectar"**.
 
    Cada botón abre el modal **fijado al proveedor de su fila**, sin selector, con el proveedor en
    el título y **nombre, correo y contraseña**: el nombre viene con el de la conexión de ese
-   proveedor, aunque esté incompleta, o con el del proveedor si no hay ninguna; el correo, el de
-   esa conexión o vacío; **la contraseña viene siempre vacía y es obligatoria** — renombrar exige
-   volver a teclearla (decisión 41). Al guardar, el portal manda **el proveedor en las dos
-   peticiones**, la validación y el guardado:
+   proveedor, aunque esté incompleta, o con el del proveedor si no hay ninguna, y **no se puede
+   editar**; el correo, el de esa conexión o vacío; **la contraseña viene siempre vacía** —nunca
+   sale del backend— y **solo es obligatoria si la conexión no está configurada**. Con la conexión
+   configurada, el campo enseña puntos y el aviso *«Déjala vacía para conservar la contraseña
+   guardada.»*; si se deja vacía, la validación usa la guardada y el guardado la conserva (decisión
+   56). Al guardar, el portal manda **el proveedor en las dos peticiones**, la validación y el
+   guardado:
 
    - **Con EvaluaTest**, valida contra EvaluaTest, exige el identificador de empresa que devuelve
      —si no llega, *no se pudo identificar tu empresa*— y guarda con él. El correo no es
@@ -110,7 +113,7 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
 
    «Conectado» gana sobre cualquier fallo guardado: un desenlace viejo con la sesión de hoy viva es
    *Conectado*, y con la renovación anticipada en curso también, porque las invitaciones salen.
-   `no_connection` → nada, porque la fila ya dice *sin conectar*. **Pulsar *Conectar*** llama a la
+   `no_connection` → nada, porque la fila ya dice *Sin configurar*. **Pulsar *Conectar*** llama a la
    ruta de escritura de abajo y pinta su respuesta; **mientras la respuesta diga que hay ráfaga en
    curso, la fila vuelve a pedir el estado cada cinco segundos** hasta que deje de haberla —también
    al cargar la página o al guardar el modal si la respuesta ya viene así—, con tope de doce minutos,
@@ -151,7 +154,10 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
    - **Validar sin login.** La misma ruta de validación acepta `provider`; con PsicoAlianza responde
      por su adaptador **sin llamar a nadie** —válida si trae correo y contraseña, sin identificador
      de empresa— porque validar sería acuñar una sesión y un captcha rechazado acusaría a la
-     contraseña (decisión 44). Con EvaluaTest sigue haciendo login por el puerto.
+     contraseña (decisión 44). Con EvaluaTest sigue haciendo login por el puerto. **Si la contraseña
+     llega vacía**, las dos validaciones usan la que la empresa del usuario autenticado tiene
+     guardada para ese proveedor; sin conexión guardada, validan con la vacía y fallan como antes
+     (decisión 56).
    - **El estado de la sesión.** Una ruta de solo lectura bajo *Mi compañía* responde `connected`,
      `no_session`, `expired` o `no_connection`, comprobando de verdad con la petición barata del
      cliente y **sin acuñar nada**; primero resuelve la conexión, así que con la sesión manual

@@ -19,11 +19,11 @@ Brief: `brief-etapa3-paso6-1-mi-compania.md`. El número de caso es el del brief
 
 | Orden | Caso | Qué se hace | Qué se tiene que ver | Resultado |
 | --- | --- | --- | --- | --- |
-| 1 | 1 | Abrir *Mi compañía*, pestaña del flujo | Dos filas: «EvaluaTest — sin conectar» y «PsicoAlianza — sin conectar», sin etiqueta | ☐ |
-| 2 | 2 | *Conectar* en EvaluaTest con correo y contraseña inventados. **Un solo intento** (hace un login real contra EvaluaTest; autorizado por el usuario el 2026-09-14) | «Correo o contraseña incorrectos», y la fila sigue *sin conectar* | ☐ |
+| 1 | 1 | Abrir *Mi compañía*, pestaña del flujo | Dos filas: «**EvaluaTest** — Sin configurar» y «**PsicoAlianza** — Sin configurar», cada una con el botón *Editar*, sin etiqueta | ☐ |
+| 2 | 2 | *Editar* en EvaluaTest con correo y contraseña inventados. **Un solo intento** (hace un login real contra EvaluaTest; autorizado por el usuario el 2026-09-14) | «Correo o contraseña incorrectos», y la fila sigue *Sin configurar* | ☐ |
 | 3 | 11 | Añadir `mode=dev` a la dirección; en la pestaña de desarrollo, plazo 1,5 y guardar | Se guarda, igual que hoy | ☐ |
-| 4 | 14 | *Conectar* en PsicoAlianza con la contraseña y **el correo vacío** | El formulario exige el correo; no sale «correo o contraseña incorrectos» | ☐ |
-| 5 | 3 | Lo mismo, con correo | La fila dice «PsicoAlianza (PsicoAlianza) — correo»; **la de EvaluaTest sigue *sin conectar*** | ☐ |
+| 4 | 14 | *Editar* en PsicoAlianza con la contraseña y **el correo vacío** | El formulario exige el correo; no sale «correo o contraseña incorrectos» | ☐ |
+| 5 | 3 | Lo mismo, con correo | La fila dice «**PsicoAlianza** — Configurado — correo»; **la de EvaluaTest sigue *Sin configurar*** | ☐ |
 | 6 | 12 | Recargar la página; pulsar cualquier interruptor de etapa del flujo | El mensaje de días enteros del backend, no «error al actualizar» | ☐ |
 | 7 | 15 | Guardar las credenciales de un portal de empleo (Computrabajo) | El mismo mensaje. **Anotar si se ve con el modal abierto o solo al cerrarlo** | ☐ |
 | 8 | 9 | Pestaña de desarrollo (`mode=dev`): plazo 1,5 y guardar | No se manda; aviso de días enteros | ☐ |
@@ -32,7 +32,7 @@ Brief: `brief-etapa3-paso6-1-mi-compania.md`. El número de caso es el del brief
 | 11 | 6 | Pegar una cookie inventada, **reiniciar el backend** y recargar | Desde el 2c.3 el texto lo elige la regla: con la conexión recién guardada y **ningún desenlace guardado** en la base, el aviso amarillo «Pendiente de conexión — pulsa Conectar para conectar ahora.» con el botón *Conectar* encendido. Con la manual encendida el botón no arranca nada (ver 2c.3, caso 1) | ☐ |
 | 12 | 5 | Apagar el interruptor, **reiniciar el backend** y recargar | El mismo aviso si sigue sin desenlace guardado; si la tarea de la hora ya intentó, el texto que toque a ese desenlace (ver la tabla del 2c.3) | ☐ |
 | 13 | 7 | Volver a la sesión válida y reiniciar; en las herramientas del navegador, **bloquear solo la petición del estado de sesión**, y recargar | «No se pudo comprobar la sesión», nunca *Sin conexión* | ☐ |
-| 14 | 8 | Quitar el bloqueo; *Editar conexión* de PsicoAlianza, cambiar solo el nombre y reteclear la contraseña | Cambia el nombre y la etiqueta se vuelve a pedir | ☐ |
+| 14 | 8 | ~~Cambiar solo el nombre y reteclear la contraseña~~ | **Sustituido** por la sección *Mi compañía — nombre bloqueado y contraseña guardada* (decisión 56): el nombre ya no se edita | — |
 | 15 | 13 | ~~Abrir una oferta de esa empresa~~ | **Sustituido** por la sección del paso 6.2b, que ya está hecho | — |
 
 **No se hace**: el caso extra con una cuenta real de EvaluaTest, porque no la hay.
@@ -92,10 +92,27 @@ termine en *sin configurar* sin lanzar nada.
 | 7 | 7 | El caso 4, **con `PSICOALIANZA_CHROMIUM_PATH` vacía** en el `.env` (reiniciar el backend una vez para eso) | Pulsar *Conectar* | «Conectando…» un instante y luego «Conexión fallida — vuelve a intentarlo.» (la pieza termina en *sin configurar*, que no bloquea); nada se lanzó. En el registro del backend, la ráfaga con ese desenlace y el aviso de la variable | ☐ |
 | 8 | 8 | El caso 3 | El botón no se ve encendido; llamar la ruta `POST /tenants/my-tenant/psicoalianza/connect` a mano | La respuesta trae `bursting: false` y `blockedByCredentials: true`; **en la base, `lastAttemptOutcome` sigue en `bad_credentials`**: el bloqueo no se liberó | ☐ |
 | 9 | 9 | El caso 4; en las herramientas del navegador, **bloquear solo la petición del estado** (`session-status`) | Recargar | «No se pudo comprobar la sesión», sin botón | ☐ |
-| 10 | 10 | El caso 4, con la ruta del navegador vacía | *Editar conexión*, reteclear la contraseña y guardar | La etiqueta se vuelve a pedir: «Conectando…» brevísimo o directamente «Conexión fallida — vuelve a intentarlo.»; en la base, `lastAttemptOutcome` pasó por nulo (el guardado libera el bloqueo) y quedó en `not_configured` | ☐ |
+| 10 | 10 | El caso 4, con la ruta del navegador vacía | *Editar* y guardar sin tocar la contraseña | La etiqueta se vuelve a pedir: «Conectando…» brevísimo o directamente «Conexión fallida — vuelve a intentarlo.»; en la base, `lastAttemptOutcome` pasó por nulo (el guardado libera el bloqueo) y quedó en `not_configured` | ☐ |
 | 11 | 11 | Un usuario con un rol que **no puede editar la empresa** | Abrir *Mi compañía* | **No ve la sección de etapas** ni la fila de PsicoAlianza: toda la sección está detrás del permiso de editar; el botón hereda esa puerta (opinión previa del 2c.3) | ☐ |
 | 12 | Revisión del diff | Manual apagada; en la base, sin cookies y sin desenlace; **`PSICOALIANZA_CHROMIUM_PATH` apuntando a un ejecutable que tarde** en responder. Si no se puede preparar, se omite y se anota | Pulsar *Conectar* y, mientras dice «Conectando…», ir a otra pantalla del portal | En la pestaña de red del navegador, **ninguna petición más** al estado de sesión (`session-status`) tras salir | ☐ |
 
 **Lo que no se prueba en local, a sabiendas:** «Conectando…» durante minutos y el paso a «Conectado» por
 una ráfaga real. Es la comprobación real del punto 7d de `before-deploy.md`, en el servidor de pruebas,
 y desde este paso se hace **desde la pantalla**: guardar la conexión o pulsar *Conectar*.
+
+## Mi compañía — nombre bloqueado y contraseña guardada
+
+Decisión 56. Hecho por el planificador a petición del usuario, **sin revisión de otra persona**: estos casos son
+la única comprobación de lo que ve el reclutador. Se pueden correr en el servidor de pruebas, que ya tiene la
+rama. ⚠️ Los casos con EvaluaTest hacen **un login real** contra EvaluaTest con la cuenta de esa empresa.
+
+| # | Cómo está la empresa | Qué se hace | Qué se tiene que ver | Resultado |
+| --- | --- | --- | --- | --- |
+| 1 | Con EvaluaTest configurada | *Editar* en EvaluaTest | El nombre **no se puede editar**; la contraseña vacía con puntos en gris y el aviso «Déjala vacía para conservar la contraseña guardada.» | ☐ |
+| 2 | Igual | Guardar **sin tocar nada** | Se guarda, sin «correo o contraseña incorrectos»; la fila sigue conectada con su correo | ☐ |
+| 3 | Igual | Volver a *Editar*, escribir una contraseña **inventada** y guardar | «Correo o contraseña incorrectos»; no se guarda. Cerrar sin guardar | ☐ |
+| 4 | Igual | *Editar* y guardar otra vez sin tocar nada | Se guarda: la contraseña buena sigue ahí, el caso 3 no la pisó | ☐ |
+| 5 | Con PsicoAlianza **sin configurar** | *Editar* en PsicoAlianza con correo y **sin contraseña** | El formulario **exige** la contraseña: sin conexión configurada no hay nada guardado que conservar | ☐ |
+| 6 | Con PsicoAlianza configurada | *Editar* en PsicoAlianza y guardar sin tocar la contraseña | Se guarda; la etiqueta se vuelve a pedir y dispara el intento de sesión como al guardar (2c.2) | ☐ |
+| 7 | Igual | En las herramientas del navegador, pestaña de red: abrir *Mi compañía* y el modal | **Ninguna respuesta trae la contraseña**, ni cifrada ni en claro | ☐ |
+| 8 | Cualquiera, pestaña del flujo | Recorrer las filas de *Recopilación de candidatos*, *Análisis de compatibilidad*, *Prueba psicométrica* y *Verificación de cumplimiento* | Todas con el mismo patrón: **nombre en negrita** — Configurado — detalle, o — Sin configurar; y todos los botones dicen **Editar** (el único *Conectar* es el de la sesión de PsicoAlianza) | ☐ |

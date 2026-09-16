@@ -20,7 +20,7 @@ diff de documentación. Lo que está en la bitácora y no aquí, no se va a hace
 | 7 | **La imagen base del backend, en dos tiempos** (decisión 43; procedimiento en §4, abajo). Tiempo 1: Node 22 sobre Debian ligero, sin Chromium, un día en el servidor de pruebas. Tiempo 2: la misma base más Chromium, fuentes y Xvfb. Cada tiempo va **a mano y con el despliegue nocturno sin programar**. **Estado: tiempo 1 desplegado en pruebas el 2026-09-16, en su día de prueba** (§4); producción cambiará de imagen al fusionar `develop` en `main` | Usuario y quien despliega | ☐ |
 | 7b | **Medir el consumo de memoria del backend en el servidor de pruebas** antes del tiempo 2, y ponerle límite: el consumo medido más unos 600 MB, y memoria compartida de 1 GB, en los dos compose. Comando en §4 | Quien despliega | ☐ |
 | 7c | **Deuda aceptada el 2026-09-15**: Chromium corre **sin su aislamiento** (como root, dentro del contenedor del backend). Acotado a que la pieza solo navega a PsicoAlianza y a los dominios del captcha. Activarlo es un paso propio: usuario propio en la imagen, cambio de dueño de los volúmenes de registros y un perfil de seguridad en los dos compose | Equipo, después | ☐ |
-| 7d | **La comprobación real de la pieza que consigue la sesión se hace en el servidor de pruebas, no en local** (decidido por el usuario el 2026-09-15). Después del tiempo 2, y con las variables del punto 8 puestas: un intento, y si falla, al menos una hora antes del siguiente. Procedimiento en §4 | Usuario y quien despliega | ☐ |
+| 7d | **La comprobación real de la pieza que consigue la sesión se hace en el servidor de pruebas, no en local** (decidido por el usuario el 2026-09-15). Después del tiempo 2, y con las variables del punto 8 puestas: un intento, y si falla, al menos una hora antes del siguiente. Procedimiento en §4. **Estado: en pruebas entró al primer intento el 2026-09-16** (§5, *Pendiente*); falta el pico de memoria, y en producción se repite | Usuario y quien despliega | ☐ |
 | 8 | Configurar en los servidores las variables del proxy (`PROXY_HOST`, `PROXY_PORT`, `PROXY_LOGIN` **con el sufijo `__asn.26611`, que fija el operador en Claro — medido el 2026-09-16, sin él la mitad de las IPs salen por otros operadores; si se rota el login, conservar el sufijo**, `PROXY_PASS`, y `PROXY_PROTOCOL`, opcional: `http` si no se pone; **para conseguir la sesión tiene que ser HTTP**, con `socks5` termina como *sin configurar*) y las tres de la pieza (paso 2c.1): `PSICOALIANZA_CHROMIUM_PATH=/usr/bin/chromium`, `PSICOALIANZA_LOGIN_DIR` apuntando al volumen del §4 (por ejemplo `/var/lib/psicoalianza-login`) y `PSICOALIANZA_LOGIN_HEADLESS` sin poner (**con ventana sobre Xvfb**, que es la forma que entró; `true` solo para medir sin ventana). Las cuatro de la renovación (paso 2c.2), **opcionales, sin poner salvo que haya que ajustar la cadencia**: `PSICOALIANZA_LOGIN_ATTEMPTS_PER_BURST` (3 intentos por ráfaga), `PSICOALIANZA_LOGIN_BURST_COOLDOWN_MINUTES` (60 minutos entre ráfagas), `PSICOALIANZA_LOGIN_ATTEMPTS_PER_WINDOW` (20 intentos por ventana de 24 horas) y `PSICOALIANZA_SESSION_RENEWAL_DAYS` (renovar a los 4 días). 🔴 **`ALERT_SUPPORT_EMAILS` tiene que estar puesta**, o los correos de la renovación —credenciales rechazadas, tope alcanzado, variable que falta— no salen y solo queda un aviso en el registro. Todo antes de que una empresa use PsicoAlianza. Sin ellas el backend arranca; falla al conseguir la sesión | Quien despliega | ☐ |
 | 8b | **Correr las pruebas a mano del portal** de `pruebas-a-mano.md` —los pasos 6.1, 6.2b y **2c.3**—, en local y con la rama entera, y anotar el resultado de cada caso. Si alguno falla, no se despliega | Usuario | ☐ |
 | 9 | Configurar en los servidores las variables de PsicoAlianza antes de que una empresa la use: `PSICOALIANZA_BASE_URL` si no es la oficial, y comprobar que **`PSICOALIANZA_MANUAL_SESSION_ENABLED` no está encendida** ni hay cookies pegadas (paso 2 de la etapa 3). No bloquea desplegar ese paso solo | Quien despliega | ☐ |
@@ -205,6 +205,11 @@ tiene que saberlo, y comprobar antes en ese servidor lo mismo que se comprobó e
 
 ### Tiempo 2 · Chromium, fuentes y Xvfb
 
+✅ **En pruebas desde el 2026-09-16 a las 10:50**, sin esperar el día del tiempo 1 (decisión del usuario).
+**Versiones instaladas: Chromium 152.0.7977.82 de Debian 13, con `puppeteer-core` 25.10.0** —el par que
+entró en la prueba en Docker—. Si al reconstruir la base sale otro Chromium, se compara antes de seguir.
+La receta completa, con lo que salió mal, en §5.
+
 Etiqueta `selessia-node-chromium:22-debian-1`. Se escribe cuando el tiempo 1 lleve un día en verde:
 `Dockerfile.base` gana la instalación de `chromium`, `xvfb` y `fonts-liberation` (lo que probó el
 otro chat el 2026-09-14), y **las versiones instaladas se anotan en este documento** junto a la
@@ -258,3 +263,130 @@ abarata el login a la mitad) y deja ahí las capturas `login-attempt-<fecha>.png
 entran. Volumen con nombre y no una carpeta del servidor montada: el perfil lleva ficheros de candado y
 sockets que Chromium necesita poder crear. El volumen conserva el perfil entre despliegues; borrarlo es
 empezar con un perfil sin reputación de Google. Las capturas se limpian a mano.
+
+## 5 · Desplegar en producción: la receta, con lo aprendido en pruebas
+
+> Escrito el 2026-09-16, después de desplegar la rama entera en pruebas en una mañana, con el usuario en
+> la consola del servidor. Es para quien lo repita en producción **sin haber estado ahí**. Lo que aquí
+> se da por comprobado se comprobó en **pruebas**; en producción hay que volver a mirarlo todo.
+
+### Cómo están las ramas y los servidores
+
+| Rama | Servidor | Cómo se despliega |
+| --- | --- | --- |
+| `main` | Producción | `deploy.sh` hace `git pull` de la rama que tenga puesta la carpeta de cada repositorio. **El script no nombra ramas** |
+| `develop` | Pruebas, normalmente | Igual |
+| `feat/integrate-psicoanalisis-provider` | Pruebas, **desde el 2026-09-16**, con `deploy-branch.sh` | Script propio **solo en pruebas**, junto a `deploy.sh`: cambia las carpetas del backend y del portal a la rama que se le pida —se detiene si hay cambios a mano—, enseña un resumen, pide confirmar y despliega backend y, justo después, portal. `bash deploy-branch.sh develop` devuelve pruebas a `develop` |
+
+🔴 **Mientras pruebas esté en la rama, lo que otros suban a `develop` no llega a pruebas.** Y la rama **no está
+en `develop` ni en `main`**. Para producción el camino es rama → `develop` → `main`, y **nadie puede pasar
+`develop` a `main`** hasta que esta lista esté hecha en producción: sin la migración, la etapa psicométrica
+se salta para todas las empresas sin dar error.
+
+### Lo que salió mal o casi, en pruebas
+
+| Qué pasó | Cómo se evita |
+| --- | --- |
+| Pruebas estaba **veinte commits atrás de `develop`**: el despliegue del tiempo 1 metió arreglos ajenos | Antes de desplegar, comparar el último commit de la carpeta del servidor con el remoto |
+| A la rama le faltaban commits de `develop` —entre ellos **el propio cambio de imagen**—: desplegarla así habría vuelto a Alpine | Traer `develop` a la rama en local, verificar compilación y pruebas, y solo después desplegar. Hubo un conflicto, solo de importaciones en el orquestador |
+| Alguien fusionó `develop` en la rama por pull request (#80) y el despliegue trajo arreglos de publicación que nadie de este frente revisó | Mirar qué trae el `git pull` en la salida del despliegue, siempre |
+| Una **`T` de más** al principio de `PROXY_LOGIN`, restos del marcador «TU_LOGIN» al pegar. Cada intento habría fallado como error de red, sin decir que el usuario estaba mal | Comparar el valor con el `.env` sin imprimirlo, antes de desplegar |
+| `sh deploy.sh` no sirve: el script usa cosas de bash | Siempre `bash deploy.sh …`. Sin argumentos abre un menú donde la opción 2 despliega **todos** los servicios |
+| `git` como `maya-admin` responde *dubious ownership* | Todo como root: `sudo su` |
+| Los comandos con barras verticales copiados de una **tabla** del chat llegan rotos: la tabla se come la barra invertida y el `grep` busca otra cosa sin avisar | Dar esos comandos fuera de tablas |
+| **Las pruebas dentro del contenedor se atascaron** tras poner el límite de memoria de 1 GB: Jest lanza varios procesos en paralelo dentro del mismo contenedor que el backend, y pasarse del límite puede matar al backend | Dentro del contenedor, solo `npx jest --runInBand`. Y comprobar después con `docker ps` que el backend no se reinició |
+| El lector de correos y el portal **se reinician** cada vez que se despliega el backend | Es normal: el lector depende del backend en el compose |
+| Aviso *«Your kernel does not support swap limit capabilities»* al arrancar | Inofensivo: el límite de memoria se aplica igual |
+
+### La receta, en orden
+
+Todo en la consola del servidor de **producción**, como root, en la carpeta de `deploy.sh`. Las copias locales de
+`.deploy/prod/` **no se suben**: el servidor se edita a mano, porque alguien pudo cambiar algo allí.
+
+**1 · Mirar antes de tocar nada.**
+
+- `bash deploy.sh config` → hoy la copia local de producción dice `IMAGE_BACKEND_BASE=selessia-node:22-debian-1`
+- `grep -nE "ensure_backend_base_image|Dockerfile.base" deploy.sh` → cinco líneas: la función existe
+- `cat Dockerfile.base` → Node 22 sobre `trixie`
+- `atq` → vacío
+- `docker buildx ls` → el constructor en uso, el del asterisco, con el controlador `docker`. **No activar** uno `docker-container`: no ve las imágenes base construidas en el servidor
+- `git -C repositories/esscoti-backend branch --show-current` → `main`; y `git -C … status --short` en backend y portal → vacío
+- `grep -n "STAGE" docker-compose.yml` → ⚠️ **la copia local de producción tiene `STAGE: dev` en el backend**. Comprobarlo en el servidor: esa variable decide qué archivo de entorno se carga y cómo se titulan las alertas
+- `grep -nE "EVALUATEST_EMAIL|EVALUATEST_PASSWORD|EVALUATEST_ENTERPRISE_ID|PSICOALIANZA_MANUAL" docker-compose.yml` → vacío (puntos 2 y 9)
+
+**2 · Copia de la base. En producción es obligatoria** (decidido con el usuario; en pruebas no se hizo). El usuario y la
+contraseña de Mongo están en el `docker-compose.yml` del servidor, en el servicio de Mongo. En la cadena de conexión, los
+caracteres especiales de la contraseña van codificados —en pruebas, `^` como `%5E`— y hace falta `authSource=admin`:
+
+- `docker exec <contenedor de mongo> mongodump --uri "mongodb://USUARIO:CONTRASEÑA@localhost:27017/esscoti?authSource=admin" --archive=/tmp/esscoti-antes-psicoalianza.gz --gzip`
+- `mkdir -p backups` y `docker cp <contenedor de mongo>:/tmp/esscoti-antes-psicoalianza.gz backups/`
+- `ls -lh backups/` → el archivo, no vacío
+
+**3 · La migración** (§1), con el backend viejo todavía corriendo. Se entra con `docker exec -it <contenedor de mongo> mongosh "<la misma cadena>"`.
+Además de los conteos de §1, **antes del paso 4** estas dos tienen que dar lo mismo, o el paso 4 no rellena esas ofertas:
+
+- `db.offers.countDocuments({})`
+- `db.offers.countDocuments({ tenantId: { $type: "objectId" } })`
+
+Y **después del paso 4**, esta tiene que salir vacía, porque cada oferta tiene que apuntar a una conexión de su propia empresa:
+
+- `db.offers.aggregate([{ $match: { "evaluatestConfig.connectionId": { $nin: [null] } } }, { $lookup: { from: "tenants", localField: "tenantId", foreignField: "_id", as: "tenant" } }, { $unwind: "$tenant" }, { $match: { $expr: { $not: { $in: ["$evaluatestConfig.connectionId", "$tenant.psychometricConnections.id"] } } } }, { $count: "malas" }])`
+
+En pruebas, de referencia: 4 empresas, 2 con credenciales, 15 ofertas activas rellenadas, 0 sin conexión. ⚠️ Al pegar
+comandos largos en `mongosh`, la consola a veces **enseña** caracteres duplicados (`trtrue`) que no se ejecutan así: los
+conteos de después son los que dicen si se escribió bien.
+
+**4 · Editar a mano los tres archivos del servidor.** Primero una copia de cada uno con el sufijo `.antes-chromium`. En YAML, **espacios, nunca tabuladores**.
+
+- `Dockerfile.base`: la línea del `apt-get install` termina en `tzdata chromium xvfb fonts-liberation \`
+- `deploy.sh`, línea 14: la etiqueta pasa a `selessia-node-chromium:22-debian-1`
+- `docker-compose.yml`, servicio del backend:
+  - Debajo de la última variable, con 6 espacios: `PROXY_HOST: "gw.dataimpulse.com"`, `PROXY_PORT: 823`, `PROXY_LOGIN: "<login de DataImpulse>__asn.26611"`, `PROXY_PASS: "<contraseña>"`, `PSICOALIANZA_CHROMIUM_PATH: /usr/bin/chromium`, `PSICOALIANZA_LOGIN_DIR: /var/lib/psicoalianza-login` y, **solo para el primer intento**, `PSICOALIANZA_LOGIN_ATTEMPTS_PER_BURST: 1`. Comprobar que `ALERT_SUPPORT_EMAILS` está
+  - Antes de su `volumes:`, con 4 espacios: `shm_size: 1gb`, `mem_limit:` (ver *Pendiente*) e `init: true`
+  - En su `volumes:`, con 6 espacios: `- psicoalianza_login:/var/lib/psicoalianza-login`
+  - En el `volumes:` general del final, con 2 espacios: `psicoalianza_login:`
+- `docker compose config -q` → **no imprime nada**. Si imprime, hay un error de sangría
+- `grep -nE "PROXY_|PSICOALIANZA_|shm_size|mem_limit|init: true|psicoalianza_login" docker-compose.yml` → las líneas nuevas, en el servicio del backend (también aparecen los `mem_limit` de los robots, que ya estaban)
+
+**5 · Desplegar.** Con `main` ya conteniendo la rama: `bash deploy.sh deploy selessia-backend` y, **en cuanto termine**,
+`bash deploy.sh deploy selessia-front` (§3). La salida del backend tiene que decir `Building base image 'selessia-node-chromium:22-debian-1'`
+—la primera vez tarda un minuto— y `Created` para el volumen de la pieza.
+
+**6 · Comprobar.**
+
+- `docker ps --filter name=selessia-backend` → *Up*, sin reinicios
+- `docker exec selessia-backend node -v` → `v22.23.2`
+- `docker exec selessia-backend date` → hora con `-05`
+- `docker exec selessia-backend chromium --version` → `Chromium 152.0.7977.82`
+- `docker exec selessia-backend which Xvfb` → `/usr/bin/Xvfb`
+- `docker exec selessia-backend df -h /dev/shm` → `1.0G`
+- `docker exec selessia-backend ps -o pid,comm -p 1` → `docker-init`
+- `docker exec selessia-backend ls -la /var/lib/psicoalianza-login` → la carpeta existe
+- Los errores del registro desde el arranque → nada nuevo
+- En el portal: *Mi compañía* de una empresa con EvaluaTest dice **EvaluaTest — Configurado — correo**, y una oferta con prueba activa enseña sus controles, no «tu empresa no tiene proveedor»
+
+**7 · La primera conexión de PsicoAlianza** (punto 7d), solo en la empresa que la vaya a usar y con su cuenta:
+
+- Dos consolas: el registro del backend filtrado por PsicoAlianza, en vivo, y `docker stats selessia-backend`, apuntando el **máximo** de memoria
+- *Mi compañía* → fila PsicoAlianza → *Editar* → correo y contraseña → *Guardar*. Guardar dispara la ráfaga: «Conectando…» y después «Conectado» o «Conexión fallida — vuelve a intentarlo.»
+- 🔴 Si falla, **no pulsar *Conectar* durante al menos una hora** —el botón se salta la espera a propósito—; ante *credenciales rechazadas* o *bloqueada*, parar el día; **no cerrar sesión en PsicoAlianza**
+- Cuando entre, quitar `PSICOALIANZA_LOGIN_ATTEMPTS_PER_BURST` del compose y volver a desplegar el backend
+
+**8 · Volver atrás, si hace falta.**
+
+| Qué falló | Cómo se vuelve |
+| --- | --- |
+| La imagen | La primera línea del Dockerfile del backend a la etiqueta anterior, y desplegar. Las bases construidas se quedan en el servidor |
+| El código | Desplegar la versión anterior. **La base puede quedarse como está**: la migración solo añade, y el backend viejo ignora lo nuevo |
+| Datos estropeados por el código nuevo | Restaurar la copia del paso 2 con `mongorestore`, reemplazando las colecciones, **junto con** volver al código anterior. Borra lo escrito después de la copia |
+| Pruebas, volver a `develop` | `bash deploy-branch.sh develop` |
+
+### Pendiente de pruebas antes de producción
+
+- ✅ **El primer intento real por el código de producción entró** (2026-09-16, 11:49, en pruebas): ráfaga lanzada con el botón *Conectar*, **un intento, `passed` en 36,1 s**, Chromium 152.0.7977.82 con ventana, por el proxy con el operador fijado. Después, la comprobación de la etiqueta respondió viva (302).
+- ☐ **El pico de memoria del backend durante un login**: en ese intento no se midió. Con ese pico se fija el `mem_limit` de producción: si queda por debajo de unos 700 MB, 1 GB; si se acerca, 1,5 o 2 GB. Se mide en el próximo intento, con `docker stats` abierto.
+- ✅ **Reiniciar el backend no tira la sesión** (medido a las 11:56): tras `docker restart`, la primera comprobación dio 302 solo con la cookie de cinco días, y la lista de vacantes cargó. ⚠️ Esa primera petición de datos tardó **12,4 s**; si se repite, el selector de vacantes irá lento justo después de cada reinicio.
+- ☐ **Sin explicar: a las 11:47, diez minutos después de desplegar, la sesión guardada apareció muerta** (200 en la comprobación), y hasta que se pulsó *Conectar* la etiqueta dijo «Conexión fallida». No es el reinicio (ver arriba). El despliegue **recreó el contenedor y borró su registro anterior**, así que no se ve qué pasó antes. Hipótesis abiertas: alguien usó o cerró sesión con la cuenta de gerencia desde un navegador, o la sesión de antes nunca quedó bien guardada. Pendiente: preguntar al equipo y leer en la base `attemptsInWindow` y las fechas de la sesión. Para no perder la pista la próxima vez: **antes de desplegar, guardar el registro** (`docker logs selessia-backend > backups/backend-<fecha>.log`).
+- ☐ **Defecto de la etiqueta del 2c.3**: dice «Conexión fallida — vuelve a intentarlo.» cuando la sesión no responde **aunque el último intento haya entrado**, porque «hubo algún intento» cuenta también los que entraron. Engaña justo en el caso de las 11:47 e invita a gastar un intento. Sin arreglo todavía.
+- ☐ **Las pruebas dentro de la imagen** con la rama y lo fusionado de `develop`, con `--runInBand`.
+- ☐ **Los casos a mano** de `pruebas-a-mano.md` (punto 8b), que ahora se pueden correr en el servidor de pruebas.
