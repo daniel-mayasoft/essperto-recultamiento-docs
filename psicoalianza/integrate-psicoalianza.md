@@ -1657,6 +1657,12 @@ Se da por terminado cuando se cumplen las dos condiciones:
       completar desde el portal, donde el campo ya existe. **Medido**: de 33 personas que han pasado
       por la etapa, **una** sin documento, y unas once con un nombre de ciudad en ese campo. Sin paso
       todavía; el texto lo aprueba el usuario.
+
+      **Medido de nuevo en producción el 2026-09-17**, con la regla real (documento vacío o sin ningún
+      dígito): de **2.221** personas que han llegado alguna vez a la etapa, **26** sin documento y **32**
+      sin ningún dígito (las 26 incluidas), un **1,4 %**. La medición del 15 no era de producción.
+      Casi todas pasaron con EvaluaTest, que no mira el documento: es la proporción que se perdería con
+      PsicoAlianza, no gente que se esté perdiendo hoy. **El aviso no pasa por delante** en la lista.
     - ✅ **La creación desde administración pasa a aceptar la conexión y a comprobar la vacante**, por
       el mismo guardado que usa el portal desde el 6.2a. Hoy copia la configuración de la prueba **tal
       cual**, sin comprobar nada, y su formato de entrada **ni siquiera admite decir con qué conexión**:
@@ -1723,9 +1729,12 @@ Se da por terminado cuando se cumplen las dos condiciones:
     ⚠️ **En una máquina de desarrollo sin la sesión manual y con la ruta del navegador puesta, la tarea
     entra de verdad con la cuenta del cliente** cada hora que haga falta. Anotado en `../entorno-local.md`.
 
-55. **Quien cumple el plazo sin haber sido invitado nunca pasa a la siguiente etapa, y el reclutador
-    se entera: en el correo de candidato seleccionado y en la ficha del candidato. Para los dos
+55. **Quien cumple el plazo sin haber sido invitado pasa a la siguiente etapa, y el reclutador se
+    entera: en el correo de candidato seleccionado y en la ficha del candidato. Para los dos
     proveedores** (2026-09-16, decidido con el usuario; cierra A1/A5 de *Lo que hereda la etapa 3*).
+    *Título corregido el 2026-09-17: decía «nunca pasa», al revés que el cuerpo.* 🔴 **Sustituida el
+    mismo 2026-09-17 por decisión del equipo: quien no recibe la invitación NO pasa.** Lo vigente es la
+    revisión del final de esta decisión; lo de arriba queda como registro.
 
     **El hueco, comprobado en el código el 2026-09-15:** el vencimiento del cron solo alcanza a quien ya
     tiene identificador en el proveedor. Quien quedó *esperando resultado externo* sin identificador
@@ -1751,6 +1760,36 @@ Se da por terminado cuando se cumplen las dos condiciones:
     PsicoAlianza sería una condición cuya única función es conservar un fallo conocido de EvaluaTest;
     es un cambio de comportamiento en producción para EvaluaTest, aceptado a sabiendas. Va antes de
     desplegar. Sin brief todavía.
+
+    **Revisión del 2026-09-17, decidida por el usuario con el equipo — ES LO VIGENTE.** El fallo es
+    anterior a la integración (el reintento sin plazo está en producción desde el 10 de junio), pero
+    PsicoAlianza lo vuelve frecuente: con la sesión caída, todas las personas que entran a la etapa se
+    quedan sin invitación. Se arregla para los dos proveedores, en la rama de la integración, que se
+    revisa antes de desplegar.
+
+    | Qué | Decidido | Descartado |
+    | --- | --- | --- |
+    | **Ana, sin invitación por un problema técnico** | **No pasa a la siguiente etapa.** Sigue *esperando resultado externo* y el cron **sigue reintentando** cada 5 minutos, sin fin mientras la oferta no se cancele | Pasarla sin puntaje (la primera versión de esta decisión) |
+    | **Cuándo se avisa** | **A los 20 minutos del primer fallo** de la invitación de esa persona. Con PsicoAlianza, conseguir una sesión nueva tarda hasta unos 13 minutos; antes serían falsas alarmas | Al tercer fallo (unos 10 minutos); a los 15 o a los 30 minutos |
+    | **Aviso a soporte** | Correo a soporte (el buzón de alertas que ya usa el arranque fallido), **uno por empresa y proveedor**, con **4 horas de silencio**: si pasado ese tiempo sigue fallando, otro con el número de personas afectadas | Uno por persona: 100 personas, 100 correos. Un resumen cada hora: hasta una hora de retraso |
+    | **Aviso al reclutador** | La **novedad por candidato** que ya existe (icono en la tabla, aviso en el detalle), a la vez que el aviso a soporte, y **se quita sola cuando la invitación sale**. Título «Prueba psicométrica pendiente»; mensaje «Problema técnico con el proveedor de la prueba. Seguimos intentándolo.» (aprobado) | Sin aviso: Marta vería a Ana días «en prueba psicométrica» sin saber por qué |
+    | **¿Se le escribe a Ana?** | **No** (la ventana de 24 horas de WhatsApp, ver abajo) | — |
+    | **El plazo de la prueba** | **Cuenta desde la invitación**, no desde la entrada a la etapa, para los dos proveedores: es lo que dice el mensaje («a partir de este momento»). Quien ya estaba invitado antes del cambio no tiene guardada la hora: su plazo sigue contando desde la entrada | Paso aparte: con Ana reintentándose sin fin, una invitación que sale al tercer día la descartaría por vencimiento en la pasada siguiente |
+    | **El cupo** | Sin cambios: quien espera ocupa cupo de la etapa (tres por plaza) | — |
+
+    Lo que sigue es **el primer cierre del 2026-09-17, sustituido por la revisión de arriba**; se conserva
+    porque explica la ventana de 24 horas y el descarte del último intento.
+
+    | Pregunta | Decidido | Descartado |
+    | --- | --- | --- |
+    | **Al vencer el plazo, ¿último intento?** | **No: pasa directamente.** | Intentar una última vez: si la invitación sale en ese momento, a Ana le llega «dispones de 2 días a partir de este momento» con nuestro plazo ya vencido, y la pasada siguiente la descarta por *no recibimos a tiempo* |
+    | **¿Se le escribe a Ana al pasar?** | **No.** Pasa a la siguiente etapa sin mensaje propio; el recordatorio de esa etapa, que ya manda plantilla con la ventana cerrada, la retoma. *Primero se decidió un mensaje corto, y se corrigió ese mismo día*: al vencer el plazo han pasado días desde el último mensaje de Ana, la ventana de 24 horas de WhatsApp está cerrada, y Meta acepta el texto libre y lo descarta en silencio (`whatsapp-window.ts`) | Un mensaje de texto libre: no llegaría. Mandarlo solo con la ventana abierta: casi nunca aplica y añade código. Una plantilla nueva de Meta: exige aprobación fuera del código; queda como posible mejora |
+    | **Dónde se entera el reclutador** | **La novedad por candidato que ya existe**, la misma que usa el fallo técnico de ReTHUS: icono en la tabla de candidatos, *Novedades* en el detalle y dentro de los correos «Entrevista agendada» y «Falta agendar la entrevista». El portal no cambia. El correo «¡Plaza ocupada!» del cambio de estado a mano no la lleva, como hoy ninguna novedad | Un distintivo propio en la ficha: duplicaría lo que ya existe |
+    | **Texto de la novedad** | Título «Sin prueba psicométrica»; mensaje «No se pudo enviar la invitación a la prueba psicométrica dentro del plazo. El candidato continuó el proceso sin puntaje; se recomienda evaluarlo por otro medio.» (aprobado) | — |
+    | **El plazo que cuenta desde la entrada a la etapa y no desde la invitación** | **Paso aparte (11)**, justo después | Meterlo en este: son dos cambios de comportamiento y se revisan peor juntos |
+
+    **Medido en producción el 2026-09-17:** **cero** personas esperando resultado en la etapa **sin
+    invitación**, de 71 esperando en total en ofertas no canceladas. Al desplegar nadie pasa de golpe.
 
 56. **En el modal de conexión de *Mi compañía* el nombre no se edita, y la contraseña guardada no se
     vuelve a teclear** (2026-09-16, decidido con el usuario tras verlo desplegado en pruebas). Corrige la
@@ -2569,6 +2608,8 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 6.2a | ✅ **HECHO y revisado el 2026-09-15.** Verificado por el planificador: backend 115 suites y 1.169 pruebas (1.160 pasan, 9 omitidas; 11 nuevas), con la caché limpia; ninguna afirmación existente cambiada, solo el dato de la prueba que congelaba una conexión inexistente; la lectura de conexiones de la IA solo en la rama de copia; una conexión vacía en el cuerpo cuenta como ninguna. **Backend** (decisión 51): el guardado de la configuración de la prueba conserva la conexión congelada cuando el cuerpo no trae una, y rechaza si ya no está en la empresa; la IA en modo copia solo toma la vacante de una oferta de EvaluaTest — brief `brief-etapa3-paso6-2a-conexion-de-la-oferta.md` | Toca el guardado de producción |
 | 6.2b | ✅ **Código HECHO y revisado el 2026-09-15; casos a mano pendientes** en `pruebas-a-mano.md`, que el usuario corre con la rama entera antes de desplegar. Verificado por el planificador: comprobación de tipos del portal limpia; backend sin cambios; las trampas del brief comprobadas en el diff. En la revisión se añadieron: el texto de vacante no usable por un motivo desconocido (aprobado por el usuario) y la espera a los datos de la empresa antes de copiar una oferta o preparar un borrador de la IA, con el error dentro de cada pantalla. **Portal, la oferta** (decisión 51): la señal de «hay conexión», que hoy solo mira EvaluaTest y decide si la ficha y el diálogo de crear enseñan los controles de la prueba; el selector de proveedor, solo con más de una conexión (3); la conexión elegida, mandada al guardar la oferta y al pedir el selector y el estado de la vacante (48); las pruebas adicionales solo con EvaluaTest (4); el texto de los motivos nuevos de vacante no usable (ver *Opinión previa del paso 3*, en esta etapa). Además (decisión 51): ninguna conexión elegida por defecto con dos, cambiar de conexión borra la vacante, con PsicoAlianza el código de perfil y las pruebas adicionales se mandan vacíos, copiar una oferta copia su conexión, el aviso de oferta sin proveedor mira la conexión congelada, y los textos aprobados del aviso de la vacante. Cierra el caso espejo que el 6.2a deja en local (su trampa 6): editar desde la ficha una oferta de PsicoAlianza lista vacantes de EvaluaTest. Va después del 6.1, que es quien deja guardar una conexión de PsicoAlianza desde el portal, y del 6.2a — brief `brief-etapa3-paso6-2b-la-oferta-por-proveedor.md` | Visible |
 | 9 | ✅ **Código HECHO y revisado el 2026-09-16; casos a mano pendientes** en `pruebas-a-mano.md`, que el usuario corre en el servidor de pruebas. Verificado por el planificador: backend 133 suites y 1.372 pruebas (1.363 pasan, 9 omitidas), con la caché limpia; portal con tipos limpios; control negativo con 12 fallos; ninguna afirmación existente quitada ni relajada. Aprobado sin arreglos. Textos del bloque pendientes de que el usuario los confirme. El resultado psicométrico en el detalle del candidato (decisión 58): el adaptador de PsicoAlianza guarda el peso de cada prueba; el veredicto del cron escribe un resultado permanente en la participación; el portal lo enseña junto a ReTHUS. Se numera 9 porque la etapa 1 ya tiene pasos 7, 8a y 8b — brief `brief-etapa3-paso9-resultado-en-el-detalle.md` | Embudo (el veredicto) y visible |
+| 10 | **Brief escrito el 2026-09-17, sin empezar.** En la rama de la integración. Quien no recibe la invitación por un problema técnico **no pasa**: se sigue reintentando; a los 20 minutos del primer fallo, correo a soporte por empresa y proveedor con 4 horas de silencio y novedad para el reclutador que se quita al invitar; y el plazo de la prueba cuenta desde la invitación. Para los dos proveedores (decisión 55, revisión del 2026-09-17) — brief `brief-etapa3-paso10-plazo-sin-invitacion.md` | Embudo; cambia comportamiento de EvaluaTest en producción |
+| 11 | ~~El plazo desde la invitación~~ **Unido al 10** el 2026-09-17 | — |
 
 **Antes del paso 2, fuera del código:** cuenta de PsicoAlianza para probar y **una sesión de esa
 cuenta pegada en el `.env` local** (decisión 42; cómo sacarla, en `../entorno-local.md`). Para el 2b
