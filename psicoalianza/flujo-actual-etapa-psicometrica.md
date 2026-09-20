@@ -10,7 +10,7 @@ conexión de PsicoAlianza guardada, validada y consultada por el backend (paso 5
 46) y con el resolvedor que elige proveedor al guardar la oferta, al invitar y al consultar (paso
 4a, decisión 48), y con *Mi compañía* por proveedor, la etiqueta de la sesión y el plazo en días
 enteros en la pantalla (paso 6.1, decisión 50), y con la oferta que conserva su conexión al guardar
-(paso 6.2a, decisión 51), y el 2026-09-16 con la demo que pide la prueba real (decisión 57). No es historia ni
+(paso 6.2a, decisión 51), y el 2026-09-16 con la demo que pide la prueba real (decisión 57), y el 2026-09-20 con el aviso de la invitación que no sale y el plazo desde la invitación (paso 10, decisión 55). No es historia ni
 justificación: **los porqués están en la bitácora**, y aquí solo se apunta el número de
 decisión. Cuenta qué le pasa a una persona en cada caso.
 
@@ -357,14 +357,31 @@ que copia la configuración tal cual, o es de antes de la migración— y sigue.
   lo reintenta** cada 5 minutos (§4). ⚠️ *Sin código de evaluación*
   cuenta como pasajero a propósito: EvaluaTest responde igual cuando el código no existe y
   cuando el endpoint falla (decisión 39). 🔴 **Con PsicoAlianza, una sesión muerta o ausente cae
-  aquí**, y la etapa no se omite: el aviso dice que la prueba llegará por correo y no llega, y como
-  el vencimiento (§4) solo se mira a quien ya tiene identificador, la persona espera **sin plazo**
-  hasta que vuelva la sesión (corrección de la decisión 44). **Desde el 2c.2, esa sesión muerta
-  dispara la renovación** (decisión 54): el adaptador pide una sesión por fuera —sin esperar— y deja
-  subir el fallo pasajero igual; la renovación arrienda una IP móvil, entra con Chromium y guarda la
-  sesión, y en el primer tick del cron con sesión nueva la persona recibe su enlace. Si la
-  renovación no la consigue —captcha, tope, credenciales rechazadas—, la persona sigue esperando
-  sin plazo hasta el paso A1/A5, que no cambia aquí.
+  aquí**, y la etapa no se omite: el aviso dice que la prueba se está preparando, y como el
+  vencimiento (§4) solo se mira a quien ya tiene identificador, la persona espera **sin plazo** hasta
+  que vuelva la sesión (corrección de la decisión 44; **a propósito desde la revisión de la 55**: no
+  pasa de etapa). **Desde el 2c.2, esa sesión muerta dispara la renovación** (decisión 54): el
+  adaptador pide una sesión por fuera —sin esperar— y deja subir el fallo pasajero igual; la
+  renovación arrienda una IP móvil, entra con Chromium y guarda la sesión, y en el primer tick del
+  cron con sesión nueva la persona recibe su enlace.
+
+  **Y desde el paso 10 (decisión 55, revisión del 2026-09-17), la espera no es silenciosa.** El primer
+  fallo pasajero de cada persona guarda su hora en el estado de la conversación (solo si estaba
+  vacía). En cada fallo pasajero posterior, si han pasado **20 minutos o más** desde ese primer fallo:
+  se pone en la oferta una **novedad para el reclutador** asociada a la persona —«Prueba psicométrica
+  pendiente — Problema técnico con el proveedor de la prueba. Seguimos intentándolo.»—, escrita con
+  una operación atómica sobre la oferta para que un choque del guardado de la participación no la
+  pierda; y sale un **correo a soporte**, como mucho **uno por empresa y proveedor cada 4 horas**
+  (silencio en memoria: tras un reinicio puede salir uno de más), con la empresa, el proveedor —o
+  *sin resolver* si falló resolverlo—, la oferta y el candidato que lo dispararon, el error y el
+  número de personas de esa empresa que esperan la invitación desde hace 20 minutos o más (se cuenta
+  por empresa: quien no fue invitado no tiene proveedor guardado). A la persona no se le escribe nada:
+  la ventana de 24 horas de WhatsApp puede estar cerrada. **La novedad se quita sola** en cuanto el
+  arranque termina de cualquier otra forma: la invitación sale, la empresa resulta sin conexión y la
+  etapa se aprueba, falta un dato y se descarta, o el fallo es permanente. **Cuando la invitación sale
+  se guarda su hora** y se borra la del primer fallo; desde esa hora cuenta el plazo (§4). La demo no
+  escribe ninguna de las dos. Quien espera sigue ocupando cupo: cuenta para el cupo de la etapa de
+  preguntas de su oferta (§7 de la bitácora, decisión 55).
 - **Fallo permanente** (vacante sin nombre guardado): el arranque **deja salir la excepción**
   y actúa el mecanismo de la casa para cualquier etapa que falla al arrancar: correo de
   alerta a soporte, vuelta a la cola, hasta tres intentos y descarte con el motivo de
@@ -444,9 +461,13 @@ Cada iteración recarga la oferta fresca (aprobar a uno sube la versión del doc
    candidato sigue su proceso, igual que en el arranque (decisión 40). Si falla de forma
    pasajera, se registra, se cuenta como error y sigue esperando. ⚠️ Si el documento de la persona no se puede cargar, no se intenta nada y no
    se descarta nada. Medido el 2026-09-11: hoy no hay nadie sin identificador.
-2. **Vencimiento**: si entró a la etapa hace más días que el plazo, le escribe que no se
-   recibió su resultado a tiempo y lo descarta con `psychometric_external_timeout`. El plazo
-   es la ventana que se le anunció; no se detiene por nada (decisión 36).
+2. **Vencimiento**: si **fue invitado** hace más días que el plazo —o, si no tiene guardada la hora de
+   la invitación porque se le invitó antes del paso 10, si **entró a la etapa** hace más días que el
+   plazo—, le escribe que no se recibió su resultado a tiempo y lo descarta con
+   `psychometric_external_timeout`. El plazo es la ventana que se le anunció «a partir de este
+   momento», el de la invitación (decisión 55, revisión); no se detiene por nada (decisión 36). Al
+   retomar a un aparcado que ya tenía invitación, su hora de invitación se reinicia junto con la
+   entrada a la etapa, para que no venza en la pasada siguiente.
 3. **El resultado** de §3, según el estado.
 
 ## 5 · El veredicto
@@ -509,6 +530,8 @@ los nuevos; al leer, el nuevo y si está vacío el viejo.** Solo dos se leen:
 | `psychometricState` | Nadie |
 | `psychometricLastPolledAt` | Nadie |
 | `psychometricProviderData` | El cron, para el correo de registro. Guarda además el código de estado y el resultado por prueba adicional |
+| `psychometricInvitedAt` (paso 10) | El cron, para el vencimiento: desde aquí cuenta el plazo. Lo escribe la invitación que sale; el retomar lo reinicia; nace nulo |
+| `psychometricInviteFirstFailedAt` (paso 10) | El arranque, para avisar a los 20 minutos. Lo escribe el primer fallo pasajero; lo borra la invitación que sale; nace nulo |
 
 Los seis campos viejos con prefijo `evaluatest` siguen en el esquema, solo se leen. La
 compatibilidad caduca sola: nadie está a mitad de prueba más que el plazo.
@@ -592,6 +615,12 @@ con credenciales usa las suyas para elegir vacante. La demo **se queda como est�
   con *Aprobada* o *No aprobada*; sin pruebas, solo el encabezado. Números y fecha en el idioma elegido
   en el portal; un dato nulo, «—». No tiene condición de visibilidad propia: el ojo solo aparece para
   candidatos desbloqueados o añadidos a mano.
+- **La invitación que no sale** (paso 10, decisión 55): a los 20 minutos del primer fallo, junto a la
+  persona en la tabla de candidatos el icono de advertencia, y en su detalle la novedad «Prueba
+  psicométrica pendiente — Problema técnico con el proveedor de la prueba. Seguimos intentándolo.».
+  Es la misma novedad por candidato que usa el fallo técnico de ReTHUS, así que también viaja en los
+  correos «Entrevista agendada» y «Falta agendar la entrevista» si sigue puesta. Desaparece sola
+  cuando la invitación sale o el arranque termina de otra forma.
 - **Lo que no ve**: nada de los campos del candidato dentro del estado de la conversación de §6 (el
   portal no los lee), ni el resultado de quien se evaluó antes del paso 9.
 

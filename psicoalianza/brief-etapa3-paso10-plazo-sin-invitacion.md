@@ -43,6 +43,13 @@ Leer, en este orden:
 
 Después, **antes de tocar código**: opinión del plan, con el árbol limpio.
 
+⚠️ **Este brief se escribió leyendo el código de la rama de la integración, y la rama nueva sale de
+`develop`**, que además trae commits de otras personas posteriores: entre ellos, un arreglo del 2026-09-19
+al despacho de antecedentes que toca **el guardado con reintento ante conflicto de versión** (PR #84),
+justo la zona de la trampa 1. **La opinión previa tiene que confirmar que lo que este brief da por leído
+sigue igual en `develop`**: el bucle del cron, el fallo pasajero del arranque, el guardado con reintento y
+el ayudante de novedades. Si algo se movió, decirlo antes de empezar.
+
 ## El caso
 
 **Ana** contesta la última pregunta a las 10:00. La invitación a la prueba falla porque la sesión de
@@ -299,3 +306,130 @@ Backend: `npm run build` y `npm test`, una vez sobre el conjunto, con la caché 
    identificadores nuevos**, parámetros de funciones flecha y de `spec` incluidos.
 7. **Los documentos actualizados.**
 8. **Un mensaje de commit** por repositorio.
+
+## Ejecución y revisión (2026-09-20)
+
+⚠️ **Escrito por el planificador a petición del usuario, sin opinión previa ni revisión de otra persona.**
+Los casos a mano son la única comprobación aparte de las pruebas automáticas.
+
+**Verificado con la caché de Jest limpia sobre `feat/psychometric-followups`: backend, compila, 136 suites y
+1.411 pruebas (1.402 pasan, 9 omitidas).** Una suite nueva (la utilidad del aviso) y 27 pruebas nuevas
+entre el arranque, el cron, la cola, el esquema y la utilidad. **Control negativo** invirtiendo a la vez
+las cuatro reglas del brief —los 20 minutos, el silencio, el vencimiento desde la invitación y la
+escritura atómica de la novedad—: **11 fallos**; restaurado sin diferencias fuera del índice. Ninguna
+afirmación existente cambió; los dos montajes que alcanzan el arranque real ganan dobles nuevos
+(`offerModel.updateOne`, `ses.sendSupportAlert`, `notifications`, `unmarkModified`, el silenciador).
+
+**Lo comprobado en `develop` antes de empezar:** lo que `develop` trae respecto a la rama de la integración
+en el orquestador es un solo cambio (PR #84, 42 líneas): el despacho de antecedentes guarda con reintento y
+marca solo su participación. No toca el guardado con reintento, el cron psicométrico, el arranque ni las
+novedades. `ALERT_SUPPORT_EMAILS` está en los dos compose: `before-deploy.md` no cambia.
+
+**Decisiones tomadas fuera del brief:**
+
+| Qué | Decidido | Por qué |
+| --- | --- | --- |
+| **Trampa 1** | La novedad se pone y se quita con dos `updateOne` atómicos sobre la oferta por su identificador (`$pull` del código y, si se pone, `$push`); la copia en memoria de la oferta se actualiza a mano y se **desmarca** como modificada, para que ningún `save` posterior la reescriba con una foto vieja | Es la propuesta que el brief aceptaba de entrada. Los `updateOne` no tocan la versión del documento, así que no chocan con el guardado versionado |
+| **El número de afectados** | Se cuenta **por empresa**, no por empresa y proveedor: quien no fue invitado no tiene proveedor guardado. El correo lo dice así | Averiguar el proveedor de cada oferta exigiría leer la conexión congelada de cada una; no compensa para un número orientativo |
+| **El silencio de 4 horas** | En memoria, en un objeto propio (`PsychometricInviteAlertSilencer`) con clave empresa + proveedor | Lo que el brief aceptaba; tras un reinicio puede salir un correo de más (caso 14) |
+| **El fallo permanente** | La novedad se quita **antes** de dejar salir la excepción | Si se quitara después, no se quitaría nunca |
+| **Caso a mano 3** | Cambiado: poner el primer fallo hace 4 horas en la base **no basta** para forzar el segundo correo, porque el silencio no está en la base. Se reinicia el backend | Consecuencia del silencio en memoria |
+| **Caso a mano 6, nuevo** | Una persona invitada sin hora de invitación (las 71 de producción) sigue venciendo desde la entrada | Es la trampa 5, y merece verse |
+
+**Identificadores nuevos**, todos en inglés: `psychometricInvitedAt`, `psychometricInviteFirstFailedAt`
+(esquema); `PSYCHOMETRIC_INVITE_ALERT_AFTER_MS`, `PSYCHOMETRIC_INVITE_ALERT_SILENCE_MS`,
+`PSYCHOMETRIC_INVITE_PENDING_NOTIFICATION_PREFIX`, `PSYCHOMETRIC_INVITE_PENDING_TITLE`,
+`PSYCHOMETRIC_INVITE_PENDING_MESSAGE`, `psychometricInvitePendingCode`, `isInviteAlertDue`,
+`PsychometricInviteAlertSilencer` con `shouldSend` y `lastSentAt` (utilidad); `psychometricInviteAlerts`,
+`setPsychometricInvitePendingNotification`, `alertPsychometricInvitePending`,
+`countPsychometricInvitesPending`, y dentro `current`, `hasNotification`, `notification`, `others`,
+`existing`, `providerLabel`, `affected`, `alertErr`, `threshold`, `rows` (orquestador); en los `spec`:
+`updateOffer`, `sendSupportAlert`, `flowState`, `notifications`, `twentyOneMinutesAgo`,
+`nineteenMinutesAgo`, `flowStateOf`, `pendingCode`, `transientInvite`, `pendingNotification`,
+`firstFailedAt`, `buildError`, `alert`, `body`, `build`, `invitedAt`, `oldInvitedAt`, `entry`, `silencer`,
+`first`, `now`. Sin comentarios nuevos en código; los textos del correo y de la novedad, en el código, como
+los de ReTHUS.
+
+**El correo a soporte, tal como quedó.** Asunto: `[Essperto] Invitación psicométrica pendiente — <empresa>
+· <proveedor>`. Cuerpo: «No se puede enviar la invitación a la prueba psicométrica.», empresa con su
+identificador, proveedor, oferta con su identificador, candidato (solo el identificador), el error, el
+número de personas de la empresa esperando desde hace 20 minutos o más, y la frase de que el sistema sigue
+reintentando y de que el aviso no se repite en 4 horas para esa empresa y proveedor.
+
+**Confirmaciones:** nadie pasa de etapa por no recibir la invitación (el reintento del cron no cambió); no
+se escribe al candidato en ningún caso nuevo; el veredicto, el vencimiento (salvo la fecha de partida), la
+demo y la escritura de la cola no cambiaron; la novedad de ReTHUS no se tocó.
+
+**Pendiente:** los casos a mano en el servidor de pruebas, que corre el usuario; y, antes de desplegar en
+producción, la consulta de «esperando sin invitación».
+
+## Revisión del diff (2026-09-20, por el planificador del despliegue)
+
+Como el código lo escribió un planificador sin opinión previa, esta es la única revisión independiente.
+Verificado con la caché de Jest limpia sobre el índice de `feat/psychometric-followups`: **compila, 136
+suites y 1.411 pruebas (1.402 pasan, 9 omitidas)**, lo mismo que consta arriba. Índice y árbol coinciden,
+nada sin rastrear, ningún merge. La única línea quitada en un spec existente es del montaje (admite un
+estado inicial), no una afirmación. Sin comentarios nuevos en código; los que hay son de `spec`.
+**Control negativo propio** sobre la regla que toca a EvaluaTest en producción —el vencimiento desde la
+invitación, invirtiendo la preferencia entre las dos fechas—: dos pruebas del cron fallan; restaurado y
+caché limpia. Comprobado además que el cron y el guardado con reintento recargan la oferta entera, sin
+proyección, así que la comprobación en memoria de «¿ya tiene la novedad?» ve lo que hay en la base.
+
+**Aprobado.** Una menudencia y una anotación:
+
+- **Menudencia, opcional:** el silenciador marca la hora **antes** de enviar el correo. Si el envío falla
+  (SES caído), el fallo se registra pero el silencio de 4 horas corre igual y ese aviso se pierde hasta la
+  siguiente ventana. Marcar después del envío lo evitaría; dentro de una pasada los fallos se procesan en
+  serie, así que no habría doble envío. No bloquea: con `ALERT_SUPPORT_EMAILS` vacía la alerta no lanza.
+- **Anotación:** que `unmarkModified('notifications')` deje la copia en memoria sin que un `save`
+  posterior pise lo escrito por `updateOne` **solo lo comprueban los casos a mano** (los `spec` lo
+  simulan con un doble). El caso 4 —la novedad desaparece al aprobar por *sin conexión*, que guarda la
+  oferta después— es el que lo demuestra.
+
+### Antes de commitear: el aviso sale del orquestador (decidido por el usuario el 2026-09-20)
+
+**Para el ejecutor.** El diff está aprobado en lo que hace; lo que cambia es **dónde vive**. Las tres
+funciones privadas que el diff añade al orquestador —poner o quitar la novedad, avisar a soporte y contar
+a los afectados— son una sola pieza con sus propias dependencias, y el orquestador ya es el archivo más
+grande del proyecto. Se mueven a un servicio propio. Es un paso **mecánico**: mismo comportamiento, mismas
+pruebas, sin opinión previa; si al hacerlo aparece algo que no cuadra, se dice antes de seguir.
+
+**Cómo queda:**
+
+| Qué | Dónde |
+| --- | --- |
+| Un servicio inyectable `PsychometricInviteAlertService`, en `src/offers/pipeline/`, junto a los demás servicios del embudo | Absorbe la utilidad `psychometric-invite-alert.util.ts` entera —constantes, textos, la regla de los 20 minutos y el silenciador— y las tres funciones del orquestador. Sus dependencias: el modelo de ofertas, el modelo de empresas y el correo. El silenciador pasa a ser un campo suyo. Nombres de las operaciones públicas, en inglés, los elige el ejecutor; la semántica es la del alcance 3 y 4 |
+| El orquestador | Se queda con **las escrituras de las dos fechas** en la participación (son estado del flujo que él guarda) y con **cinco llamadas de una línea** al servicio: quitar la novedad en las cuatro salidas que no son fallo pasajero, y en el fallo pasajero «si toca, pon la novedad y avisa». La regla de «si toca» (los 20 minutos) puede quedar dentro del servicio, recibiendo el primer fallo |
+| El módulo de ofertas | Declara el proveedor nuevo |
+| Los `spec` | Las pruebas de las tres funciones y del silenciador pasan al spec del servicio, con sus tres dobles. Los dos montajes que alcanzan el arranque real (`psychometric-start-through-port` y `demo-mode-evaluatest-mock`) cambian los dobles sueltos de `updateOne`, `sendSupportAlert` y `unmarkModified` por un doble del servicio, y afirman **que se le llama** en cada salida con el valor que toca. Ninguna afirmación de comportamiento se pierde: cambia de archivo |
+
+**Lo que no cambia:** ningún texto, ninguna regla, ningún nombre de campo persistido, la utilidad se
+puede borrar solo si el servicio la absorbe entera (nada más la importa hoy; comprobado el 2026-09-20).
+**Y de paso, la menudencia de arriba**: el silenciador marca la hora **después** de que el correo salga,
+no antes; con su prueba (el envío falla → la siguiente llamada vuelve a intentar enviar).
+
+**Verificación:** `npm run build` y `npm test` con la caché limpia, una vez sobre el conjunto. Lo esperado:
+las mismas 1.411 pruebas o más, ninguna menos salvo las que se fusionen al mover; si el número baja, decir
+cuáles y por qué. Control negativo en la del silenciador tras el envío fallido.
+
+**Qué entregar:** el mismo reporte corto de siempre, más la lista de lo que quedó en el orquestador
+(tiene que ser las dos fechas y cinco llamadas), los nombres de las operaciones del servicio, y el
+mensaje de commit del backend actualizado. Los documentos no cambian, salvo el flujo si nombra dónde
+vive el aviso.
+
+### Hecho: el aviso sale del orquestador (2026-09-20, por el planificador)
+
+Mecánico, sin opinión previa; nada dejó de cuadrar. **Verificado con la caché limpia: compila, 136
+suites y 1.418 pruebas (1.409 pasan, 9 omitidas)**, siete más que antes: las cinco de la utilidad y las
+del contenido de la novedad, del correo y del silenciador se fusionan en el spec del servicio (15), y el
+spec del arranque queda con 13, ninguna afirmación de comportamiento perdida —cambian de archivo—. Control
+negativo del silenciador: marcando la hora antes de enviar, la prueba del envío fallido cae. Todo en el
+índice; la utilidad borrada (nadie la importaba).
+
+| Qué | Dónde quedó |
+| --- | --- |
+| **`PsychometricInviteAlertService`** (`src/offers/pipeline/psychometric-invite-alert.service.ts`) | Constantes y textos, `psychometricInvitePendingCode`, `isInviteAlertDue`, el silenciador (`PsychometricInviteAlertSilencer`, ahora con `isSilenced` y `markSent`, campo del servicio) y las tres funciones. Dependencias: modelo de ofertas, modelo de empresas y correo. Declarado en el módulo de ofertas |
+| Operaciones públicas | `clearPending(offer, entry)`: quita la novedad si la tiene. `reportFailureIfDue(offer, entry, { provider, errorMessage })`: si el primer fallo de la participación lleva 20 minutos o más, pone la novedad y avisa a soporte; la regla de los 20 minutos vive dentro |
+| **En el orquestador** | Las dos fechas: la hora de invitación y el primer fallo en el arranque, el reinicio de la hora al retomar, y el cron leyendo la hora de invitación para el vencimiento. Y cinco llamadas: `clearPending` en la invitación que sale, en *sin conexión*, en *falta un dato* y en el fallo permanente; `reportFailureIfDue` en el fallo pasajero, después del guardado |
+| **El silenciador** | Marca la hora **después** de que el correo salga: si SES falla, la siguiente llamada vuelve a intentar |
+| Los `spec` | Los dos montajes del arranque sustituyen los dobles sueltos por un doble del servicio y afirman que se le llama en cada salida con el valor que toca, más una prueba de orden (la novedad se quita después del guardado que escribe el identificador) |

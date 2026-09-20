@@ -136,3 +136,30 @@ real. Forma del campo: `provider` (`psicoalianza` o `evaluatest`), `score`, `min
 | 6 | Candidato sin el campo | Abrir el ojo | Sin bloque; el resto del modal como siempre | ☐ |
 | 7 | Portal en inglés, con el caso 1 | Abrir el ojo | *Psychometric test*, *Score*, *offer minimum*, *Passed*, columnas *Test · Weight · Score · Result*; la nota con punto decimal (90.29) y la fecha en formato inglés. Los textos de resultado de PsicoAlianza **siguen en español** (son dato) | ☐ |
 | 8 | Veredicto real: un candidato de una oferta de PsicoAlianza que termina su prueba | Esperar el veredicto del cron (hasta ~25 minutos de calificación más la pasada) y abrir el ojo | El bloque con el índice del tablero, el mínimo de la oferta y cada prueba con su peso de la vacante; **si aprueba, seguir viéndolo** con el candidato en la etapa siguiente | ☐ |
+
+## Paso 10 — la invitación que no sale, con aviso; y el plazo desde la invitación
+
+Brief: `brief-etapa3-paso10-plazo-sin-invitacion.md`; decisión 55, revisión del 2026-09-17. Se corren en el
+**servidor de pruebas** con la rama `feat/psychometric-followups`. 🔴 **Ninguno puede llegar a PsicoAlianza
+ni conseguir una sesión.** Preparación y orden de deshacer:
+
+1. En el `.env` del backend de pruebas: **la sesión manual encendida** (`PSICOALIANZA_MANUAL_SESSION_ENABLED`,
+   así la renovación no hace nada) y **`PSICOALIANZA_BASE_URL` apuntando a una dirección que no responde**
+   (así cada invitación falla por red sin salir del servidor). Comprobar que `ALERT_SUPPORT_EMAILS` está en
+   el compose (el 2026-09-20 estaba en los dos). Reiniciar el backend.
+2. Correr los casos.
+3. 🔴 **Antes de devolver el `.env` a su estado**: cancelar las ofertas de prueba o quitar sus
+   participaciones. Si no, la primera pasada con la dirección real **invitaría de verdad**.
+
+**Antes de desplegar en producción**, repetir la consulta de «esperando resultado externo sin identificador»
+(el 2026-09-17 dio cero de 71): quien salga ahí recibirá la novedad y el correo 20 minutos después de su
+primer fallo posterior al despliegue.
+
+| # | Cómo se prepara | Qué se hace | Qué se tiene que ver | Resultado |
+| --- | --- | --- | --- | --- |
+| 1 | Una oferta de PsicoAlianza en una empresa de pruebas; un candidato de prueba que contesta las preguntas en el simulador | Esperar 25 minutos | En el simulador, solo el aviso de siempre («Estamos preparando tu prueba…»); en el log, fallos por red cada 5 minutos; **un** correo a soporte hacia los 20 minutos, con la empresa, «psicoalianza», la oferta, el candidato, el error y el número de afectados; en la tabla de candidatos, el icono de advertencia; en el detalle, «Prueba psicométrica pendiente — Problema técnico con el proveedor de la prueba. Seguimos intentándolo.» | ☐ |
+| 2 | Otro candidato en otra oferta de PsicoAlianza de **la misma empresa** | Esperar 25 minutos | Su novedad; **ningún correo nuevo** a soporte | ☐ |
+| 3 | La participación del caso 1 | En la base, poner `flowState.psychometricInviteFirstFailedAt` hace más de 4 horas **no basta**: el silencio es en memoria. Reiniciar el backend y esperar la pasada | Un segundo correo (el reinicio vacía el silencio), con el número de personas afectadas | ☐ |
+| 4 | El candidato del caso 1 | En la base, quitar la conexión de PsicoAlianza de la empresa (guardando antes una copia) y esperar la pasada | La etapa se aprueba; **la novedad desaparece** de la tabla y del detalle | ☐ |
+| 5 | Una participación ya invitada, en la base: `flowState.psychometricInvitedAt` hace 1 día, `flowState.startedAt` hace 3, plazo de la empresa 2 | Esperar la pasada | **No** se descarta | ☐ |
+| 6 | Una participación ya invitada **sin** `psychometricInvitedAt` (como las 71 de producción), `startedAt` hace 3 días, plazo 2 | Esperar la pasada | Se descarta por vencimiento, como siempre | ☐ |
