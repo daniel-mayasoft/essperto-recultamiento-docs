@@ -1775,7 +1775,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
     | **Aviso al reclutador** | La **novedad por candidato** que ya existe (icono en la tabla, aviso en el detalle), a la vez que el aviso a soporte, y **se quita sola cuando la invitación sale**. Título «Prueba psicométrica pendiente»; mensaje «Problema técnico con el proveedor de la prueba. Seguimos intentándolo.» (aprobado) | Sin aviso: Marta vería a Ana días «en prueba psicométrica» sin saber por qué |
     | **¿Se le escribe a Ana?** | **No** (la ventana de 24 horas de WhatsApp, ver abajo) | — |
     | **El plazo de la prueba** | **Cuenta desde la invitación**, no desde la entrada a la etapa, para los dos proveedores: es lo que dice el mensaje («a partir de este momento»). Quien ya estaba invitado antes del cambio no tiene guardada la hora: su plazo sigue contando desde la entrada | Paso aparte: con Ana reintentándose sin fin, una invitación que sale al tercer día la descartaría por vencimiento en la pasada siguiente |
-    | **El cupo** | Sin cambios: quien espera ocupa cupo de la etapa (tres por plaza) | — |
+    | **El cupo** | Sin cambios: quien espera ocupa cupo de la etapa (tres por plaza). **Precisado el 2026-09-20, leído del código**: quien está en la etapa psicométrica cuenta para el cupo de la etapa de **preguntas por WhatsApp**, así que una sesión de PsicoAlianza caída **para la entrada a las preguntas** de las ofertas de esa empresa hasta que soporte la arregle o el reclutador descarte a mano. La captación de hojas de vida y la compatibilidad siguen. Es lo que va a notar el reclutador, y es coherente con «no pasa nadie» | — |
 
     Lo que sigue es **el primer cierre del 2026-09-17, sustituido por la revisión de arriba**; se conserva
     porque explica la ventana de 24 horas y el descarte del último intento.
@@ -2451,6 +2451,13 @@ en producción (41); las contraseñas de portales de empleo y antecedentes que e
 sirviendo descifradas (deuda conocida del contexto del proyecto); y el comentario del barrido de
 flujos atascados que nombra un campo viejo del candidato (registro del 6b).
 
+**Añadido el 2026-09-18, sin paso:** el 400 «ya fue tomado por otro usuario» de PsicoAlianza —nuestro
+correo del candidato pertenece allá a otra cédula— cae hoy como **fallo pasajero**, porque el cliente
+convierte cualquier respuesta que no sea 2xx en un error genérico. No se arregla reintentando: hace
+falta corregir un correo. Con el paso 10 se reintenta sin fin con novedad y correo a soporte cada 4
+horas (caso 18 de su brief); distinguirlo como permanente, o como *falta un dato* con su propio motivo,
+es un paso aparte que toca el cliente y el adaptador.
+
 🔴 **El orden de despliegue vigente es el de `before-deploy.md`: migración, backend, y portal
 inmediatamente después.** Las entradas del paso 7, la cuenta compartida y el correo inventado
 dicen «portal antes que backend, o a la vez»; eran ciertas para cada cambio suelto y quedan como
@@ -2575,7 +2582,10 @@ anotados que empeoran con el tiempo.
 > lista con el código y con el contrato, y cada paso según se cierre.
 
 **Se prueba en local antes que en el servidor de pruebas.** Cómo levantar el entorno:
-`../entorno-local.md`. La etapa 1 sigue sin desplegar.
+`../entorno-local.md`. ~~La etapa 1 sigue sin desplegar.~~ ✅ **La rama entera —etapa 1 y todos los pasos
+de esta tabla hasta el 9— está en producción desde el 2026-09-17** (`before-deploy.md` §5, *Lo que se
+hizo en producción*). Ninguna empresa de producción tiene PsicoAlianza conectada todavía. **Lo que
+sigue va en ramas nuevas desde `develop`**, empezando por `feat/psychometric-followups` con el paso 10.
 
 ### Cómo se parte
 

@@ -17,8 +17,15 @@ etapa psicométrica, el cron de resultados y el estado de la conversación.
 
 ## Rama
 
-**`feat/integrate-psicoanalisis-provider`**, la de la integración, en el backend. Se revisa entera antes
-de desplegar. El portal no se toca.
+~~**`feat/integrate-psicoanalisis-provider`**, la de la integración, en el backend. Se revisa entera antes
+de desplegar.~~ **Corregido el 2026-09-18: la integración ya está en producción** (desplegada el
+2026-09-17; `before-deploy.md` §5). Este paso va en **una rama nueva del backend que sale de `develop`**,
+`feat/psychometric-followups`, y se despliega aparte cuando esté revisado. El portal no se toca.
+
+⚠️ **Ahora es un cambio sobre producción con gente dentro**: el 2026-09-17 había 71 personas esperando
+resultado en la etapa, todas ya invitadas, así que a ninguna le cambia nada al desplegar (su plazo sigue
+contando desde la entrada, trampa 5). Pero cualquier fallo pasajero de EvaluaTest después del despliegue
+entra por este código.
 
 ## Antes de escribir una sola línea
 
@@ -81,6 +88,11 @@ En el vencimiento del cron, la fecha de partida es **la hora de la invitación**
 entrada a la etapa, como hoy. El límite de plazo de la oferta se calcula igual que hoy. Nada más cambia
 en el vencimiento: su mensaje, su motivo de descarte y cuándo se aplica.
 
+**Al retomar a un candidato aparcado que ya tiene identificador, la hora de invitación se reinicia
+igual que la entrada a la etapa** (añadido el 2026-09-20; era la pregunta 5b, respondida en el código:
+el retomar reinicia la entrada a propósito para que un aparcado varios días no caduque al volver). Si
+no, contaría desde la invitación vieja y vencería en la pasada siguiente.
+
 ### 3 · A los 20 minutos del primer fallo: aviso a soporte y novedad para el reclutador
 
 En **cada fallo pasajero** del arranque, después de guardar, si han pasado **20 minutos o más** desde el
@@ -140,6 +152,9 @@ mientras la oferta no se cancele, como hoy.
 | 13 | Empresa en demo con la prueba simulada | Como hoy: nunca falla | — | — |
 | 14 | El backend se reinicia a las 11:00 con Medicall en silencio | Espera | Puede salir **un** correo de más | Lo mismo |
 | 15 | La oferta se cancela mientras Ana espera | El cron ya no la mira | Nada nuevo | — |
+| 16 | Vacante de EvaluaTest **sin código de evaluación** (error de configuración; cuenta como pasajero a propósito, 39) | Se reintenta sin fin hasta que alguien arregle la vacante | Un correo cada 4 horas mientras dure: es lo deseado, insiste | Novedad «problema técnico con el proveedor» |
+| 17 | Tres Anas atascadas en una oferta de **una plaza** | Esperan. Quien está en la etapa psicométrica **cuenta para el cupo de la etapa de preguntas** (tres por plaza, comprobado el 2026-09-18): **no entra nadie más a las preguntas** en esa oferta hasta que salga una invitación o Marta descarte a alguien a mano. La captación de hojas de vida y la compatibilidad siguen; lo que se para es la entrada a las preguntas por WhatsApp | Los correos de arriba | Tres novedades |
+| 18 | **El correo de Ana pertenece en PsicoAlianza a otra cédula** (la consulta previa por su documento dio *desconocido*, se invitó con nuestro correo, y PsicoAlianza respondió 400 «ya fue tomado por otro usuario», `psicoalianza-api.md`). Comprobado el 2026-09-18: el cliente convierte cualquier respuesta que no sea 2xx en un error genérico, y el adaptador lo deja subir como **pasajero** | Se reintenta sin fin, aunque no se arregla solo: hace falta corregir el correo de Ana o el de la otra persona en PsicoAlianza | Un correo cada 4 horas, con el mensaje «PsicoAlianza respondió 400…», que es lo que permite reconocerlo | Novedad «problema técnico con el proveedor». **No es de este paso** distinguir ese 400 como permanente: queda anotado en la bitácora para un paso aparte |
 
 **Medido en producción el 2026-09-17: cero personas esperando sin invitación.** Al desplegar no sale
 ningún correo de golpe.
@@ -152,7 +167,8 @@ ningún correo de golpe.
 - **No se toca**: el reintento (salvo lo que escribe y dispara), los fallos permanentes, *sin conexión*,
   *falta un dato*, el veredicto, el mensaje ni el motivo del vencimiento, la demo, la renovación de la
   sesión de PsicoAlianza ni su correo a desarrolladores.
-- **No se cambia el cupo** de la etapa: quien espera sigue ocupándolo.
+- **No se cambia el cupo** de la etapa: quien espera sigue ocupándolo, y con ello bloquea la entrada a
+  las preguntas de esa oferta (caso 17). Aceptado en la decisión 55; Marta lo libera descartando a mano.
 - **No se arreglan** los mensajes de texto libre fuera de la ventana que ya existen (vencimiento,
   «Gracias por completar», resultados): no son de este frente.
 - **No se arregla** el mismo hueco de guardado en la novedad de ReTHUS (trampa 1).
@@ -163,7 +179,9 @@ ningún correo de golpe.
 recarga la oferta y copia **solo la participación**. Las novedades viven en la oferta: si ese guardado
 choca con otro —un webhook de WhatsApp de otro candidato de la misma oferta—, poner o quitar la novedad
 se pierde en silencio. **La novedad tiene que quedar puesta o quitada aunque haya conflicto.** Cómo, lo
-propone el ejecutor.
+propone el ejecutor **en la opinión previa, con la propuesta concreta**: es lo difícil de este paso. La
+que el planificador aceptaría de entrada: poner y quitar la novedad con una escritura atómica sobre la
+oferta por su identificador, fuera del guardado versionado, para que un choque no la alcance.
 
 **2. El primer fallo solo se escribe si está vacío.** Si se pisara en cada fallo, los 20 minutos no
 llegarían nunca.
@@ -177,6 +195,12 @@ todas las ofertas de esa empresa con ese proveedor a la vez: por eso la clave no
 **5. Quien ya estaba invitado no tiene hora de invitación.** El vencimiento tiene que caer a la entrada a
 la etapa, no a *sin fecha*: sin fecha, hoy no se descarta a nadie, y esas personas esperarían para
 siempre.
+
+**5b. El retomar y la hora de invitación.** Retomar a un candidato que ya tiene identificador no reinvita:
+solo lo devuelve a *esperando resultado externo*. Su hora de invitación vieja se quedaría y el plazo
+contaría desde ella, con lo que podría vencer en la pasada siguiente. ~~Pregunta para la opinión previa~~
+**Resuelto el 2026-09-20 y llevado al alcance 2**: el retomar reinicia la entrada a la etapa a propósito,
+y la hora de invitación se reinicia con ella. Con su prueba.
 
 **6. Las pruebas existentes no deberían cambiar.** El constructor del archivo de pruebas del cron pone la
 entrada a la etapa hace un minuto, así que nada llega a 20 minutos ni vence; y la prueba de vencimiento
@@ -244,6 +268,11 @@ llegar a PsicoAlianza ni conseguir una sesión.** Se preparan así, y se deshace
 2. Correr los casos.
 3. 🔴 **Antes de devolver el `.env` a su estado**: cancelar las ofertas de prueba o quitar sus
    participaciones. Si no, la primera pasada con la dirección real **invitaría de verdad**.
+
+**Y antes de desplegar en producción**, repetir la consulta de «esperando resultado externo sin
+identificador» (el 2026-09-17 dio cero de 71). Quien salga ahí recibirá la novedad y el correo a soporte
+20 minutos después de su primer fallo posterior al despliegue: no es un problema, pero conviene saberlo
+para no confundirlo con un fallo nuevo.
 
 | # | Cómo se prepara | Qué se hace | Qué se tiene que ver |
 | --- | --- | --- | --- |
