@@ -55,6 +55,15 @@ tercera copia desincronizada, que es justo lo que existe para evitar.
   en todo el backend, tope por ventana de 24 horas y correo a los desarrolladores; la pieza que
   entra con Chromium por el proxy móvil es la del 2c.1. Con la sesión manual del `.env` encendida no
   hace nada.
+- **La entrega del enlace pendiente** (paso 11, decisión 59): un servicio propio al lado del embudo
+  que, cuando el candidato pulsa «Sí, Continuar» o escribe cualquier cosa con un enlace guardado, le
+  manda **el mensaje de siempre** con ese enlace, anota que ya lo recibió y borra el pendiente. **No
+  decide nada**: ni si la ventana está abierta ni cuál es el plazo; las dos cosas se las da el
+  embudo, que es quien las sabe. **Tampoco guarda**: guarda el embudo, después del mensaje y con el
+  guardado con reintento, porque otros candidatos de la misma oferta guardan a la vez y un choque
+  después de mandar el enlace dejaría el pendiente vivo —se lo volvería a mandar en su siguiente
+  mensaje, y su plazo contaría desde antes de lo que le dijo—. El texto del mensaje con el enlace vive en un archivo aparte, sin
+  lógica, y lo usan el arranque y la entrega.
 
 ## 1 · La empresa se conecta y configura la oferta
 
@@ -338,6 +347,41 @@ que copia la configuración tal cual, o es de antes de la migración— y sigue.
    enseña el correo de la bolsa, que con el desvío de pruebas es la dirección de QA. El aviso sin
    enlace es el mismo para los dos.
 
+   🔴 **Y desde el paso 11 (decisión 59), ese mensaje solo sale si la ventana de 24 horas de
+   WhatsApp está abierta**, mirada **antes de enviar** con la hora del último mensaje entrante
+   (Meta acepta el texto libre fuera de la ventana y lo descarta en silencio). Con la ventana
+   **abierta**, todo como arriba, y se guarda la hora de la invitación (§4). Con la ventana
+   **cerrada** —lo normal cuando la invitación sale tras un fallo de días—, **no se le manda el
+   texto**: se le manda la **plantilla de etapa pendiente**, `pending_process_reminder` (el nombre sale
+   de `WHATSAPP_PENDING_PROCESS_TEMPLATE`, que la trae por defecto): «Hola {{1}}👋 Para continuar con
+   tu proceso de selección para {{2}} en {{3}}, necesitamos tu confirmación. ¿Deseas continuar con el
+   proceso?», con su nombre de pila —«Candidato» si no lo hay—, el título de la oferta y el nombre de
+   la empresa —«la empresa» si no lo hay—, y dos botones: **«Sí, Continuar»**, que manda el mismo
+   identificador que el «Continuar proceso» de los recordatorios, y **«No»**, que manda el del retiro
+   voluntario. **El enlace queda guardado como pendiente de entregar**, con la fecha en que quedó
+   pendiente (§6). La hora de la invitación **no se escribe**: el plazo no puede contar desde un
+   enlace que la persona no ha visto. Si la plantilla no se puede entregar, se registra y ya: el
+   enlace sigue pendiente y corre el plazo de respaldo (§4). **No se reintenta sin botones**, a
+   diferencia de la de recordatorio: sin su identificador, Meta devuelve el título del botón, y ni
+   «Sí, Continuar» ni «No» se reconocen —no deben reconocerse: la plantilla de primer contacto tiene
+   botones «Si»/«No» con otro significado—, así que serían botones que no hacen nada. La demo no
+   pasa por esta comprobación: manda su texto como siempre.
+
+   Lo que hace cada respuesta: **«Sí, Continuar»** va al reenvío de la etapa y le entrega el enlace
+   (§2, más abajo). **«No»** la retira en el acto, como en cualquier etapa: «Entendido, gracias por
+   avisarnos 🙏…» y el descarte con el motivo de retiro de la etapa. **Si escribe en vez de pulsar**
+   —lo natural ante una pregunta—, cualquier texto en esta etapa con un enlace pendiente **le entrega
+   el enlace** en vez de la respuesta fija de siempre («Tu prueba se realiza por correo electrónico
+   📬…»); su mensaje abrió la ventana, así que llega. También un «no» escrito: es inofensivo, y para
+   retirarse está el botón. Sin enlace pendiente, la respuesta fija de siempre.
+
+   ⚠️ **Para que eso funcione, la hora del último mensaje entrante viaja con la persona al entrar a
+   la etapa** —al pasar de etapa y al activarla el bombeo—, porque el embudo le estrena el estado
+   de la conversación y sin esa hora la ventana se vería cerrada **siempre**. Se copia **solo hacia
+   esta etapa**: en las demás la decisión se toma con el respaldo a plantilla, donde equivocarse
+   hacia «cerrada» no pierde ningún mensaje, y copiarla allí cambiaría sus recordatorios en
+   producción (paso aparte, anotado en la bitácora).
+
 ### Si el arranque falla
 
 - **Fallo pasajero** (red, proveedor caído, sin código de evaluación, **la lectura del
@@ -408,7 +452,14 @@ nada.
 | El botón "Continuar proceso" de un recordatorio | ⚠️ **Se lo traga**: el webhook atrapa cualquier fallo. El candidato gastó la reapertura de WhatsApp en un botón que no hizo nada (sin paso todavía) |
 
 Retomar a un candidato que **ya tiene** identificador no reinvita: solo lo devuelve a
-*esperando resultado externo*.
+*esperando resultado externo*. **Desde el paso 11, antes de eso mira si tiene un enlace pendiente
+de entregar** (§2.6): si lo tiene y la ventana está abierta —que es el caso del botón «Sí, Continuar»
+de la plantilla de etapa pendiente, porque
+pulsarlo es un mensaje suyo y el enrutado guarda su hora **antes** de llegar aquí—, le manda **el
+mismo mensaje de siempre** con ese enlace y el plazo, guarda la hora de la invitación y borra el
+pendiente; desde ese momento cuenta su plazo. Si la ventana está **cerrada** —el otro camino que
+llega aquí es el retomar de un aparcado, que no la abre—, **no se le manda nada y el pendiente se
+conserva**: mandar el texto ahí sería tirarlo y dejarla sin enlace y sin plantilla.
 
 ## 3 · El cron consulta resultados
 
@@ -461,12 +512,14 @@ Cada iteración recarga la oferta fresca (aprobar a uno sube la versión del doc
    candidato sigue su proceso, igual que en el arranque (decisión 40). Si falla de forma
    pasajera, se registra, se cuenta como error y sigue esperando. ⚠️ Si el documento de la persona no se puede cargar, no se intenta nada y no
    se descarta nada. Medido el 2026-09-11: hoy no hay nadie sin identificador.
-2. **Vencimiento**: si **fue invitado** hace más días que el plazo —o, si no tiene guardada la hora de
-   la invitación porque se le invitó antes del paso 10, si **entró a la etapa** hace más días que el
-   plazo—, le escribe que no se recibió su resultado a tiempo y lo descarta con
-   `psychometric_external_timeout`. El plazo es la ventana que se le anunció «a partir de este
-   momento», el de la invitación (decisión 55, revisión); no se detiene por nada (decisión 36). Al
-   retomar a un aparcado que ya tenía invitación, su hora de invitación se reinicia junto con la
+2. **Vencimiento**: la fecha de partida son **tres, en este orden** (decisiones 55 y 59): la **hora
+   de la invitación** si la hay —el enlace se entregó, y es la ventana que se le anunció «a partir de
+   este momento»—; si no, la **fecha en que el enlace quedó pendiente** —se le invitó pero nunca lo
+   recibió: es el plazo de respaldo, para que no ocupe cupo para siempre—; y si no hay ninguna de
+   las dos, **la entrada a la etapa**, que es lo de siempre y lo que se aplica a quien se invitó
+   antes del paso 10. Pasado el plazo, le escribe que no se recibió su resultado a tiempo y lo
+   descarta con `psychometric_external_timeout`; no se detiene por nada (decisión 36). Al retomar a
+   un aparcado, la hora de la invitación **y** la fecha del pendiente se reinician junto con la
    entrada a la etapa, para que no venza en la pasada siguiente.
 3. **El resultado** de §3, según el estado.
 
@@ -532,6 +585,8 @@ los nuevos; al leer, el nuevo y si está vacío el viejo.** Solo dos se leen:
 | `psychometricProviderData` | El cron, para el correo de registro. Guarda además el código de estado y el resultado por prueba adicional |
 | `psychometricInvitedAt` (paso 10) | El cron, para el vencimiento: desde aquí cuenta el plazo. Lo escribe la invitación que sale; el retomar lo reinicia; nace nulo |
 | `psychometricInviteFirstFailedAt` (paso 10) | El arranque, para avisar a los 20 minutos. Lo escribe el primer fallo pasajero; lo borra la invitación que sale; nace nulo |
+| `psychometricPendingLink` (paso 11) | El reenvío del botón y la respuesta al texto libre de la etapa: es el enlace que se le entrega al pulsar «Sí, Continuar» o al escribir. Lo escribe la invitación que sale con la ventana cerrada; lo borra la entrega; nace nulo. Es un dato personal: no se registra en el log |
+| `psychometricPendingLinkSince` (paso 11) | El cron, para el vencimiento cuando el enlace nunca se entregó (§4). Se escribe y se borra con el anterior; el retomar la reinicia; nace nula |
 
 Los seis campos viejos con prefijo `evaluatest` siguen en el esquema, solo se leen. La
 compatibilidad caduca sola: nadie está a mitad de prueba más que el plazo.

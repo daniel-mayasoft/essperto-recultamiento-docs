@@ -1774,7 +1774,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
     | **Aviso a soporte** | Correo a soporte (el buzón de alertas que ya usa el arranque fallido), **uno por empresa y proveedor**, con **4 horas de silencio**: si pasado ese tiempo sigue fallando, otro con el número de personas afectadas | Uno por persona: 100 personas, 100 correos. Un resumen cada hora: hasta una hora de retraso |
     | **Aviso al reclutador** | La **novedad por candidato** que ya existe (icono en la tabla, aviso en el detalle), a la vez que el aviso a soporte, y **se quita sola cuando la invitación sale**. Título «Prueba psicométrica pendiente»; mensaje «Problema técnico con el proveedor de la prueba. Seguimos intentándolo.» (aprobado) | Sin aviso: Marta vería a Ana días «en prueba psicométrica» sin saber por qué |
     | **¿Se le escribe a Ana?** | **No** (la ventana de 24 horas de WhatsApp, ver abajo) | — |
-    | **El plazo de la prueba** | **Cuenta desde la invitación**, no desde la entrada a la etapa, para los dos proveedores: es lo que dice el mensaje («a partir de este momento»). Quien ya estaba invitado antes del cambio no tiene guardada la hora: su plazo sigue contando desde la entrada | Paso aparte: con Ana reintentándose sin fin, una invitación que sale al tercer día la descartaría por vencimiento en la pasada siguiente |
+    | **El plazo de la prueba** | **Cuenta desde la invitación**, no desde la entrada a la etapa, para los dos proveedores: es lo que dice el mensaje («a partir de este momento»). Quien ya estaba invitado antes del cambio no tiene guardada la hora: su plazo sigue contando desde la entrada. **Afinado por la 59 (2026-09-20): desde que la persona recibe el enlace**, que con la ventana de WhatsApp abierta es la invitación y con la cerrada es cuando pulsa el botón | Paso aparte: con Ana reintentándose sin fin, una invitación que sale al tercer día la descartaría por vencimiento en la pasada siguiente |
     | **El cupo** | Sin cambios: quien espera ocupa cupo de la etapa (tres por plaza). **Precisado el 2026-09-20, leído del código**: quien está en la etapa psicométrica cuenta para el cupo de la etapa de **preguntas por WhatsApp**, así que una sesión de PsicoAlianza caída **para la entrada a las preguntas** de las ofertas de esa empresa hasta que soporte la arregle o el reclutador descarte a mano. La captación de hojas de vida y la compatibilidad siguen. Es lo que va a notar el reclutador, y es coherente con «no pasa nadie» | — |
 
     Lo que sigue es **el primer cierre del 2026-09-17, sustituido por la revisión de arriba**; se conserva
@@ -1877,6 +1877,42 @@ Se da por terminado cuando se cumplen las dos condiciones:
     | **Candidatos sin desbloquear** | Sin regla propia: el ojo solo aparece para quien está desbloqueado o se añadió a mano, y el bloque hereda esa puerta | — |
 
     Brief: paso 9 de la etapa 3.
+
+59. **Si la invitación sale con la ventana de WhatsApp cerrada, el enlace no se manda como texto: se
+    manda la plantilla con el botón, el botón entrega el enlace, y el plazo cuenta desde que la persona
+    lo recibe** (2026-09-20, decidido con el usuario al revisar el paso 10). Corrige la fila «el plazo
+    de la prueba» de la revisión de la 55.
+
+    **El hueco, comprobado en el código el 2026-09-20:** el mensaje con el enlace de la prueba se manda
+    siempre como texto libre, sin mirar la ventana de 24 horas de WhatsApp. Meta lo acepta y lo descarta
+    en silencio fuera de la ventana. Antes del paso 10 casi nunca se llegaba ahí: el plazo contaba desde
+    la entrada a la etapa y la persona se descartaba antes. Con el paso 10, esperar a que la sesión
+    vuelva es el camino previsto, y si la sesión tarda más de 24 horas desde el último mensaje de Ana
+    —credenciales rechazadas hasta la mañana siguiente, el captcha todo el día, el 400 del correo, o una
+    candidata de viernes por la noche—, **Ana nunca ve el enlace**, su plazo corre, y se la descarta por
+    vencimiento con otro texto que tampoco le llega. Marta la ve como «no completó la prueba».
+
+    | Qué | Decidido | Descartado |
+    | --- | --- | --- |
+    | **Al invitar con la ventana cerrada** | No se manda el texto con el enlace. Se manda la **plantilla de recordatorio que ya usan las demás etapas** (la que nombre `WHATSAPP_REMINDER_TEMPLATE`; en producción hoy es `recordatorio_cita`, no la del código), con el «qué se espera» propio de esta etapa, y el enlace queda **pendiente de entregar** en la participación | Mandar el texto igual y confiar: es lo que hay hoy y se pierde. Una plantilla nueva con botón de enlace variable: exige aprobación de Meta fuera del código; queda como mejora si el compañero de la cuenta la consigue |
+    | **Al pulsar «Continuar proceso»** | Pulsar es un mensaje de Ana y abre la ventana. Si tiene enlace pendiente, se le manda **el mensaje de siempre** con el enlace y el plazo, y se borra el pendiente. Si no, como hoy (solo vuelve a esperar) | — |
+    | **El plazo** | **Cuenta desde que Ana recibe el enlace**: con la ventana abierta, la invitación; con la ventana cerrada, el momento en que pulsa el botón. Es lo que dice el mensaje («a partir de este momento»), y PsicoAlianza fija su propia ventana al invitar de todos modos | Desde la invitación en el proveedor (paso 10): descartaría por vencimiento a quien nunca vio el enlace |
+    | **Si Ana no pulsa nunca** | El plazo cuenta desde la invitación en el proveedor, como respaldo, y se la descarta al vencer, como a quien recibe el enlace y no hace la prueba. Marta la ve descartada por no completarla, que esta vez es cierto | Esperar sin fin: ocuparía cupo para siempre |
+    | **Si la plantilla no se puede enviar** | Se registra; el enlace queda pendiente y el plazo de respaldo corre. No se reintenta la plantilla | Reintentar la plantilla cada pasada: el cron de recordatorios no mira a quien espera resultado, y añadirlo es otro paso |
+    | **El texto «qué se espera»** | ~~«que presentes tu prueba psicométrica»~~ **Sustituido el 2026-09-21** (fila siguiente) | — |
+    | **La plantilla, corregida el 2026-09-21 con el equipo** | **Una plantilla nueva y genérica**, que sirva también a otras etapas, **`pending_process_reminder`**, creada por el equipo el 2026-09-21: «Hola {{1}}👋 Para continuar con tu proceso de selección para {{2}} en {{3}}, necesitamos tu confirmación. ¿Deseas continuar con el proceso?» (nombre, vacante, empresa), con dos botones de respuesta rápida, **«Sí, Continuar»** primero (continuar) y **«No»** segundo (retirarse, con el mensaje y el descarte que ya existen). Utilidad, `es_CO`; el nombre en una variable de entorno. **Tiene que estar aprobada en Meta antes de desplegar** | La de recordatorio con el «qué se espera»: su cuerpo no está en el repositorio, y en producción la variable apunta a `recordatorio_cita`, que por el nombre puede hablar de citas. Botones «Continuar proceso» / «Ya no me interesa»: se prefirió Sí/No por cómo se lee con «confírmanos» |
+    | **Si la plantilla falla con sus botones** (2026-09-21, segunda opinión previa del paso 11) | Se registra y el enlace sigue pendiente; **no se reintenta sin botones** | Reintentar sin botones, como la de recordatorio: sin su identificador Meta devuelve el título del botón, y ni «Sí, Continuar» ni «No» se reconocen ni deben reconocerse (la plantilla de primer contacto tiene «Si»/«No» con otro significado): serían botones muertos |
+    | **Si Ana escribe en vez de pulsar** (2026-09-21, segunda opinión previa del paso 11) | Cualquier texto en la etapa psicométrica con enlace pendiente **le entrega el enlace**, por el mismo servicio que el botón: su mensaje abrió la ventana. También un «no» escrito, que es inofensivo: para retirarse está el botón «No». Sin pendiente, la respuesta fija de siempre | La respuesta fija («Tu prueba se realiza por correo electrónico 📬…»): la plantilla termina en una pregunta que invita a escribir «sí», y el enlace no se entregaba nunca |
+
+    **Lo que le pasa a Ana:** contesta el lunes a las 10:00; la sesión vuelve el martes a las 11:00. Le
+    llega la plantilla: «…necesitamos tu confirmación. ¿Deseas continuar con el proceso?». Pulsa «Sí,
+    Continuar» a las 15:30 y recibe el enlace con «dispones de 2 días a partir de este momento»; se la descarta, si
+    no la hace, el jueves a las 15:30. Si nunca pulsa, el jueves a las 11:00.
+
+    **Vale para los dos proveedores.** Los mensajes del vencimiento y del veredicto siguen siendo texto
+    libre fuera de la ventana: son de antes, de otro frente, y quedan anotados en *Lo que hereda*.
+
+    Brief: paso 11 de la etapa 3, en la misma rama que el paso 10; se despliegan juntos.
 
 ## Falta de PsicoAlianza
 
@@ -2451,6 +2487,16 @@ en producción (41); las contraseñas de portales de empleo y antecedentes que e
 sirviendo descifradas (deuda conocida del contexto del proyecto); y el comentario del barrido de
 flujos atascados que nombra un campo viejo del candidato (registro del 6b).
 
+**Añadido el 2026-09-20, sin paso:** **la hora del último mensaje entrante se pierde al cambiar de
+etapa**. El paso de etapa y el bombeo construyen un estado de conversación nuevo que solo conserva el
+teléfono de pruebas, así que la ventana de 24 horas de WhatsApp se ve **cerrada** al empezar cualquier
+etapa y el primer recordatorio sale siempre como plantilla. La ventana es de la conversación, no de la
+etapa: lo correcto es que esa hora viaje siempre. El paso 11 la copia **solo a la etapa psicométrica**,
+porque copiarla a todas cambia los recordatorios de cédula, documentos y agendamiento en producción
+—pasarían a texto libre cuando la persona escribió hace menos de 24 horas, que es lo que ese código dice
+querer, y en agendamiento el texto lleva el enlace de reserva que la plantilla no lleva—. Levantado en la
+opinión previa del paso 11 y comprobado.
+
 **Añadido el 2026-09-18, sin paso:** el 400 «ya fue tomado por otro usuario» de PsicoAlianza —nuestro
 correo del candidato pertenece allá a otra cédula— cae hoy como **fallo pasajero**, porque el cliente
 convierte cualquier respuesta que no sea 2xx en un error genérico. No se arregla reintentando: hace
@@ -2619,7 +2665,7 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 6.2b | ✅ **Código HECHO y revisado el 2026-09-15; casos a mano pendientes** en `pruebas-a-mano.md`, que el usuario corre con la rama entera antes de desplegar. Verificado por el planificador: comprobación de tipos del portal limpia; backend sin cambios; las trampas del brief comprobadas en el diff. En la revisión se añadieron: el texto de vacante no usable por un motivo desconocido (aprobado por el usuario) y la espera a los datos de la empresa antes de copiar una oferta o preparar un borrador de la IA, con el error dentro de cada pantalla. **Portal, la oferta** (decisión 51): la señal de «hay conexión», que hoy solo mira EvaluaTest y decide si la ficha y el diálogo de crear enseñan los controles de la prueba; el selector de proveedor, solo con más de una conexión (3); la conexión elegida, mandada al guardar la oferta y al pedir el selector y el estado de la vacante (48); las pruebas adicionales solo con EvaluaTest (4); el texto de los motivos nuevos de vacante no usable (ver *Opinión previa del paso 3*, en esta etapa). Además (decisión 51): ninguna conexión elegida por defecto con dos, cambiar de conexión borra la vacante, con PsicoAlianza el código de perfil y las pruebas adicionales se mandan vacíos, copiar una oferta copia su conexión, el aviso de oferta sin proveedor mira la conexión congelada, y los textos aprobados del aviso de la vacante. Cierra el caso espejo que el 6.2a deja en local (su trampa 6): editar desde la ficha una oferta de PsicoAlianza lista vacantes de EvaluaTest. Va después del 6.1, que es quien deja guardar una conexión de PsicoAlianza desde el portal, y del 6.2a — brief `brief-etapa3-paso6-2b-la-oferta-por-proveedor.md` | Visible |
 | 9 | ✅ **Código HECHO y revisado el 2026-09-16; casos a mano pendientes** en `pruebas-a-mano.md`, que el usuario corre en el servidor de pruebas. Verificado por el planificador: backend 133 suites y 1.372 pruebas (1.363 pasan, 9 omitidas), con la caché limpia; portal con tipos limpios; control negativo con 12 fallos; ninguna afirmación existente quitada ni relajada. Aprobado sin arreglos. Textos del bloque pendientes de que el usuario los confirme. El resultado psicométrico en el detalle del candidato (decisión 58): el adaptador de PsicoAlianza guarda el peso de cada prueba; el veredicto del cron escribe un resultado permanente en la participación; el portal lo enseña junto a ReTHUS. Se numera 9 porque la etapa 1 ya tiene pasos 7, 8a y 8b — brief `brief-etapa3-paso9-resultado-en-el-detalle.md` | Embudo (el veredicto) y visible |
 | 10 | ✅ **Código HECHO el 2026-09-20 por el planificador y revisado el mismo día por el planificador del despliegue** (aprobado; control negativo propio sobre el vencimiento; una menudencia opcional y una anotación en la *Revisión del diff* del brief)**; casos a mano pendientes** en `pruebas-a-mano.md`, en el servidor de pruebas. Revisado aparte por el planificador del despliegue, aprobado. Después, por decisión del usuario, el aviso salió del orquestador a `PsychometricInviteAlertService`. Verificado con la caché limpia: 136 suites y 1.418 pruebas (1.409 pasan, 9 omitidas); controles negativos con 11 fallos y, tras el movimiento, el del silenciador; ninguna afirmación existente cambiada. Decisiones fuera del brief, el correo tal como quedó y lo que queda en el orquestador, en las secciones finales del brief. ~~En la rama de la integración.~~ En la rama nueva `feat/psychometric-followups`, creada desde `develop` el 2026-09-20. Quien no recibe la invitación por un problema técnico **no pasa**: se sigue reintentando; a los 20 minutos del primer fallo, correo a soporte por empresa y proveedor con 4 horas de silencio y novedad para el reclutador que se quita al invitar; y el plazo de la prueba cuenta desde la invitación. Para los dos proveedores (decisión 55, revisión del 2026-09-17) — brief `brief-etapa3-paso10-plazo-sin-invitacion.md` | Embudo; cambia comportamiento de EvaluaTest en producción |
-| 11 | ~~El plazo desde la invitación~~ **Unido al 10** el 2026-09-17 | — |
+| 11 | ~~El plazo desde la invitación~~ **Unido al 10** el 2026-09-17. **Reasignado el 2026-09-20: el enlace fuera de la ventana de WhatsApp** (decisión 59): si la invitación sale con la ventana de 24 horas cerrada, se manda la plantilla de recordatorio con el botón en vez del texto con el enlace, el botón entrega el enlace, y el plazo cuenta desde que la persona lo recibe. En la misma rama que el 10; se despliegan juntos. **Brief escrito el 2026-09-20, sin empezar**; pendiente de confirmar con Meta el cuerpo de la plantilla — brief `brief-etapa3-paso11-enlace-fuera-de-ventana.md` | Embudo; los dos proveedores |
 
 **Antes del paso 2, fuera del código:** cuenta de PsicoAlianza para probar y **una sesión de esa
 cuenta pegada en el `.env` local** (decisión 42; cómo sacarla, en `../entorno-local.md`). Para el 2b

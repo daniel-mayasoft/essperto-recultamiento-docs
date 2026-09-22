@@ -163,3 +163,25 @@ primer fallo posterior al despliegue.
 | 4 | El candidato del caso 1 | En la base, quitar la conexión de PsicoAlianza de la empresa (guardando antes una copia) y esperar la pasada | La etapa se aprueba; **la novedad desaparece** de la tabla y del detalle | ☐ |
 | 5 | Una participación ya invitada, en la base: `flowState.psychometricInvitedAt` hace 1 día, `flowState.startedAt` hace 3, plazo de la empresa 2 | Esperar la pasada | **No** se descarta | ☐ |
 | 6 | Una participación ya invitada **sin** `psychometricInvitedAt` (como las 71 de producción), `startedAt` hace 3 días, plazo 2 | Esperar la pasada | Se descarta por vencimiento, como siempre | ☐ |
+
+## Paso 11 — el enlace de la prueba cuando la ventana de WhatsApp está cerrada
+
+Brief: `brief-etapa3-paso11-enlace-fuera-de-ventana.md`; decisión 59. Se corren **con los del paso 10**,
+en el servidor de pruebas y con la misma preparación. Los casos que **sí** invitan necesitan además que
+`PSICOALIANZA_BASE_URL` vuelva a la dirección real y **una vacante de PsicoAlianza de la cuenta de
+pruebas** con una persona de prueba; 🔴 **al terminar hay que sacarla de la vacante** (fila 5c de
+`before-deploy.md`).
+
+**La ventana cerrada se prepara en la base**, poniendo `flowState.lastInboundAt` de esa participación
+hace dos días. No vale con esperar: cualquier mensaje del simulador la reabre.
+
+| # | Cómo se prepara | Qué se hace | Qué se tiene que ver | Resultado |
+| --- | --- | --- | --- | --- |
+| 1 | Un candidato de prueba que acaba de contestar las preguntas (ventana abierta) y una oferta cuya invitación sale de verdad | Esperar el arranque | En el simulador, **el texto de siempre con el enlace**; en la base, `psychometricInvitedAt` de ahora y **ningún** `psychometricPendingLink` | ☐ |
+| 2 | Un candidato esperando sin invitación (caso 1 del paso 10); en la base, `lastInboundAt` hace dos días; devolver `PSICOALIANZA_BASE_URL` a la dirección real y reiniciar | Esperar la pasada | En el simulador, **la plantilla `pending_process_reminder`** con su nombre, el título de la oferta y la empresa, y los botones «Sí, Continuar» y «No» (el simulador la enseña como plantilla), **no** el texto; en la base, `psychometricPendingLink` con su enlace, `psychometricPendingLinkSince` de ahora y `psychometricInvitedAt` **nulo** | ☐ |
+| 3 | El caso 2 | Pulsar «Sí, Continuar» en el simulador | **El texto de siempre con el enlace y el plazo**; en la base, `psychometricInvitedAt` de ahora y los dos campos del pendiente **en nulo** | ☐ |
+| 4 | El caso 3 | Pulsar «Sí, Continuar» otra vez | **Nada nuevo**: solo vuelve a quedar esperando resultado | ☐ |
+| 5 | Una participación con `psychometricPendingLinkSince` hace 3 días, **sin** `psychometricInvitedAt`, plazo de la empresa 2 | Esperar la pasada | Se descarta por vencimiento (el plazo de respaldo de quien nunca pulsó) | ☐ |
+| 6 | Una participación con `psychometricInvitedAt` hace 1 día **y** `psychometricPendingLinkSince` hace 3 (inconsistente a propósito), plazo 2 | Esperar la pasada | **No** se descarta: manda la hora de la invitación, que es la del enlace ya entregado | ☐ |
+| 7 | Otro candidato preparado como el caso 2, con la plantilla ya recibida | Escribir «sí» en el simulador, **sin** pulsar el botón | **El texto de siempre con el enlace y el plazo**, no «Tu prueba se realiza por correo electrónico 📬…»; en la base, `psychometricInvitedAt` de ahora y los dos campos del pendiente **en nulo** | ☐ |
+| 8 | Otro candidato preparado como el caso 2, con la plantilla ya recibida | Pulsar **«No»** en el simulador | «Entendido, gracias por avisarnos 🙏 Cerramos aquí tu participación…»; **ningún enlace**; en el portal, descartado por retiro en la etapa psicométrica | ☐ |
