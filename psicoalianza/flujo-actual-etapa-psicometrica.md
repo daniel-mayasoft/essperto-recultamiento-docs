@@ -337,8 +337,11 @@ que copia la configuración tal cual, o es de antes de la migración— y sigue.
    la invitación. Si la invitación no trajo enlace, el mensaje solo dice que llegará por
    correo — ⚠️ y no anuncia el plazo, aunque corre igual (riesgo abierto; con EvaluaTest hoy
    es inalcanzable). **El texto depende del proveedor resuelto** (decisión 49): con EvaluaTest,
-   el de siempre —«Aplicar ahora», «regístrate», «para completarla»— y el correo enmascarado es
-   el nuestro; **con PsicoAlianza**, el paso 1 dice que el enlace entra directo a las pruebas
+   **desde el 2026-09-22 el correo del candidato va completo y antes del enlace**, con el aviso de
+   que si se registra con otro su prueba no quedará asociada a su postulación, y los pasos «Aplicar
+   ahora», «regístrate con el correo indicado arriba (o inicia sesión si ya tienes cuenta)» y
+   «tienes N días para completarla»; sin correo del candidato, sin aviso y con el paso genérico
+   (arreglo de otra rama, llevado al archivo del mensaje al fusionar); **con PsicoAlianza**, el paso 1 dice que el enlace entra directo a las pruebas
    pendientes, el paso 2 pide presentar todas las pruebas de la lista, el paso 4 pide
    «completarlas todas», y el correo enmascarado es **el de registro que devolvió la
    invitación** —el que PsicoAlianza ya tenía para ese documento, o el nuestro— porque es donde
