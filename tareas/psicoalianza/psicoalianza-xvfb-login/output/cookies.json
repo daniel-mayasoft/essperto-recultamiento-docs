@@ -1,0 +1,65 @@
+[
+  {
+    "name": "_ga_Y96RZDDK5G",
+    "value": "GS2.1.s1789520843$o1$g0$t1789520854$j49$l0$h0",
+    "domain": ".psicoalianza.com",
+    "path": "/",
+    "expires": 1824080855.001169,
+    "httpOnly": false,
+    "secure": false
+  },
+  {
+    "name": "_clsk",
+    "value": "c51l5x%5E1789520853523%5E1%5E1%5Ee.clarity.ms%2Fcollect",
+    "domain": ".psicoalianza.com",
+    "path": "/",
+    "expires": 1789607253,
+    "httpOnly": false,
+    "secure": false
+  },
+  {
+    "name": "_ga",
+    "value": "GA1.1.1551136836.1789520843",
+    "domain": ".psicoalianza.com",
+    "path": "/",
+    "expires": 1824080843.354423,
+    "httpOnly": false,
+    "secure": false
+  },
+  {
+    "name": "_clck",
+    "value": "flme4b%5E2%5Eg9i%5E0%5E2450",
+    "domain": ".psicoalianza.com",
+    "path": "/",
+    "expires": 1821056845,
+    "httpOnly": false,
+    "secure": false
+  },
+  {
+    "name": "XSRF-TOKEN",
+    "value": "eyJpdiI6Ik5qVWN3MUhBRnIyU0kvbzVJWVlOUUE9PSIsInZhbHVlIjoiNnZZNEoySVQrNHgxR1M5cWcwcFczSkw0VTlFQVVXcGlWZmJiNDJ2dmxDaUdWcmlJTlEybGRYaVZYYlZmdm9TNExtdVJmdjJTK1BOVDQyTWpPckhlRno3VDc5eTRlQXhQTm1YaHRDcUFWZDlQSjRaSEhRdkpSdjcxWEdqemNzaENiUk9VdVllZDhVM28xRGIwUDJvWlBvTUVUWWxwVDMrR1Y2YTAyVENFbGdiUHNMREVHY3Fzbld0Ty9GWWpRTURzZFBDTXVIT08vNEVGcDFQajRlNDdKb1A1NUhsS0oycjhTV0xrTVo0MU1aRERpMCs3ZG56T1I4MGFreUh2ekFFMXNac1F2YkJxOFk5WlhPQW0yRjcrQXVBYkhTdWNxNnhZOTVDMmNwRGh3RW5ZQUh6dCsxUGs4ZmlIMGZhL2lYb0NML0htOHpXTGdrenNlQ3VEeElkZjNYMnFvWDRpeW5LOUdMUlpRa2ErVHpiSjJxRGNiTW1veU5OeXY5OXpKL29HUGFFS052b3hpNVV1QnYrL2NtcVgvV3dJNFhzWXJ1TTVoSmRpWExjOU5Kbyt6am10VGZxSzJCdkVvbDJVb1VzeGFkNVJEWmVrVlZzd0I3Sjh1YjRFRW9jdDhjL1A3YVUzSlBWVyttZFBNZ1dodHduT2x2enNhVEhESFQwdEVPZUIiLCJtYWMiOiJiYjM4YTMyMWJmNmZkMjZmMDRiYTAzYTVkNzY5NWQxYjBmMzA4N2ZjMzFiNGE4MmI3OWY2Y2FmNDYzYjZlNGE4IiwidGFnIjoiIn0%3D",
+    "domain": "ats.psicoalianza.com",
+    "path": "/",
+    "expires": 1789952856.412791,
+    "httpOnly": false,
+    "secure": true
+  },
+  {
+    "name": "remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d",
+    "value": "eyJpdiI6IklQUWtDMW1xS20xWUEvTXB3WkxVUEE9PSIsInZhbHVlIjoidS9oQ1JXRVk3VkhUbzkzM1d3eDA5VmJjemhoWTF1NVluWFNNQXNJamloV1lmakFQd2ZRSG1GR0E3LzZOeEhaVCt3UGlKalFiSmpEckJGSDdycmNGbWNBWDZWbXRYUmNsQzJ2TzJQSEx1T1hXcXRjMmRRaE1MOEhvenVPbmE0NnF2MWVLSy9SL3E3QlozMUNhbFJqUVRJQ1JyRkdueXhITjJMRUdyRVJZZlJmeGNSUFdmNnVlWlpvK3RQQmZFbllxalBSSFM3QktQVE43UXlRWnozLzBMMUhldVlFQVNVeC9OZUFrd25qVWpYcm5QQkxFelBzWWRvR1pXaUlTSndBNGhvdjZtdXZWWWVFc0t6V2c5WDlTNE42ZlY4NmExbitsdUt0TmVlWHpNWFI5TFRtUlZROTZEczg2M1MvVFdDTitkc04yT0NPcDExSWZzZ0dHRVBlSEFtWHpjSXBvOTl2SmY5RTg2Slo4aEJ0LysxNHNJYXVkTElIb3BFTzBvcDVMZE9ra0pNN1JHUDRBd1NzZXk0SW12czdhRUdwdkpZS0ZKSjdQRWYxcFZOZzJlZ3lQQXZxcE54SjFTcWZEQ0dlN2ZvVy9GaG1jR0tWMHlRSGdqMm1CQ3I2ejBNMDRxQWxaS1oyUmdsU0tiL0x3ZWNSNnpyUVFHYlZid1JIcG5kR0VuY0Fqa3VETW84S3RkTHVOQlJqa1A5am1SWDNDVTFnUld5Z0hoMm12RUFIMXZaOGVQOGdhNXgzL2cyRFZYMnRlMmd2ZytYR1k2Zjl3Vi9ZQkUrK2E0ZjRrcGtORmEyMzFKY3JpdEVrQW9LaFVMNU13ak9OdmNBK2ZGV3FKeEpoelNZQnV6aTdNc3NoL1VNd0tObE8ycG00enZZRWs2WDJKUFNLN05oSkdicWZKMlE2VndFaUV0SC8vQ1YwQmFOaHAiLCJtYWMiOiIwMjk5MWU1OGI2ZDhmODUyZmVmN2E5NDUwNDk2N2U1ZGJmMjAwZDE5ZmVkMzVlMWM3ZDU2ZTRiMTg2NDExN2Y3IiwidGFnIjoiIn0%3D",
+    "domain": "ats.psicoalianza.com",
+    "path": "/",
+    "expires": 1789952856.413079,
+    "httpOnly": true,
+    "secure": true
+  },
+  {
+    "name": "ats_session",
+    "value": "eyJpdiI6IkdIdHowQ2tDaHBVODh5RTNYdWVxSmc9PSIsInZhbHVlIjoiWjNCK3cvaWYra0doYjhnMUNjYkNhOExwV2pWdGZtcVhCWThzTzN4WTIvUTVMRllmMEVXb1B5SlZua1ZpSXJPemhMTUdlaXFNU05XcG1jVE9IWldlWWJkS0x4WWU1c0N4Q3VMT1gzQjVYUEhzd1k5U0dNb09mZFB6WEt2ZjhYcWZ6Q0RPWTlrVVRKZWJicWZtYW5ETE9MdEJDL203QnhzeGUzaXNvVUdoRUh1SlA3Y1M0dHR1cytaK0tnSEs3UHc3NnFQZGFLaDQ0WGNVcFRCR1VyTFFKcmlEQ080TGswWVo4ZVZlM1JYRUlMckNoNGdsdDhId0Z3TlBHR1lUZ0tNdzlUQUVEOVRub0lBTzFEOTd5ZTl2MmZsZjJieWp2QUpRK0NDVHV1R1ZLNXhjaU5FMUVxeVJkOE9wd1AzOHZBTkFNTlk3ejVFMUV4dUJCYVdZZjErR2dSQ3F5SGlVZDJjcFY0amZ5dXA3em9HcmVNNTRyWnRhMUh5VDZMYUZFREp2NHdKd1V3cTArTDROSE8vMnllVlJxdFVGV0RDM3VpL2tmeHZBWjVhaENTMm5OL1doL0YvSHovVjd2Z3ppQXZxZkpyZFNlczE0S3E1MjM5UzFTSkNMYUhraU4yVjJoa0hxcVgrYW1XWlBGeUdtaERjQjJXTzBkQzcxaTlqc1VIUk4iLCJtYWMiOiIxNzA3NTk4OTNmMTBlOGRlNjg2ZjA0YTNhZTMzMjc0MTQ5ZTQ0NDJkMTNhNWVkMWU2NDcxNDNjOWVhN2MxMjBiIiwidGFnIjoiIn0%3D",
+    "domain": "ats.psicoalianza.com",
+    "path": "/",
+    "expires": 1789952856.412994,
+    "httpOnly": true,
+    "secure": true
+  }
+]

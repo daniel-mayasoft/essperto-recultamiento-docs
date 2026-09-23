@@ -1,0 +1,13 @@
+services:
+  login:
+    build: .
+    image: psicoalianza-xvfb-login
+    shm_size: 1gb
+    volumes:
+      - profile:/profile
+      - ./output:/output
+      - ../../esscoti-backend/.env:/secrets/backend.env:ro
+
+volumes:
+  profile:
+    name: psicoalianza-xvfb-login-profile

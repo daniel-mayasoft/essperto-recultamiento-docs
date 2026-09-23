@@ -2668,6 +2668,31 @@ construye la imagen. El 2 y el 2b se escriben ya.
 | 11 | ~~El plazo desde la invitación~~ **Unido al 10** el 2026-09-17. **Reasignado el 2026-09-20: el enlace fuera de la ventana de WhatsApp** (decisión 59): si la invitación sale con la ventana de 24 horas cerrada, se manda la plantilla de recordatorio con el botón en vez del texto con el enlace, el botón entrega el enlace, y el plazo cuenta desde que la persona lo recibe. En la misma rama que el 10; se despliegan juntos. **Brief escrito el 2026-09-20, sin empezar**; pendiente de confirmar con Meta el cuerpo de la plantilla — brief `brief-etapa3-paso11-enlace-fuera-de-ventana.md`. **Código revisado el 2026-09-22: aprobado con un arreglo** (la entrega del enlace guarda con reintento) y un caso a mano; la plantilla pasó a ser `pending_process_reminder`, con botones «Sí, Continuar» y «No», en aprobación en Meta. ✅ **Cerrado el 2026-09-22**: el arreglo está (la entrega guarda con el guardado con reintento, comprobado en el código), commiteado con la fusión de `develop` que trajo el mensaje de Elvis. **Casos a mano pendientes**, con los del 10, en el servidor de pruebas | Embudo; los dos proveedores |
 | 12 | ✅ **HECHO y revisado el 2026-09-22.** Verificado por el planificador con la caché limpia: **142 suites y 1.480 pruebas (1.471 pasan, 9 omitidas)**, la línea base más las dos nuevas; once archivos movidos con `git mv`, que git ve como renombres, y en ellos solo cambian importaciones; los comentarios de los botones, movidos enteros; ninguna afirmación cambiada; control negativo propio sobre el orden de los botones (caen 2). El archivo del mensaje también se movió, por decisión del usuario una vez fusionada la rama de Elvis. Mecánico: lo que es de la etapa psicométrica del embudo pasa a `src/offers/pipeline/psychometric-stage/`, y los botones y los componentes de la plantilla de etapa pendiente salen del orquestador a `src/offers/pipeline/whatsapp-template-buttons.ts`, porque sirven a todas las etapas. Sin cambio de comportamiento. En la misma rama, encima del 11 — brief `brief-etapa3-paso12-carpeta-etapa-psicometrica.md` | Mecánico |
 
+### Estado a 2026-09-22 — pasos 10 a 12 en `develop`
+
+La rama `feat/psychometric-followups` está entera en `develop` (pull request #88), sin desplegar en
+producción: espera la aprobación de la plantilla en Meta, los casos a mano y la consulta previa (fila 10
+de `before-deploy.md`). **`develop` verificado por el planificador con la caché limpia: compila, 147
+suites y 1.529 pruebas (1.520 pasan, 9 omitidas).**
+
+🔴 **Antes de esa fusión entró en la rama otra que cambia la misma etapa, y no se ha contrastado con este
+frente.** La última fusión de `develop` en la rama (`8b91af7`, resuelta a mano por el usuario) trajo
+`feature/new-psycometric-flow` (pull request #87, de Henry Peña, 2026-09-17 a 22): 27 archivos, unas
+2.800 líneas, mil de ellas en el orquestador. Lo comprobado en el código ese día, sin revisión completa:
+
+| Qué cambia | Comprobado | Qué deja desactualizado aquí |
+| --- | --- | --- |
+| **El plazo de la prueba sale de la oferta**, no de la empresa: `evaluatestConfig.evaluatestTimeoutDays`, editable por oferta, con valor por defecto en `offerDefaults` de la empresa, y **una foto por candidato al invitarlo** (`evaluatestTimeoutDaysSnapshot`) | Sí | La decisión 45 («empresa > entorno > 2 días»), §2 punto 2 y §4 del flujo |
+| **Sin plazo en la oferta, 1 día**, no 2 (una constante; ya no hay variable de entorno) | Sí | Lo mismo. Quien ya esperaba sin foto se congela con un valor de respaldo propio, no con el de su empresa |
+| **La regla de días enteros con PsicoAlianza (46)** pasó a validar `offerDefaults` de la empresa | Sí | **El plazo por oferta no la valida**: la ruta que guarda la configuración de la prueba de una oferta acepta el valor sin comprobar que sea entero. Con PsicoAlianza, un plazo con decimales es error permanente en el adaptador (39 ampliada): esos candidatos acabarían descartados por arranque fallido. Hoy el portal no manda ese campo, así que solo se alcanza por la API |
+| **Capacidad independiente** para la prueba psicométrica y la verificación de cumplimiento | Sin leer | Puede cambiar el caso 17 del paso 10 (quien espera en la prueba bloquea la entrada a las preguntas) |
+| **Recordatorios y mensaje de vencimiento de EvaluaTest**, y el registro de la hora del último mensaje entrante | Sin leer | Puede solaparse con lo que hacen los pasos 10 y 11 en la misma etapa (la hora entrante que el 11 conserva al entrar a la etapa, los mensajes fuera de la ventana) |
+| Nuestras pruebas del arranque | Sí | Adaptadas en la fusión al plazo por oferta; **una se quitó** (fallo al leer el plazo de la empresa), con la razón escrita en el spec: esa lectura ya no existe |
+
+**Pendiente, antes de desplegar en producción** (fila 10c de `before-deploy.md`): contrastar esa rama
+con los pasos 10 y 11 y con las decisiones 45, 46, 55 y 59, y actualizar el flujo. Hasta entonces, lo que
+el flujo dice del plazo describe el código anterior a esa fusión.
+
 **Antes del paso 2, fuera del código:** cuenta de PsicoAlianza para probar y **una sesión de esa
 cuenta pegada en el `.env` local** (decisión 42; cómo sacarla, en `../entorno-local.md`). Para el 2b
 y el 2c, la cuenta del proxy móvil (DataImpulse, ya contratada) en el `.env` con las variables
