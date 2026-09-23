@@ -30,7 +30,7 @@ el árbol de trabajo limpio, no a mitad del cambio.
 
 ## Qué leer, y en qué orden
 
-1. `../CLAUDE.md` — el proyecto: repositorios, verificación, vocabulario, deuda conocida.
+1. `../../CLAUDE.md` — el proyecto: repositorios, verificación, vocabulario, deuda conocida.
 2. `integrate-psicoalianza.md` — **la bitácora, que es la fuente única de la verdad.**
    Tiene las decisiones numeradas, las preguntas abiertas y el registro de avance. Si el
    brief y la bitácora se contradicen, avisa: alguien tiene que arreglar uno de los dos.

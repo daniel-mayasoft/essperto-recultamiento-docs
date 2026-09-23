@@ -21,7 +21,7 @@ Leer, en este orden:
 
 1. `arranque-del-ejecutor.md`. 🔴 **Ojo a lo nuevo de *Verificación***: el portal no tiene pruebas
    automáticas, y este paso se verifica con los casos a mano de abajo.
-2. `../CLAUDE.md` y `../../esscoti-backend/CLAUDE.md`.
+2. `../../CLAUDE.md` y `../../../../esscoti-backend/CLAUDE.md`.
 3. `integrate-psicoalianza.md` — decisiones **2, 3, 40, 41, 44 (con su corrección), 46 y 50**.
 4. `flujo-actual-etapa-psicometrica.md` — **§1** entero, y en §2 *Si el arranque falla*. Este paso
    cambia §1.
@@ -274,7 +274,7 @@ finales de línea CRLF, y se respetan (opinión previa).
   dos filas, el modal por proveedor, la etiqueta y el plazo, **diciendo que el campo del plazo solo
   aparece con `mode=dev`**. Y en el bloque *El backend ya guarda, valida
   y consulta la conexión de PsicoAlianza; el portal todavía no la manda*, que **el portal ya la manda**.
-- `../entorno-local.md`: la sección de la conexión de PsicoAlianza a mano pasa a decir que **se conecta
+- `../../entorno-local.md`: la sección de la conexión de PsicoAlianza a mano pasa a decir que **se conecta
   desde *Mi compañía***, donde la contraseña la cifra el backend al guardar, y que insertarla en la base
   sigue sirviendo si hace falta, cifrando la contraseña a mano como hasta ahora. La sección de la oferta
   a mano **no cambia**: es del 6.2.
@@ -286,7 +286,7 @@ finales de línea CRLF, y se respetan (opinión previa).
 sin correo**, que sale con el correo nulo. Control negativo sobre la ampliada: sin el correo en lo servido,
 falla. Borrarlo después y limpiar la caché de Jest.
 
-**Portal: casos a mano en local**, con el backend y el portal levantados (`../entorno-local.md`), una
+**Portal: casos a mano en local**, con el backend y el portal levantados (`../../entorno-local.md`), una
 empresa propia y la sesión de PsicoAlianza pegada. **El reporte dice el resultado de cada uno.**
 
 | # | Cómo se prepara | Qué se hace | Qué se tiene que ver |

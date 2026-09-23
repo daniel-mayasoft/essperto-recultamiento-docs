@@ -19,7 +19,7 @@ decisión 51.** Toca **solo el backend**. El portal es el 6.2b.
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md`.
-2. `../CLAUDE.md` y `../../esscoti-backend/CLAUDE.md`.
+2. `../../CLAUDE.md` y `../../../../esscoti-backend/CLAUDE.md`.
 3. `integrate-psicoalianza.md` — decisiones **5, 15, 40, 41, 48 y 51**, y en la tabla de la etapa 3 la
    fila del **4a** con su riesgo residual aceptado.
 4. `flujo-actual-etapa-psicometrica.md` — **§1 punto 3**. Este paso lo cambia.

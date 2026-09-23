@@ -17,7 +17,7 @@ paso y corrige a las anteriores donde dicen otra cosa. Toca solo el backend.
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md`.
-2. `../CLAUDE.md` y `../../esscoti-backend/CLAUDE.md`.
+2. `../../CLAUDE.md` y `../../../../esscoti-backend/CLAUDE.md`.
 3. `integrate-psicoalianza.md` — decisiones **42, 43, 44 (con su corrección), 47, 52 y 54**; en la
    tabla de pasos de *Dónde va la etapa 3*, las filas **2c.1, 2c.2 y 2c.3**.
 4. `flujo-actual-etapa-psicometrica.md` — §*Las piezas*, §*Si el arranque falla* y §3, que son lo que
@@ -231,7 +231,7 @@ ahí.
 **4. En local, sin sesión manual y con las variables de la pieza, la tarea entra de verdad con la
 cuenta del cliente cada hora que haga falta.** No es un fallo: es lo que hace. Pero quien levante el
 backend en su máquina tiene que saberlo: o la sesión manual encendida, o sin la ruta del navegador.
-Va a `../entorno-local.md`.
+Va a `../../entorno-local.md`.
 
 **5. La conexión puede desaparecer a mitad de ráfaga.** Si alguien quita la conexión mientras Chromium
 está entrando, la escritura del almacén no encuentra la conexión y **no escribe nada**; la anotación
@@ -334,9 +334,9 @@ todo al índice. Finales de línea de cada archivo.
   compañía* en el servidor de pruebas, o insertada en su base, y esperar la tarea de la hora—, que es
   mejor que el script con piezas falsas porque prueba el camino real. Las reglas de intentos del 7d se
   cumplen solas: una ráfaga de tres y una hora entre ráfagas, con el tope de veinte.
-- `../entorno-local.md` — las cuatro variables en la tabla del `.env`; y en *PsicoAlianza, dos formas
+- `../../entorno-local.md` — las cuatro variables en la tabla del `.env`; y en *PsicoAlianza, dos formas
   de tener sesión*, la trampa 4 tal cual.
-- `../CLAUDE.md` — en *Dónde está lo importante*, cambiar «nadie la llama todavía» por quién la llama:
+- `../../CLAUDE.md` — en *Dónde está lo importante*, cambiar «nadie la llama todavía» por quién la llama:
   la renovación de la sesión, cada hora y a demanda.
 
 ## Pruebas

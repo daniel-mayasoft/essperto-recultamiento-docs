@@ -16,7 +16,7 @@ Base: `https://ats.psicoalianza.com`. Fecha de captura: 2026-09-09.
 - **La autenticación es un formulario web de Laravel, no un token.** Responde con un
   redirect y deja la sesión en cookies de servidor. No hay nada que decodificar. El
   login está protegido con reCAPTCHA v3 validado en el servidor — la mecánica para
-  pasarlo está en `integrate-psicoalianza.md` (decisión 23) y en `../CAPTCHAS.md`.
+  pasarlo está en `integrate-psicoalianza.md` (decisión 23) y en `CAPTCHAS.md`.
 - **Cookies que emite el login:**
 
   | Cookie | Vida | Para qué |

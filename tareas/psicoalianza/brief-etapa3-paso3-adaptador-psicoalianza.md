@@ -23,7 +23,7 @@ otros `.md`.** Toca solo el backend.
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md` — cómo se trabaja aquí y qué ya salió mal. Se lee una vez.
-2. `../CLAUDE.md` — el proyecto, y `../../esscoti-backend/CLAUDE.md` — las credenciales nunca en el
+2. `../../CLAUDE.md` — el proyecto, y `../../../../esscoti-backend/CLAUDE.md` — las credenciales nunca en el
    código.
 3. `integrate-psicoalianza.md` — la bitácora. Importan **12, 15, 22, 27, 29, 33, 35, 36, 37, 39 y
    44**, la sección *Tanda de comprobaciones para el paso 3* entera, y *Falta de PsicoAlianza*.

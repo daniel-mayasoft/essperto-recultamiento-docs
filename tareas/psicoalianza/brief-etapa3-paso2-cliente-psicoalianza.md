@@ -12,7 +12,7 @@ solo el backend.
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md` — cómo se trabaja aquí y qué ya salió mal. Se lee una vez.
-2. `../CLAUDE.md` — el proyecto, y `../../esscoti-backend/CLAUDE.md` — las credenciales nunca en el
+2. `../../CLAUDE.md` — el proyecto, y `../../../../esscoti-backend/CLAUDE.md` — las credenciales nunca en el
    código.
 3. `integrate-psicoalianza.md` — la bitácora. Importan **41, 42 y 43**, *Confirmado de PsicoAlianza*
    y *Dónde va la etapa 3*.
@@ -323,12 +323,12 @@ Las de `arranque-del-ejecutor.md`. Las que más se han incumplido en este frente
 - **No commitear.** Los archivos nuevos se añaden al índice, con `add`.
 - **Documentación en el mismo diff** (el flujo de la etapa psicométrica **no cambia**, porque nada
   llama a esto todavía — decirlo en el reporte):
-  - `../entorno-local.md` — las tres variables nuevas, y **cómo insertar a mano en la base local la
+  - `../../entorno-local.md` — las tres variables nuevas, y **cómo insertar a mano en la base local la
     conexión de PsicoAlianza de una empresa**, con la contraseña cifrada. Ese documento ya promete
     que llega con este paso.
   - `before-deploy.md` — una fila: configurar las variables de PsicoAlianza en los servidores antes
     de que una empresa la use. No bloquea desplegar este paso solo.
-  - `../CLAUDE.md` — en *Dónde está lo importante*, **una frase**: existe un cliente de PsicoAlianza
+  - `../../CLAUDE.md` — en *Dónde está lo importante*, **una frase**: existe un cliente de PsicoAlianza
     que trabaja con una sesión ya abierta.
 
 ## Pruebas

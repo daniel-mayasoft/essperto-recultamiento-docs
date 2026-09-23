@@ -118,7 +118,7 @@ Las de `arranque-del-ejecutor.md`: sin lint ni formateador, sin comentarios nuev
 identificadores en inglés —los nombres de las cookies son contrato—, la solución más pequeña, sin
 commitear y todo al índice.
 
-**Documentación en el mismo diff**: ninguna. `../entorno-local.md` no explica qué guarda el campo de
+**Documentación en el mismo diff**: ninguna. `../../entorno-local.md` no explica qué guarda el campo de
 sesión (comprobado en la opinión previa), el flujo de la etapa **no cambia** —nada de esto se ve— y
 `before-deploy.md` tampoco. La bitácora la actualiza el planificador.
 

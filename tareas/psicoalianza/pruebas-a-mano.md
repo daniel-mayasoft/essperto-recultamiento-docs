@@ -9,7 +9,7 @@ hay que ver. Si un caso falla, no se despliega: se anota qué se vio y se abre u
 
 ## Cómo se prepara
 
-El entorno local de `../entorno-local.md`: base, backend y portal levantados, y la sesión de PsicoAlianza
+El entorno local de `../../entorno-local.md`: base, backend y portal levantados, y la sesión de PsicoAlianza
 pegada en el `.env` del backend con el interruptor de la sesión manual. **Una sola empresa local sin
 ninguna conexión** basta para todo el paso 6.1: cada caso deja preparado el siguiente.
 
@@ -44,7 +44,7 @@ invita a nadie**, pero los que listan o comprueban vacantes consultan las cuenta
 
 🔴 **No hay cuenta real de EvaluaTest.** Los casos que necesitan listar o comprobar vacantes de EvaluaTest se
 anotan como *no se pueden correr sin cuenta*. Para tener «las dos conexiones» basta insertar a mano en la base
-una conexión de EvaluaTest con datos inventados (`../entorno-local.md`): cuenta como configurada, pero su lista
+una conexión de EvaluaTest con datos inventados (`../../entorno-local.md`): cuenta como configurada, pero su lista
 de vacantes y su estado fallarán.
 
 **Preparación**, sobre la empresa del 6.1, que ya tiene PsicoAlianza conectada: al menos una vacante activa en

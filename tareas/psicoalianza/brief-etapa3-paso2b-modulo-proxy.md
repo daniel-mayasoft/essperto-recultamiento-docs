@@ -20,12 +20,12 @@ el backend.
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md` — cómo se trabaja aquí y qué ya salió mal. Se lee una vez.
-2. `../CLAUDE.md` — el proyecto, y `../../esscoti-backend/CLAUDE.md` — las credenciales nunca en el
+2. `../../CLAUDE.md` — el proyecto, y `../../../../esscoti-backend/CLAUDE.md` — las credenciales nunca en el
    código, y el chequeo de secretos que corre sobre el diff.
 3. `integrate-psicoalianza.md` — la bitácora. Importan la **decisión 43** (la tabla de la
    arquitectura y las protecciones), *Medición con proxy* dentro de *Dónde va la etapa 3* (la tabla
    de lo que este brief necesita saber del proxy), y la fila **2b** de la tabla de pasos.
-4. `../entorno-local.md` — la sección *PsicoAlianza, dos formas de tener sesión*, que ya nombra las
+4. `../../entorno-local.md` — la sección *PsicoAlianza, dos formas de tener sesión*, que ya nombra las
    variables del proxy, y la del `.env` del backend.
 5. `brief-etapa3-paso1-modulo-captcha.md` — **es la forma que este paso copia**: módulo propio al
    nivel de los demás, puerto sin proveedor, tipos aparte, un archivo por error, adaptador único sin
@@ -193,11 +193,11 @@ Las de `arranque-del-ejecutor.md`. Las que más se han incumplido en este frente
 - **La solución más pequeña que resuelve el caso.**
 - **No commitear.** Los archivos nuevos se añaden al índice, con `add`.
 - **Documentación en el mismo diff** (el flujo de la etapa psicométrica no cambia):
-  - `../entorno-local.md` — en *PsicoAlianza, dos formas de tener sesión*, la frase que dice que los
+  - `../../entorno-local.md` — en *PsicoAlianza, dos formas de tener sesión*, la frase que dice que los
     nombres exactos los fija el brief del 2b pasa a listar las cinco variables con su valor local; y
     en la tabla del `.env` del backend, las cinco, junto a las de PsicoAlianza.
   - `before-deploy.md` — la fila 8 gana `PROXY_PROTOCOL` en su lista, con la nota de que es opcional.
-  - `../CLAUDE.md` — en *Dónde está lo importante*, **una frase**: el módulo de proxy existe, con su
+  - `../../CLAUDE.md` — en *Dónde está lo importante*, **una frase**: el módulo de proxy existe, con su
     puerto sin proveedor, y nadie lo llama hasta la pieza que consigue la sesión.
 
 ## Pruebas

@@ -318,7 +318,7 @@ que copia la configuración tal cual, o es de antes de la migración— y sigue.
 
    Son las dos puertas por las que hoy sale gente del proceso al entrar a la etapa; la del
    documento solo se alcanza con una oferta que congeló una conexión de PsicoAlianza, que hasta
-   el paso 6 se escribe a mano (`../entorno-local.md`).
+   el paso 6 se escribe a mano (`../../entorno-local.md`).
 
    Con todo en orden, con EvaluaTest pasan **cuatro** cosas (32-a): se resuelve el código de
    evaluación de la vacante, se registra al candidato con nuestra referencia, se le invita, y

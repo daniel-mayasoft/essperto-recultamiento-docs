@@ -108,7 +108,7 @@ Llegó sin numeración (cita «el punto 5», que es el de mover el archivo del m
 que tras el paso 11 más la nueva.** Si baja, decir cuáles y por qué.
 
 **Documentación en el mismo diff:** solo los documentos vivos que nombran rutas de estos archivos —
-`../CLAUDE.md` y `flujo-actual-etapa-psicometrica.md`, si las nombran—. La bitácora y los briefs cerrados
+`../../CLAUDE.md` y `flujo-actual-etapa-psicometrica.md`, si las nombran—. La bitácora y los briefs cerrados
 no se tocan.
 
 ## Qué entregar

@@ -20,7 +20,7 @@ adaptador de PsicoAlianza, el veredicto del cron psicométrico, el esquema de la
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md`.
-2. `../CLAUDE.md`, `../../esscoti-backend/CLAUDE.md` y `../../esscoti-frontend/CLAUDE.md` si existe.
+2. `../../CLAUDE.md`, `../../../../esscoti-backend/CLAUDE.md` y `../../../../esscoti-frontend/CLAUDE.md` si existe.
 3. `integrate-psicoalianza.md` — decisiones **15** (la bolsa del proveedor y cómo se empalma), **37**
    (puntaje ausente leído como cero), **48** (el cron pregunta por el proveedor del candidato) y
    **58**; en *Lo que la lista de herencia no tenía*, el punto *Quién decide el aprobado*.

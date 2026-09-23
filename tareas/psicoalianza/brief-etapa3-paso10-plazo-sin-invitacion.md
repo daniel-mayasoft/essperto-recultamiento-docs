@@ -32,7 +32,7 @@ entra por este código.
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md`.
-2. `../CLAUDE.md` y `../../esscoti-backend/CLAUDE.md` si existe.
+2. `../../CLAUDE.md` y `../../../../esscoti-backend/CLAUDE.md` si existe.
 3. `integrate-psicoalianza.md` — decisiones **36** (el plazo no se detiene), **39** (el rescate de quien
    no tiene identificador), **40** (la empresa sin conexión), **45** (el plazo viaja en la invitación),
    **54** (la sesión muerta dispara la renovación) y **55 entera, con su revisión del 2026-09-17**.

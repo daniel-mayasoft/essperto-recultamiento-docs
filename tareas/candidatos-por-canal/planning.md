@@ -6,7 +6,7 @@ está cada pieza** y **qué hay que decidir antes de que alguien toque código**
 
 ## Antes de nada
 
-1. `../CLAUDE.md` — el proyecto, el vocabulario, la verificación y la deuda conocida.
+1. `../../CLAUDE.md` — el proyecto, el vocabulario, la verificación y la deuda conocida.
 2. `../psicoalianza/arranque-del-ejecutor.md` — cómo se trabaja aquí. Las reglas son de la casa.
 3. `../canales-de-publicacion/planning.md` y `../ofertas-sin-ats/planning.md` — las tareas hermanas, y la
    coordinación con Elvis por LinkedIn, que también afecta a esta.
@@ -39,7 +39,7 @@ siempre el del primero.
 
 ## Dónde está cada pieza
 
-### Backend (`../../esscoti-backend`)
+### Backend (`../../../../esscoti-backend`)
 
 | Qué | Dónde | Para qué importa |
 | --- | --- | --- |
@@ -49,7 +49,7 @@ siempre el del primero.
 | Quién escribe el origen | `src/offers/offers.service.ts` (llegada desde un portal y alta individual) y `src/offers/bulk-candidates/bulk-candidates.service.ts` (carga masiva) | Los tres caminos de entrada |
 | Los portales de la oferta y de la persona | La lista de plataformas de la oferta (`offer.schema.ts`) y la de la ficha de la persona (`candidate.schema.ts`), cada una con plataforma e identificador de la vacante en ese portal | Cruzándolas se puede saber **qué portal trajo a esa persona a esa oferta** |
 
-### Portal (`../../esscoti-frontend`)
+### Portal (`../../../../esscoti-frontend`)
 
 | Qué | Dónde |
 | --- | --- |

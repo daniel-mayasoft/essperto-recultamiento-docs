@@ -15,7 +15,7 @@ otros `.md`.** Toca **los dos repositorios**: backend y portal.
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md` — cómo se trabaja aquí y qué ya salió mal.
-2. `../CLAUDE.md` y `../../esscoti-backend/CLAUDE.md`.
+2. `../../CLAUDE.md` y `../../../../esscoti-backend/CLAUDE.md`.
 3. `integrate-psicoalianza.md` — la bitácora. Importan **12, 33, 39 (con su ampliación del
    2026-09-14), 40 y 45**, la fila A14 de *Falta de PsicoAlianza*, *Opinión previa del paso 3* y
    *Paso 3*.

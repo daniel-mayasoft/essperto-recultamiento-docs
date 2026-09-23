@@ -1098,7 +1098,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
 
     **Qué se hace.** Quien desarrolla entra a PsicoAlianza en su navegador con *permanecer
     conectado*, copia las cookies de la sesión y las pega en una variable del `.env` del backend
-    local (cómo, en `../entorno-local.md`). El cliente de PsicoAlianza las manda tal cual en cada
+    local (cómo, en `../../entorno-local.md`). El cliente de PsicoAlianza las manda tal cual en cada
     petición y **no intenta ningún login**: ni contraseña, ni captcha, ni CSRF de login. Cuando la
     sesión caduque —5 días, ver A13— se vuelve a entrar y a pegar.
 
@@ -1727,7 +1727,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
     servicio expone. **Con la sesión manual del `.env` encendida (42), nada de esto hace nada.**
 
     ⚠️ **En una máquina de desarrollo sin la sesión manual y con la ruta del navegador puesta, la tarea
-    entra de verdad con la cuenta del cliente** cada hora que haga falta. Anotado en `../entorno-local.md`.
+    entra de verdad con la cuenta del cliente** cada hora que haga falta. Anotado en `../../entorno-local.md`.
 
 55. **Quien cumple el plazo sin haber sido invitado pasa a la siguiente etapa, y el reclutador se
     entera: en el correo de candidato seleccionado y en la ficha del candidato. Para los dos
@@ -1814,7 +1814,7 @@ Se da por terminado cuando se cumplen las dos condiciones:
 
     **Lo que no da:** ver la contraseña guardada. Quien la consultaba en el modal tiene que tenerla en
     otro sitio. Los modales de portales de empleo y de antecedentes **siguen** enseñándola: esa deuda no es
-    de este frente (`../CLAUDE.md`).
+    de este frente (`../../CLAUDE.md`).
 
     ⚠️ **Escrito por el planificador a petición del usuario, sin revisión de otra persona.** Verificado:
     backend compila y pasan 130 suites y 1.332 pruebas (1.323, 9 omitidas), con cinco nuevas en el
@@ -2628,7 +2628,7 @@ anotados que empeoran con el tiempo.
 > lista con el código y con el contrato, y cada paso según se cierre.
 
 **Se prueba en local antes que en el servidor de pruebas.** Cómo levantar el entorno:
-`../entorno-local.md`. ~~La etapa 1 sigue sin desplegar.~~ ✅ **La rama entera —etapa 1 y todos los pasos
+`../../entorno-local.md`. ~~La etapa 1 sigue sin desplegar.~~ ✅ **La rama entera —etapa 1 y todos los pasos
 de esta tabla hasta el 9— está en producción desde el 2026-09-17** (`before-deploy.md` §5, *Lo que se
 hizo en producción*). Ninguna empresa de producción tiene PsicoAlianza conectada todavía. **Lo que
 sigue va en ramas nuevas desde `develop`**, empezando por `feat/psychometric-followups` con el paso 10.
@@ -2694,9 +2694,9 @@ con los pasos 10 y 11 y con las decisiones 45, 46, 55 y 59, y actualizar el fluj
 el flujo dice del plazo describe el código anterior a esa fusión.
 
 **Antes del paso 2, fuera del código:** cuenta de PsicoAlianza para probar y **una sesión de esa
-cuenta pegada en el `.env` local** (decisión 42; cómo sacarla, en `../entorno-local.md`). Para el 2b
+cuenta pegada en el `.env` local** (decisión 42; cómo sacarla, en `../../entorno-local.md`). Para el 2b
 y el 2c, la cuenta del proxy móvil (DataImpulse, ya contratada) en el `.env` con las variables
-neutras de `../entorno-local.md`, y Chrome instalado en la máquina. La clave de SolveCaptcha ya no
+neutras de `../../entorno-local.md`, y Chrome instalado en la máquina. La clave de SolveCaptcha ya no
 hace falta. **La conexión de PsicoAlianza no
 va en el `.env`**, ni siquiera en local: se guarda en la base como cualquier conexión (decisiones 34
 y 40, y las reglas de credenciales del backend); cómo insertarla en local llega con el paso 2. En el
@@ -2998,7 +2998,7 @@ repite) y consulta aparte, sin proxy, el operador de cada IP. Ningún login; uno
 
 **Lo que queda probado:** el parámetro fija el operador, y funciona puesto en la variable sin tocar el
 módulo. **El punto «fijar el operador» se cierra con una línea de configuración por entorno**
-(`before-deploy.md`, fila 8; `../entorno-local.md`), sin brief ni código.
+(`before-deploy.md`, fila 8; `../../entorno-local.md`), sin brief ni código.
 
 ⚠️ **Lo que esta medición no confirma, y la 52 daba por hecho:** que las IPs de los otros operadores
 «no sean móviles». El servicio de consulta marca como **móviles** las nueve del control, también las de
@@ -3080,7 +3080,7 @@ revisión contó 24 pruebas nuevas leyendo *940 passed* como si fuera el total, 
 
 **Cómo se prueba contra PsicoAlianza de verdad**, para el paso 3: hacen falta las dos cosas, la
 conexión insertada a mano en la base local y la sesión pegada en el `.env` con el interruptor
-encendido. Los dos instructivos están en `../entorno-local.md`.
+encendido. Los dos instructivos están en `../../entorno-local.md`.
 
 ### Tanda de comprobaciones para el paso 3 (2026-09-14)
 

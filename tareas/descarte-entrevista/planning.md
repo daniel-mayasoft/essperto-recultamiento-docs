@@ -6,12 +6,12 @@ está cada pieza** y **qué hay que decidir antes de que alguien escriba código
 
 ## Antes de nada
 
-1. `../CLAUDE.md` — el proyecto: los dos repositorios, el vocabulario, la verificación y la deuda
+1. `../../CLAUDE.md` — el proyecto: los dos repositorios, el vocabulario, la verificación y la deuda
    conocida.
 2. `../psicoalianza/arranque-del-ejecutor.md` — **cómo se trabaja aquí**: los dos papeles (quien planifica
    y quien ejecuta), la opinión previa antes de tocar código, el rigor según el riesgo, y las siete cosas
    que ya salieron mal. Se escribió para el frente de PsicoAlianza, pero las reglas son de la casa.
-3. `../../esscoti-backend/CLAUDE.md` — credenciales y datos de producción.
+3. `../../../../esscoti-backend/CLAUDE.md` — credenciales y datos de producción.
 
 **Esto toca el embudo**: cambia lo que hace una persona real al cerrar un proceso, y lo que queda
 guardado para siempre en la participación. Tratamiento completo, no brief corto.
@@ -37,7 +37,7 @@ porque en el código todo se llama así.
 
 ## Dónde está cada pieza
 
-### Backend (`../../esscoti-backend`)
+### Backend (`../../../../esscoti-backend`)
 
 | Qué | Dónde | Para qué sirve aquí |
 | --- | --- | --- |
@@ -49,7 +49,7 @@ porque en el código todo se llama así.
 | Lo que devuelve el detalle del candidato | `src/offers/candidates.service.ts` | Expone el desenlace, la observación y la fecha al portal |
 | La analítica | `src/metrics/metrics.service.ts` (motivos de rechazo y rechazo por etapa) y `src/metrics/metrics.controller.ts` | **Hoy agrupa por el error de etapa del embudo, no por esta decisión.** Que la causal llegue a la analítica es trabajo aparte dentro de este frente |
 
-### Portal (`../../esscoti-frontend`)
+### Portal (`../../../../esscoti-frontend`)
 
 | Qué | Dónde |
 | --- | --- |

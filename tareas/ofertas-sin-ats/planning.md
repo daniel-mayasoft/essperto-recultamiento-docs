@@ -6,12 +6,12 @@ está cada pieza** y **qué hay que comprobar antes de que alguien toque código
 
 ## Antes de nada
 
-1. `../CLAUDE.md` — el proyecto: los dos repositorios, el vocabulario (empresa, oferta, candidato,
+1. `../../CLAUDE.md` — el proyecto: los dos repositorios, el vocabulario (empresa, oferta, candidato,
    portales de empleo, robots), la verificación y la deuda conocida.
 2. `../psicoalianza/arranque-del-ejecutor.md` — cómo se trabaja aquí: los dos papeles, la opinión previa
    antes de tocar código, y lo que ya salió mal. Se escribió para otro frente, pero las reglas son de la
    casa.
-3. `../../esscoti-backend/CLAUDE.md` — credenciales y datos de producción.
+3. `../../../../esscoti-backend/CLAUDE.md` — credenciales y datos de producción.
 
 **El cambio en sí es de una línea; el riesgo está en lo que viene después.** Quitar la validación es
 trivial. Lo que no es trivial es que, a partir de ahí, **existirán ofertas sin ninguna plataforma**, un
@@ -43,7 +43,7 @@ canal del sistema y conviene no nombrarlo así en la interfaz.
 
 ## Dónde está cada pieza
 
-### Backend (`../../esscoti-backend`)
+### Backend (`../../../../esscoti-backend`)
 
 | Qué | Dónde | Para qué importa |
 | --- | --- | --- |
@@ -58,7 +58,7 @@ canal del sistema y conviene no nombrarlo así en la interfaz.
 | Carga individual | La alta manual de candidato, en `src/offers/offers.controller.ts` y su servicio | Canal siempre disponible; mismo chequeo |
 | El recorrido del candidato | `src/offers/pipeline/pipeline-orchestrator.service.ts` | Usa la plataforma de origen del candidato en varios puntos; con carga manual ya vive sin ella, conviene confirmarlo |
 
-### Portal (`../../esscoti-frontend`)
+### Portal (`../../../../esscoti-frontend`)
 
 | Qué | Dónde |
 | --- | --- |

@@ -21,7 +21,7 @@ decisión 43** (la tabla *La arquitectura*, su fila de la pieza que consigue la 
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md`.
-2. `../CLAUDE.md` y `../../esscoti-backend/CLAUDE.md`.
+2. `../../CLAUDE.md` y `../../../../esscoti-backend/CLAUDE.md`.
 3. `integrate-psicoalianza.md` — decisiones **42, 43 (con sus correcciones), 47 y 52**; *Medición con
    proxy* y *Medición cruzada de IP* en *Dónde va la etapa 3*; y en la tabla de pasos las filas **2b,
    2c.1, 2c.2 y 2c.3**.
@@ -85,7 +85,7 @@ que impide empezar (abajo).
 | La conexión de PsicoAlianza de la empresa, por la lectura única: correo y contraseña descifrados | Lanza *sin conexión*, el error que ya existe |
 | La ruta del navegador (variable de abajo) | Desenlace *sin configurar*, nombrando la variable |
 | El arriendo del proxy, por el puerto del 2b: **móvil, Colombia, pegajosa con un identificador nuevo por intento** | El error propio del proxy sube tal cual: *sin configurar* del proxy es del proxy |
-| **El protocolo del arriendo es HTTP** (opinión previa) | Con `socks5`, desenlace *sin configurar* nombrando `PROXY_PROTOCOL`: Chromium no autentica un proxy SOCKS5 por la autenticación de página, y el intento fallaría como *red* sin decir por qué. Se anota en la tabla de variables de `../entorno-local.md` |
+| **El protocolo del arriendo es HTTP** (opinión previa) | Con `socks5`, desenlace *sin configurar* nombrando `PROXY_PROTOCOL`: Chromium no autentica un proxy SOCKS5 por la autenticación de página, y el intento fallaría como *red* sin decir por qué. Se anota en la tabla de variables de `../../entorno-local.md` |
 | **Un máximo de intentos menor que uno** | Es error del programa: lanza |
 
 **La dirección base** (opinión previa): `/login` y el dominio contra el que se filtran las
@@ -231,14 +231,14 @@ secreto en ningún archivo. La solución más pequeña. Sin commitear y todo al 
 de cada archivo.
 
 **Documentación en el mismo diff** (el flujo de la etapa no cambia: nadie llama a la pieza):
-- `../entorno-local.md` — las tres variables en la tabla del `.env` del backend, con el valor local
+- `../../entorno-local.md` — las tres variables en la tabla del `.env` del backend, con el valor local
   (la ruta de Chrome en Windows, una carpeta fuera de los repositorios, sin ventana); en la tabla del
   proxy, que **`PROXY_PROTOCOL` tiene que ser HTTP para la pieza**; y en *PsicoAlianza, dos formas
   de tener sesión*, que la forma oficial ya existe en el código y cómo se dispara a mano (abajo).
 - `before-deploy.md` — en la fila 8 (variables del proxy), añadir las tres de aquí con sus valores
   del servidor; y en §4, tras el tiempo 2, **lo que el compose del backend necesita para el
   pieza que consigue la sesión**: un volumen con nombre montado en `PSICOALIANZA_LOGIN_DIR`.
-- `../CLAUDE.md` — en *Dónde está lo importante*, **una frase**: la pieza existe y nadie la llama.
+- `../../CLAUDE.md` — en *Dónde está lo importante*, **una frase**: la pieza existe y nadie la llama.
 
 ## Pruebas
 
@@ -273,7 +273,7 @@ arriendo, reintentos, guardado, resultado). La orquestación se prueba con un in
 caché.
 
 **Una comprobación real, sin entorno local** (corregido en la opinión previa: **no hay base local
-ni `.env` completo** —`../entorno-local.md` lo dice y el ejecutor lo comprobó—, así que la primera
+ni `.env` completo** —`../../entorno-local.md` lo dice y el ejecutor lo comprobó—, así que la primera
 versión de este brief pedía algo imposible). Se hace **como la tanda del paso 3**: un script **fuera
 de los repositorios** que monte la pieza compilada con **una lectura de conexiones falsa** —las
 credenciales de la cuenta principal las toma el script del `.env` del backend, sin imprimirlas— y
@@ -356,7 +356,7 @@ bloquea este paso —la política de reintentos es del 2c.2—, pero el 2c.2 no 
   operadores fijos, que puntúan como residenciales y en su día dieron cero). Fijar el operador no cuesta
   nada y no toca código: es un parámetro pegado al login de la cuenta del proxy. Hoy **la pieza
   arrienda sin fijarlo**, así que su tasa real será peor que la medida. Queda anotado en
-  `../entorno-local.md`; meterlo en el módulo de proxy es un paso aparte, y **conviene antes del 2c.2**,
+  `../../entorno-local.md`; meterlo en el módulo de proxy es un paso aparte, y **conviene antes del 2c.2**,
   porque la cadencia de reintentos depende de la tasa.
 - **La comprobación real pasa al servidor de pruebas** (punto 7d de `before-deploy.md`), decidido por el
   usuario: el modo con ventana entró dos veces, pero siempre con el script de la prueba, **nunca por el

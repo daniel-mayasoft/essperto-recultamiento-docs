@@ -9,12 +9,12 @@ Toca solo el backend.
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md` — cómo se trabaja aquí y qué ya salió mal. Se lee una vez.
-2. `../CLAUDE.md` — el proyecto, y `../../esscoti-backend/CLAUDE.md` — las credenciales nunca en el
+2. `../../CLAUDE.md` — el proyecto, y `../../../../esscoti-backend/CLAUDE.md` — las credenciales nunca en el
    código.
 3. `integrate-psicoalianza.md` — la bitácora. Importan **23, 24, 25 (con su precisión del
    2026-09-13) y 26**, *Confirmado de PsicoAlianza* (la mecánica del captcha) y *Dónde va la etapa
    3*.
-4. `../CAPTCHAS.md` — cómo lo resuelve otro proyecto de la casa. **Sirve para entender, no para
+4. `CAPTCHAS.md` — cómo lo resuelve otro proyecto de la casa. **Sirve para entender, no para
    copiar**: lista tres errores de esa implementación, y en dos puntos contradice al servicio (ver
    la trampa 3).
 5. En el backend, **la capa psicométrica como patrón a seguir**: el puerto con su token, el archivo
@@ -171,11 +171,11 @@ Las de `arranque-del-ejecutor.md`. Las que más se han incumplido en este frente
 - **La solución más pequeña que resuelve el caso.**
 - **No commitear.** Los archivos nuevos se añaden al índice, con `add`.
 - **Documentación en el mismo diff** (el flujo de la etapa psicométrica no cambia):
-  - `../entorno-local.md` — las dos variables, en la sección del `.env` del backend, en lugar de la
+  - `../../entorno-local.md` — las dos variables, en la sección del `.env` del backend, en lugar de la
     línea que dice que llegan con este brief.
   - `before-deploy.md` — una fila: **configurar `SOLVECAPTCHA_API_KEY` en los servidores antes de
     que una empresa use PsicoAlianza**. No bloquea desplegar este paso solo.
-  - `../CLAUDE.md` — en *Dónde está lo importante*, **una frase**: el módulo de captcha existe, con
+  - `../../CLAUDE.md` — en *Dónde está lo importante*, **una frase**: el módulo de captcha existe, con
     su puerto sin proveedor.
 
 ## Pruebas

@@ -56,9 +56,9 @@ demo es la excepción a propósito**: sigue siendo un condicional dentro del emb
 subcarpeta `psicoalianza/` hay un **cliente de PsicoAlianza que trabaja con una sesión ya abierta**
 —no hace login— y un almacén que guarda esa sesión en la conexión de la empresa. Cómo
 funciona la etapa hoy, de punta a punta, está en
-`psicoalianza/flujo-actual-etapa-psicometrica.md`; el detalle de cada decisión y el porqué, en
-`psicoalianza/integrate-psicoalianza.md`; y lo que hay que hacer antes de desplegar la rama, en
-`psicoalianza/before-deploy.md`.
+`tareas/psicoalianza/flujo-actual-etapa-psicometrica.md`; el detalle de cada decisión y el porqué, en
+`tareas/psicoalianza/integrate-psicoalianza.md`; y lo que hay que hacer antes de desplegar la rama, en
+`tareas/psicoalianza/before-deploy.md`.
 
 Hay además un **módulo de proxy**, `src/proxy/`, al nivel de los demás módulos: un puerto sin
 proveedor que arrienda una IP (país, tipo y adherencia) y devuelve cómo conectarse al proxy, con

@@ -16,7 +16,7 @@ botón). Toca el backend —una lectura y una ruta— y el portal.
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md`.
-2. `../CLAUDE.md`, `../../esscoti-backend/CLAUDE.md` y `../../esscoti-frontend/CLAUDE.md` si existe.
+2. `../../CLAUDE.md`, `../../../../esscoti-backend/CLAUDE.md` y `../../../../esscoti-frontend/CLAUDE.md` si existe.
 3. `integrate-psicoalianza.md` — decisiones **44 (con su corrección), 50 y 54**; en la tabla de pasos
    de *Dónde va la etapa 3*, las filas **2c.2 y 2c.3**.
 4. `flujo-actual-etapa-psicometrica.md` — §1, *La etiqueta de la sesión* y *El estado de la sesión*.
@@ -235,7 +235,7 @@ Finales de línea de cada archivo.
 - `pruebas-a-mano.md` — **una sección nueva del 2c.3** con la tabla de abajo; y en la del 6.1, los casos
   que esperaban el texto provisional de *Sin conexión* (órdenes 11 y 12) pasan a esperar el texto que
   toque según la regla, con la nota de qué desenlace hay guardado en cada uno.
-- `../CLAUDE.md` — solo si la frase de *Dónde está lo importante* deja de ser cierta; hoy dice que el
+- `../../CLAUDE.md` — solo si la frase de *Dónde está lo importante* deja de ser cierta; hoy dice que el
   botón no existe.
 
 ## Pruebas
@@ -255,7 +255,7 @@ Finales de línea de cada archivo.
 ⚠️ Control negativo en la del tope con ventana vencida y en la de *Conectar* que no libera el bloqueo;
 borrarlos y limpiar la caché.
 
-**Portal: casos a mano en local** (`../entorno-local.md`: base, backend y portal; una empresa con
+**Portal: casos a mano en local** (`../../entorno-local.md`: base, backend y portal; una empresa con
 PsicoAlianza conectada). Varios estados se preparan **escribiendo en la base** el desenlace del último
 intento o los contadores de la ventana en la sesión de la conexión, y **reiniciando el backend no hace
 falta**: la ruta lee la base en cada petición. **Ninguno consigue una sesión real** salvo que se diga.

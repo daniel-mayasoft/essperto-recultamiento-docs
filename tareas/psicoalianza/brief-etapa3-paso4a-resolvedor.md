@@ -19,7 +19,7 @@ decisión 48** y en las que ella nombra. Toca **solo el backend**.
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md`.
-2. `../CLAUDE.md` y `../../esscoti-backend/CLAUDE.md`.
+2. `../../CLAUDE.md` y `../../../../esscoti-backend/CLAUDE.md`.
 3. `integrate-psicoalianza.md` — decisiones **2, 3, 5, 6, 15, 38, 40, 41, 46 y 48**, la pregunta
    abierta B3, y *Abierto, para cuando exista el resolvedor*.
 4. `flujo-actual-etapa-psicometrica.md` — **entero**. Este paso lo cambia en §1, §2, §3, §4, §5 y §7.
@@ -160,7 +160,7 @@ del 5b cambian un argumento del constructor.
 En el mismo diff: `flujo-actual-etapa-psicometrica.md` —§1 (qué conexión congela la oferta), §2 (quién
 resuelve al invitar, qué proveedor se escribe, el respaldo sin proveedor), §3 y §4 (el cron por
 proveedor), §5 (la condición de las pruebas adicionales) y §7 (la demo no pasa por el resolvedor)— y
-`../entorno-local.md`: **cómo activar una oferta con PsicoAlianza a mano** hasta el paso 6 —en el
+`../../entorno-local.md`: **cómo activar una oferta con PsicoAlianza a mano** hasta el paso 6 —en el
 bloque de configuración de la prueba, `connectionId` con el identificador de la conexión de
 PsicoAlianza de la empresa y `jobProfileId` con la vacante de PsicoAlianza; el resto como siempre—.
 

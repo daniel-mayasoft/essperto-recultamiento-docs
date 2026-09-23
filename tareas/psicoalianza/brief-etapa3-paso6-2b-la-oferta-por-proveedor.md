@@ -23,7 +23,7 @@ Leer, en este orden:
 
 1. `arranque-del-ejecutor.md`. 🔴 El portal no tiene pruebas automáticas: **este paso se verifica con
    casos a mano, que se añaden a `pruebas-a-mano.md`** (abajo).
-2. `../CLAUDE.md`.
+2. `../../CLAUDE.md`.
 3. `integrate-psicoalianza.md` — decisiones **3, 4, 5, 10, 40, 41, 48 y 51** (con sus textos
    aprobados), y en la tabla de la etapa 3 las filas del **6.2a** y del **6.2b**.
 4. `flujo-actual-etapa-psicometrica.md` — **§1 puntos 2, 3 y 4** y **§8**. Este paso los cambia.
@@ -294,7 +294,7 @@ más pequeña, sin commitear y todo al índice. Respetar los finales de línea d
   selector, las pruebas adicionales solo con EvaluaTest), **punto 3** (el portal ya manda la conexión
   siempre; quitar el aviso del caso espejo, que queda cerrado), **punto 4** (el aviso de oferta que
   perdió el proveedor mira la conexión congelada) y **§8** (lo que ve el reclutador en la ficha).
-- `../entorno-local.md`: la sección de *una oferta con PsicoAlianza, a mano* pasa a decir que **se elige
+- `../../entorno-local.md`: la sección de *una oferta con PsicoAlianza, a mano* pasa a decir que **se elige
   desde el portal**, y que escribirla a mano sigue sirviendo.
 - `pruebas-a-mano.md`: **una sección nueva del paso 6.2b** con los casos de abajo, en el orden en que se
   hacen seguidos, y **el caso 15 del 6.1** sustituido por ellos, como ese caso ya anuncia.

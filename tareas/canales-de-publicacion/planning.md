@@ -6,7 +6,7 @@ está cada pieza** y **qué hay que decidir antes de que alguien toque código**
 
 ## Antes de nada
 
-1. `../CLAUDE.md` — el proyecto: los dos repositorios, el vocabulario, la verificación y la deuda
+1. `../../CLAUDE.md` — el proyecto: los dos repositorios, el vocabulario, la verificación y la deuda
    conocida.
 2. `../psicoalianza/arranque-del-ejecutor.md` — cómo se trabaja aquí: los dos papeles, la opinión previa
    antes de tocar código, y lo que ya salió mal. Las reglas son de la casa.
@@ -40,7 +40,7 @@ el séptimo.
 
 ## Dónde está cada pieza
 
-### Backend (`../../esscoti-backend`)
+### Backend (`../../../../esscoti-backend`)
 
 | Qué | Dónde | Para qué importa |
 | --- | --- | --- |
@@ -56,7 +56,7 @@ el séptimo.
 ⚠️ **Falso amigo en el esquema**: la oferta tiene un campo `publishers`. **No son los canales de
 publicación**: es el informe de los portales internos de difusión de Pandapé. No confundirlos.
 
-### Portal (`../../esscoti-frontend`)
+### Portal (`../../../../esscoti-frontend`)
 
 | Qué | Dónde |
 | --- | --- |

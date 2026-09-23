@@ -17,7 +17,7 @@ otros `.md`.** Toca **solo el backend**. El portal no cambia: es el paso 6.
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md`.
-2. `../CLAUDE.md` y `../../esscoti-backend/CLAUDE.md`.
+2. `../../CLAUDE.md` y `../../../../esscoti-backend/CLAUDE.md`.
 3. `integrate-psicoalianza.md` — la bitácora. Importan **2, 3, 40, 41, 44 y 46**, la pregunta abierta
    **B3**, y en *Lo que la lista de herencia no tenía* el punto «al guardar la conexión desde el portal
    hay que conservar la sesión».
@@ -231,7 +231,7 @@ contrato—, la solución más pequeña, sin commitear y todo al índice.
 
 **Documentación en el mismo diff**: `flujo-actual-etapa-psicometrica.md`, **§1** —guardar por
 proveedor, conservar la sesión, la validación sin login de PsicoAlianza, la ruta de estado y la guarda
-del plazo—. `../entorno-local.md`: la sección de insertar la conexión a mano **sigue valiendo** hasta
+del plazo—. `../../entorno-local.md`: la sección de insertar la conexión a mano **sigue valiendo** hasta
 el paso 6; una frase diciendo que la ruta ya existe. `before-deploy.md` no cambia.
 
 ## Pruebas

@@ -25,7 +25,7 @@ se toca.
 Leer, en este orden:
 
 1. `arranque-del-ejecutor.md`.
-2. `../CLAUDE.md` y `../../esscoti-backend/CLAUDE.md`.
+2. `../../CLAUDE.md` y `../../../../esscoti-backend/CLAUDE.md`.
 3. `integrate-psicoalianza.md` — decisiones **49** (el mensaje por proveedor), **55 con su revisión** y
    **59**; en la tabla de *Dónde va la etapa 3*, las filas **10 y 11**.
 4. `flujo-actual-etapa-psicometrica.md` — §2 entero y §4.
