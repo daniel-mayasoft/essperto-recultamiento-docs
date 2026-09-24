@@ -40,11 +40,12 @@ La lista la define Essperto-R y es **la misma para todas las empresas**:
 - [ ] **No se puede guardar el descarte sin causal.**
 - [ ] La analítica puede **agrupar los descartes por causal**.
 
-## Lo que hay que decidir antes de implementar
+## Decisiones, pasos y despliegue
 
-Está en `planning.md`, con el mapa de dónde vive hoy cada pieza. Lo más importante: **hoy el detalle en
-texto es obligatorio en todo descarte**, así que volverlo opcional cambia un comportamiento que ya
-funciona, y **los descartes ya guardados no tienen causal**.
+Todo está en **`bitacora.md`**, que es la fuente única de la verdad de este frente. El mapa del código
+está en `planning.md`. Lo más importante: **hoy el detalle en texto es obligatorio en todo rechazo**, así
+que volverlo opcional cambia un comportamiento que ya funciona; **los rechazos ya guardados no tienen
+causal**; y **backend y portal se despliegan a la vez**.
 
 ## Alcance y estimación acordados (2026-09-23)
 
@@ -97,11 +98,10 @@ y se presentan en un grupo aparte, sin asignarles ninguna.
 - **Los descartes anteriores no reciben causal**: se muestran en un grupo aparte, «sin causal».
 - **La causal es solo del rechazo**, no del «contratado».
 
-### Decisiones abiertas (ver `planning.md`)
+### Decisiones que estaban abiertas
 
-- Si la decisión de contratación sigue siendo definitiva e imposible de corregir (recomendado: dejarla así
-  y anotarlo).
-- Si la auditoría guarda también la causal (recomendado: sí).
+Cerradas el 2026-09-23 en `bitacora.md`: la decisión sigue siendo definitiva (decisión 10) y la auditoría
+guarda la causal (decisión 9). No quedan preguntas abiertas.
 
 ### Punto de partida
 

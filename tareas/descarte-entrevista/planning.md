@@ -1,8 +1,11 @@
 # Planning · la causal de descarte tras la entrevista
 
-Para **quien escribe el brief de este frente** y llega sin contexto. Dice **cómo funciona hoy**, **dónde
-está cada pieza** y **qué hay que decidir antes de que alguien escriba código**. El qué se pide está en
-`requisitos.md`.
+Para **quien escribe el brief de este frente** y llega sin contexto. Dice **cómo funciona hoy** y **dónde
+está cada pieza**. El qué se pide está en `requisitos.md`.
+
+> 🔴 **Actualizado el 2026-09-24. Las decisiones ya están cerradas en `bitacora.md`**, que es la fuente
+> única de la verdad de este frente: decisiones numeradas, vocabulario, pasos y despliegue. Si este
+> documento y la bitácora no coinciden, **gana la bitácora**. Este documento queda como mapa del código.
 
 ## Antes de nada
 
@@ -32,8 +35,13 @@ mira**: los motivos que enseña hoy salen del embudo automático (por qué el si
 una etapa), no de esta decisión.
 
 ⚠️ **No existe un «descarte tras la entrevista» como tal.** Lo que existe es el **desenlace de
-contratación**, que es el que se usa al final del proceso, después de entrevistar. El nombre importa
-porque en el código todo se llama así.
+contratación**, que es el que se usa al final del proceso. El nombre importa porque en el código todo se
+llama así. Y **no garantiza que haya habido entrevista**: se puede decidir sobre cualquier candidato
+desbloqueado. Por eso la bitácora lo llama **rechazo final** (punto C de la bitácora).
+
+⚠️ **La validación del DTO no se aplica** en este backend: la validación global está desactivada y este
+endpoint no declara una propia. Cualquier regla nueva va escrita en el servicio (punto A y decisión 7 de
+la bitácora).
 
 ## Dónde está cada pieza
 
@@ -42,24 +50,31 @@ porque en el código todo se llama así.
 | Qué | Dónde | Para qué sirve aquí |
 | --- | --- | --- |
 | El desenlace de contratación | `src/offers/enums/hiring-outcome.enum.ts` | Los tres valores: pendiente, contratado, rechazado |
-| Los campos guardados | `src/offers/schemas/offer.schema.ts` (participación del candidato: desenlace, observación, fecha y quién) | **Aquí nace el campo nuevo de la causal** |
-| La regla | `src/offers/offers.service.ts` → `setCandidateHiringOutcome` | Valida la observación, comprueba que esté desbloqueado, impide cambiar una decisión ya tomada, escribe la auditoría y guarda |
+| Los campos guardados | `src/offers/schemas/offer.schema.ts` (participación del candidato: desenlace, observación, fecha y quién) | **Aquí nace el campo nuevo**, `hiringOutcomeReason` (decisión 3). ⚠️ Dos comentarios de estos campos no dicen la verdad (punto B de la bitácora) |
+| La lista nueva | Un enum propio, `HiringRejectionReason`, junto a `hiring-outcome.enum.ts` | **No se reusa `RejectionReason`**, que es el del embudo automático (decisión 3) |
+| La regla | `src/offers/offers.service.ts` → `setCandidateHiringOutcome` | Valida la observación, comprueba que esté desbloqueado, impide cambiar una decisión ya tomada, escribe la auditoría y guarda. **Aquí va toda la validación nueva** (decisión 7) |
 | La entrada de la API | `src/offers/offers.controller.ts` → `POST /offers/:id/candidates/:candidateId/hiring-outcome` | Comprueba permisos de gestión de la oferta |
-| Lo que acepta la API | `src/offers/dto/set-candidate-hiring-outcome.dto.ts` | **Aquí entra la causal**; hoy solo trae el desenlace y la observación (tope de 1000 caracteres) |
-| Lo que devuelve el detalle del candidato | `src/offers/candidates.service.ts` | Expone el desenlace, la observación y la fecha al portal |
+| Lo que acepta la API | `src/offers/dto/set-candidate-hiring-outcome.dto.ts` | La causal se declara aquí para la documentación de la API, pero **sus decoradores no validan nada** (punto A). El tope de 1000 caracteres tampoco rige hoy |
+| Lo que ve la página Candidatos | `src/offers/candidates.service.ts` | Alimenta la **página Candidatos** del portal, no la ficha de la oferta (punto D). La causal tiene que salir también por aquí |
 | La analítica | `src/metrics/metrics.service.ts` (motivos de rechazo y rechazo por etapa) y `src/metrics/metrics.controller.ts` | **Hoy agrupa por el error de etapa del embudo, no por esta decisión.** Que la causal llegue a la analítica es trabajo aparte dentro de este frente |
 
 ### Portal (`../../../../esscoti-frontend`)
 
 | Qué | Dónde |
 | --- | --- |
-| Los dos botones, la ventana de rechazo y la llamada a la API | `app/routes/offers.$id.tsx` (ventana de rechazo, y la llamada a `hiring-outcome`) |
+| Los dos botones, la ventana de rechazo, la llamada a la API y **la ficha del candidato en la oferta** | `app/routes/offers.$id.tsx` (ventana de rechazo, la llamada a `hiring-outcome`, y la razón del rechazo en la ficha). La ficha lee la participación directamente de la oferta |
+| **La página Candidatos**, que también muestra la razón del rechazo | `app/routes/candidates.tsx` (punto D de la bitácora) |
 | Los tipos del candidato que llegan del backend | `app/lib/models.ts` |
-| Los textos que ve Marta | `app/i18n/locales/es.ts`, bajo `candidates.hiringOutcome` |
+| Los textos que ve Marta | `app/i18n/locales/es.ts` **y `app/i18n/locales/en.ts`**, bajo `candidates.hiringOutcome` |
 | La pantalla de analítica | `app/routes/analytics.tsx` |
 | Permisos para ver los botones | `app/lib/permissions.ts` (gestión de todas las ofertas o de las asignadas) |
 
-## Lo que hay que decidir antes de escribir el brief
+## Lo que había que decidir — cerrado en la bitácora
+
+> Las siete preguntas de abajo **ya están resueltas**. Se conservan como registro de qué se preguntó;
+> **la respuesta vigente es la de la bitácora**: 1 → decisión 6; 2 → decisión 8; 3 → decisiones 1 y 2;
+> 4 → decisión 4; 5 → decisión 10; 6 → decisiones 12 a 14 (la analítica entra, solo en el panel global);
+> 7 → decisión 9.
 
 1. 🔴 **La observación pasa de obligatoria a opcional.** Hoy el backend rechaza el descarte sin
    observación, y el portal tiene el botón apagado hasta que se escribe algo. El requisito la vuelve
@@ -85,14 +100,12 @@ porque en el código todo se llama así.
 
 ## Cómo se parte el trabajo
 
-Una propuesta, para que el brief la confirme o la cambie:
+**Los pasos vigentes y la rama están en la bitácora**, sección *Pasos*: backend (paso 1), portal (paso 2)
+y el bloque de analítica (paso 3), en `feat/hiring-rejection-reason` desde `develop`, en los dos
+repositorios.
 
-1. **Backend**: la lista de causales, el campo nuevo en la participación, la validación (causal
-   obligatoria, detalle obligatorio solo en «Otro») y lo que devuelve el detalle del candidato.
-2. **Portal**: el selector en la ventana de rechazo, el detalle opcional, y la causal visible en la ficha.
-3. **Analítica**: agrupar los descartes por causal y enseñarlo.
-
-Cada paso preserva lo anterior y se entrega por separado: el paso 2 no se puede probar sin el 1.
+🔴 **Backend y portal se despliegan a la vez**: no hay orden seguro. Detalle en la bitácora, *Antes de
+desplegar*.
 
 ## Verificación
 
