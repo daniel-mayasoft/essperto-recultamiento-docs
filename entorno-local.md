@@ -3,8 +3,8 @@
 Cómo levantar el proyecto en una máquina de desarrollo: **la base de datos en Docker, el backend
 y el portal en PowerShell**. Leído del código el 2026-09-13.
 
-**Estado:** este documento existe; el archivo de Docker y los dos `.env` **todavía no**. Se
-crean siguiendo los pasos de abajo.
+**Estado (2026-09-24):** el archivo de Docker y el `.env` del backend ya existen en esta máquina,
+con lo mínimo para arrancar contra una base vacía. El `.env` del portal todavía no.
 
 ⚠️ **En revisión (2026-09-13):** el plan cambia de "base local vacía" a **"base local con una
 copia de la de test"**. La sección "Copia de la base de test" ya está al día; el resto del
@@ -80,6 +80,10 @@ PsicoAlianza que queda por rotar.
 pierde. Primero se guarda su contenido donde corresponda (un gestor de contraseñas) y se borra a
 mano; solo entonces se crea el `.env` de abajo.
 
+**Hecho a medias el 2026-09-24:** la nota sigue en el `.env`, pero **comentada con `#`**, y las
+variables se añadieron debajo. Tal como estaba, sin comentar, Docker Compose se negaba a leer el
+`.env`. Sigue pendiente pasarla a un gestor de contraseñas y rotar las tres cuentas.
+
 ## Qué lee cada uno
 
 - **Backend:** `esscoti-backend/.env`, validado al arrancar. Si falta una variable obligatoria,
@@ -97,7 +101,7 @@ Archivo `esscoti-backend/docker-compose.local.yml`:
 ```yaml
 services:
   mongo:
-    image: mongo:7
+    image: mongo:8.2
     container_name: essperto-mongo-local
     ports:
       - "127.0.0.1:27017:27017"
@@ -113,12 +117,14 @@ volumes:
 
 Tres decisiones:
 
-- **Sin contraseña escrita en el archivo**, que se commitea: sale del `.env`, y si falta, Docker
-  se niega a arrancar con el mensaje de arriba. Es la regla de credenciales del backend.
+- **Sin contraseña escrita en el archivo**: sale del `.env`, y si falta, Docker se niega a
+  arrancar con el mensaje de arriba. Es la regla de credenciales del backend. **El archivo está
+  ignorado por git** (decidido el 2026-09-24): cada máquina lo crea copiando este bloque.
 - **Solo escucha en `127.0.0.1`.** Otra máquina de la red no llega a la base. (La de producción
   sí está expuesta a internet; no se repite aquí.)
-- ⚠️ **`mongo:7` es provisional.** Tiene que ser la misma versión mayor que el servidor de pruebas.
-  Se comprueba con `db.version()` en la consola de esa base y se ajusta la imagen.
+- **`mongo:8.2`, la versión del servidor de pruebas** (8.2.9, vista el 2026-09-24). Fijada a
+  propósito: test usa `mongo:latest`, y si se actualiza solo, su copia puede no cargar aquí. Si
+  test cambia de versión, se ajusta la imagen a mano.
 
 ## 2 · El `.env` del backend
 

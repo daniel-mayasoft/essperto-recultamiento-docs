@@ -147,7 +147,7 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
 
 | Paso | Qué | Repositorio | Estado |
 | --- | --- | --- | --- |
-| 1a | Mover la lista de motivos a su carpeta y sacar el desenlace a su servicio, sin cambiar nada | backend | Brief escrito |
+| 1a | Mover la lista de motivos a su carpeta y sacar el desenlace a su servicio, sin cambiar nada | backend | Revisado y aprobado; pendiente de commit |
 | 1b | Guardar la causal: lista, campo, validación, auditoría y la página Candidatos | backend | Pendiente |
 | 2 | Selector en la ventana de rechazo, detalle opcional y la causal en las dos fichas | portal | Pendiente |
 | 3 | Bloque «Motivos de rechazo final» en el panel global | backend y portal | Pendiente |
@@ -164,6 +164,14 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
 - **2026-09-24** — Decisiones 16 a 19: carpeta de motivos, servicio propio del desenlace, el paso 1
   partido en 1a (mecánico) y 1b (la causal), y la regla del boy scout para lo mecánico. Escrito el
   brief del paso 1a.
+- **2026-09-24** — Opinión previa del paso 1a contestada. **Pendiente para el paso 1b**: quitar el
+  comentario de encabezado del método del desenlace, que el 1a mueve tal cual y que es falso (dice que
+  no llama al servicio de planes, y lo llama); y pasar al inglés los nombres de la prueba del desenlace.
+- **2026-09-24** — Paso 1a revisado y aprobado: método idéntico, renombre al 100 %, 152 suites y
+  1.575 pruebas como la línea base, y arranque en local sin errores de dependencias. El ejecutor vio
+  tres métodos privados sin uso —`computeViableCount` y `ensureTenantExists` en el servicio de
+  ofertas, `normalizeName` en el orquestador— y no los tocó, porque la regla del boy scout cubre solo
+  importaciones. Quedan para un inventario aparte, fuera de este frente.
 
 ## Antes de desplegar
 

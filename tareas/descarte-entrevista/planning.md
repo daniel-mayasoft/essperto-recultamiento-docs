@@ -51,9 +51,9 @@ la bitácora).
 | --- | --- | --- |
 | El desenlace de contratación | `src/offers/enums/hiring-outcome.enum.ts` | Los tres valores: pendiente, contratado, rechazado |
 | Los campos guardados | `src/offers/schemas/offer.schema.ts` (participación del candidato: desenlace, observación, fecha y quién) | **Aquí nace el campo nuevo**, `hiringOutcomeReason` (decisión 3). ⚠️ Dos comentarios de estos campos no dicen la verdad (punto B de la bitácora) |
-| La lista nueva | Un enum propio, `HiringRejectionReason`, junto a `hiring-outcome.enum.ts` | **No se reusa `RejectionReason`**, que es el del embudo automático (decisión 3) |
-| La regla | `src/offers/offers.service.ts` → `setCandidateHiringOutcome` | Valida la observación, comprueba que esté desbloqueado, impide cambiar una decisión ya tomada, escribe la auditoría y guarda. **Aquí va toda la validación nueva** (decisión 7) |
-| La entrada de la API | `src/offers/offers.controller.ts` → `POST /offers/:id/candidates/:candidateId/hiring-outcome` | Comprueba permisos de gestión de la oferta |
+| La lista nueva | Un enum propio, `HiringRejectionReason`, en `src/offers/enums/rejection/`, junto a `rejection-reason.enum.ts` (decisión 16) | **No se reusa `RejectionReason`**, que es el del embudo automático (decisión 3) |
+| La regla | `src/offers/hiring-outcome.service.ts` → `HiringOutcomeService.setCandidateHiringOutcome` (decisión 17) | Valida la observación, comprueba que esté desbloqueado, impide cambiar una decisión ya tomada, escribe la auditoría y guarda. **Aquí va toda la validación nueva** (decisión 7) |
+| La entrada de la API | `src/offers/offers.controller.ts` → `POST /offers/:id/candidates/:candidateId/hiring-outcome` | Comprueba permisos de gestión de la oferta y llama directamente al servicio del desenlace |
 | Lo que acepta la API | `src/offers/dto/set-candidate-hiring-outcome.dto.ts` | La causal se declara aquí para la documentación de la API, pero **sus decoradores no validan nada** (punto A). El tope de 1000 caracteres tampoco rige hoy |
 | Lo que ve la página Candidatos | `src/offers/candidates.service.ts` | Alimenta la **página Candidatos** del portal, no la ficha de la oferta (punto D). La causal tiene que salir también por aquí |
 | La analítica | `src/metrics/metrics.service.ts` (motivos de rechazo y rechazo por etapa) y `src/metrics/metrics.controller.ts` | **Hoy agrupa por el error de etapa del embudo, no por esta decisión.** Que la causal llegue a la analítica es trabajo aparte dentro de este frente |

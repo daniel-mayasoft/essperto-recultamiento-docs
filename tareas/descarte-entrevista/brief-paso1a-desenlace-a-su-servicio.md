@@ -90,6 +90,20 @@ reporte qué quitaste y de qué archivo.
   borrado y alta.
 - **No se añaden comentarios** en el código.
 
+## Opinión previa del ejecutor (2026-09-24), verificada e incorporada
+
+| Punto | Decidido |
+| --- | --- |
+| 1 · Ni la compilación ni las pruebas comprueban que el backend arranca | **Aceptado.** Se añade un arranque en local a la verificación |
+| 2 · El comentario de encabezado del método choca con la regla de cero comentarios, y además es falso: dice que no llama al servicio de planes, y lo llama para saber el modelo de cobro | **Se mueve tal cual en este paso**, para que se pueda revisar que el método es idéntico. **El paso 1b lo quita**, junto con los del esquema, y lleva a la bitácora lo que tenga de cierto |
+| 3 · Los lectores de identificadores tienen 27 usos fuera del método, no 29 | Correcto. No cambia nada |
+| 4 · Copiar los dos lectores del servicio de ofertas tal cual, con sus mensajes; del de candidatos solo se toma la idea | Correcto: es lo que pide la tabla del punto 2 |
+| 5 · Boy scout: solo el enum del desenlace en el servicio de ofertas | Aceptado. Si aparecen otras importaciones sin usar en los archivos tocados, entran y se listan |
+| 6 · `develop` local va un commit por detrás del remoto | Comprobado: `0c68e04`, solo el orquestador, fuera de la línea de la importación. **Después de traerlo y antes de tocar nada, mide otra vez la línea base con la caché limpia.** Si no da 152 y 1.575, esa es la nueva referencia y se dice en el reporte |
+| 7 · La prueba del desenlace tiene nombres en español | Correcto no renombrarlos aquí. Quedan para el paso 1b, que ya toca ese archivo |
+
+**Se puede empezar.**
+
 ## Pruebas
 
 - **Ninguna afirmación cambia.** Las pruebas que solo cambian una ruta de importación, cambian solo eso.
@@ -106,6 +120,11 @@ reporte qué quitaste y de qué archivo.
 **152 suites y 1.575 pruebas (1.566 pasan, 9 omitidas)**. El resultado final tiene que dar
 **exactamente lo mismo**: ni una prueba más ni una menos. Si cambia, di cuáles y por qué. El aviso de
 que un proceso de Jest no terminó limpio ya sale en `develop`: no es de este paso.
+
+**Y un arranque del backend en local**, siguiendo `../../entorno-local.md`: tiene que levantar sin error
+de dependencias. Ninguna prueba monta el controlador ni el servicio por la inyección de dependencias, así
+que un proveedor sin registrar o un modelo sin inyectar compila, pasa en verde y tumba el endpoint al
+arrancar. No hace falta llamar al endpoint: Nest resuelve todas las piezas al levantar.
 
 🔴 No correr `npm run lint`.
 
