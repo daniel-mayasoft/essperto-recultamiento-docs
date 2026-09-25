@@ -90,6 +90,11 @@ abajo, que ganan sobre él).
     mejor lo que es importación y exportación: importaciones sin usar, rutas que el propio
     movimiento cambia. Nada de nombres, lógica, comentarios ni formato, y ningún archivo entra al
     diff solo por esto.
+20. **El servicio también valida el desenlace**: solo acepta contratado o rechazado. Hoy un cuerpo
+    con «pendiente» pasa, deja fecha y autor, y escribe en la auditoría un rechazo que no existió; y
+    un valor inventado revienta al guardar con un 500. Es anterior a este frente, pero está en el
+    bloque que el paso 1b reescribe (decisión 7). Encontrado por el ejecutor en la opinión previa del
+    1b; confirmado por el usuario el 2026-09-24.
 
 ## Lo que dice el código y los documentos no
 
@@ -124,6 +129,18 @@ E.
 - **E. Las pruebas del backend viven en una carpeta `test/` dentro de cada módulo** desde el
   2026-09-24. La del desenlace de contratación está en la del módulo de ofertas, y la de la
   analítica en la de métricas. Las pruebas nuevas van ahí.
+- **F. El desenlace no toca la facturación ni el estado del candidato**, a propósito: lo que se
+  cobra ya se cobró al ocupar la plaza, al revelarlo o al procesarlo, y sigue cobrado termine como
+  termine. Solo **lee** el modelo de cobro de la empresa, para saber si el candidato está
+  desbloqueado. Lo decía, con un error, el comentario de encabezado del método; el paso 1b lo borra y
+  esto queda aquí.
+- **G. Una lista cerrada en el esquema es una trampa si se retira un valor.** Mongoose valida al
+  guardar lo que se modificó; cuando se marca modificada la lista de participaciones, las valida
+  todas, y eso lo hacen 33 sitios del código, el desenlace incluido. Un código que deja de estar en la
+  lista impide guardar cualquier cambio de esa oferta que toque sus participaciones, que en la
+  práctica son casi todos. Por eso retirar o renombrar un código de la decisión 2 está prohibido, no
+  solo desaconsejado. El nulo y la ausencia del campo sí pasan (Mongoose 9.5, comprobado el
+  2026-09-24).
 
 ## Fuera del alcance, a sabiendas
 
@@ -147,8 +164,8 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
 
 | Paso | Qué | Repositorio | Estado |
 | --- | --- | --- | --- |
-| 1a | Mover la lista de motivos a su carpeta y sacar el desenlace a su servicio, sin cambiar nada | backend | Revisado y aprobado; pendiente de commit |
-| 1b | Guardar la causal: lista, campo, validación, auditoría y la página Candidatos | backend | Pendiente |
+| 1a | Mover la lista de motivos a su carpeta y sacar el desenlace a su servicio, sin cambiar nada | backend | Hecho: `7b141b9`, en `develop` por el PR #89 |
+| 1b | Guardar la causal: lista, campo, validación, auditoría y la página Candidatos | backend | Revisado y aprobado; pendiente de commit. Sin PR |
 | 2 | Selector en la ventana de rechazo, detalle opcional y la causal en las dos fichas | portal | Pendiente |
 | 3 | Bloque «Motivos de rechazo final» en el panel global | backend y portal | Pendiente |
 
@@ -172,8 +189,31 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
   tres métodos privados sin uso —`computeViableCount` y `ensureTenantExists` en el servicio de
   ofertas, `normalizeName` en el orquestador— y no los tocó, porque la regla del boy scout cubre solo
   importaciones. Quedan para un inventario aparte, fuera de este frente.
+- **2026-09-24** — Paso 1a commiteado (`7b141b9`) y fusionado en `develop` (PR #89). Después se
+  fusionó `develop` en la rama (`9cb754a`): tres arreglos del frente de candidatos procesados (cobro
+  persistido, estado de entrada recortado para el portal, hora del último mensaje en todas las etapas),
+  ninguno en la zona de este frente. Verificado con la caché limpia: compila, **152 suites y 1.574
+  pruebas (1.565 pasan, 9 omitidas)**. La prueba de menos es de ese frente, no de este: «a las demás
+  etapas no se lleva nada» dejó de aplicar al generalizarse la hora del último mensaje. **Nueva línea
+  base.**
+- **2026-09-24** — Nada más entra en `develop` hasta terminar el frente (*Antes de desplegar*).
+  Añadidos los puntos F y G. Escrito el brief del paso 1b.
+- **2026-09-24** — Opinión previa del 1b contestada: decisión 20, punto G precisado. **Pendiente
+  para el paso 2**: la pestaña de auditoría del portal muestra los valores del registro tal cual, así
+  que la causal saldrá como código (`no_show`) y no como etiqueta.
+- **2026-09-25** — Paso 1b revisado y aprobado. Compila; **153 suites y 1.590 pruebas (1.581 pasan,
+  9 omitidas)**, con la caché limpia: 16 más que la línea base, de la prueba nueva del esquema (5), la
+  de la página Candidatos (1) y la del desenlace, que pasa de 11 a 21 casos. La prueba del esquema
+  vive en `src/offers/schemas/test/`, siguiendo la convención de una carpeta de pruebas por
+  subcarpeta.
 
 ## Antes de desplegar
+
+- 🔴 **Nada del frente entra en `develop` hasta terminarlo** (decidido por el usuario el
+  2026-09-24). `develop` va al servidor de pruebas y `main` a producción. El paso 1a ya entró (PR #89)
+  porque no cambia comportamiento; del 1b en adelante, todo se commitea en la rama y se fusiona **junto
+  con el portal**. Un 1b solo en `develop` rompe los rechazos del servidor de pruebas, y en `main`, los
+  de producción.
 
 - 🔴 **Backend y portal se despliegan a la vez, en la misma ventana. No hay orden seguro**
   (corregido el 2026-09-24):
