@@ -54,3 +54,25 @@ final.
 
 La pestaña abierta desde antes del despliegue (decisión 15) no se prepara aquí y no se prueba: la cubre el mensaje de error del backend, probado en el paso 1b. El estado `DISCARDED` es
 raro en una copia y lo cubre la prueba del backend del paso 1d.
+
+## Paso 3 — «Motivos de rechazo final» en la analítica
+
+Brief: `brief-paso3-analitica.md`. **Se corre después del paso 2, sobre la misma oferta**, que ya tiene
+a Luis y al de la cola rechazados por Marta a mitad del proceso, a Pedro y a Sara rechazados al final, y
+el rechazo antiguo. Para que las cifras se puedan comprobar, en el panel de analítica **se elige esa
+oferta en el filtro de Ofertas**. Antes de empezar, en la tabla de candidatos de la oferta, contar
+cuántos tienen **Estado** «Descartado» y cuántos de ellos tienen **Motivo de descarte** «Rechazado por el
+reclutador» (tienen que ser dos: Luis y el de la cola). La resta es **N**, los descartados por el agente.
+**El cancelar la oferta va al final.**
+
+| Orden | Qué se hace | Qué se tiene que ver | Resultado |
+| --- | --- | --- | --- |
+| 1 | Panel, «Motivos de descarte» | Los motivos del agente; **no** aparece «Rechazado por el reclutador» | ☐ |
+| 2 | «Descartados por etapa» | Suman N. Ni Luis ni el de la cola suman en su etapa | ☐ |
+| 3 | El embudo, en la etapa donde estaba Luis | Luis no está ni entre los que entraron, ni entre los que pasaron, ni entre los que cayeron, ni «en curso». En las etapas anteriores sí cuenta como que las pasó | ☐ |
+| 4 | Total de descartados del resumen, y la columna de descartados de la tabla de ofertas | Los dos dicen N | ☐ |
+| 5 | Bloque «Motivos de rechazo final», junto a «Motivos de descarte» | «No cumple el perfil técnico» (Luis), «Expectativa salarial fuera de rango» (Pedro), «Otro» (Sara), la causal elegida para el de la cola, y «Sin causal» (el rechazo antiguo), de mayor a menor, con su total junto al título. Ni Ana ni otros descartados por el agente | ☐ |
+| 6 | Elegir en el filtro de Ofertas una oferta sin rechazos del reclutador | El bloque queda vacío, con el mismo aviso de vacío que los demás bloques | ☐ |
+| 7 | Detalle de la oferta en la analítica | **No** tiene el bloque nuevo; sus descartados dicen N, y su embudo excluye a Luis igual que el panel | ☐ |
+| 8 | Cambiar el idioma del portal a inglés | «Final rejection reasons», las causales en inglés y «No reason» | ☐ |
+| 9 | **Al final**: cancelar la oferta. En el panel, sin estado elegido y luego con el estado «Cancelada» | Sin estado, el bloque no la cuenta; con «Cancelada», sí | ☐ |

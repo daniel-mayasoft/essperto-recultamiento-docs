@@ -123,10 +123,17 @@ abajo, que ganan sobre él).
     2026-09-27). Luis, rechazado por Marta a mitad del proceso, tiene el mismo estado «descartado» que
     Sofía, descartada por el agente, y así debe ser porque es lo que detiene al agente. Por eso, en
     las cifras del agente, un candidato cuenta como descartado solo si su estado es «descartado» **y**
-    su código no es `recruiter_rejected`. Afecta a cuatro cifras, todas en el paso 3: motivos de
-    descarte, descartados por etapa, caídos por etapa del embudo, y el total de descartados con la
-    columna de la tabla de ofertas. **El total de descartados pasa a ser solo del agente**; el
-    bloque de Marta muestra su propio total.
+    su código no es `recruiter_rejected`. **El total de descartados pasa a ser solo del agente**; el
+    bloque de Marta muestra su propio total. Precisado en la opinión previa del paso 3
+    (2026-09-28), con dos piezas del mismo criterio:
+    - **Por candidato** (descartado y no `recruiter_rejected`): el total de descartados, los motivos
+      de descarte, los descartados por etapa, la columna de la tabla de ofertas y los descartados del
+      detalle de cada oferta.
+    - **Por historial** (sin las entradas cuyo error es `recruiter_rejected`): el embudo —entraron,
+      pasaron, cayeron y duración—, la precisión de la compatibilidad y la tasa de respuesta, en el
+      panel, la tabla y el detalle. Luis cuenta como que pasó las etapas anteriores y **desaparece de
+      la etapa donde Marta lo sacó**: ni entró, ni pasó, ni cayó. Así no se queda «en curso» para
+      siempre y la tasa de esa etapa no lo juzga.
 
 
 ## Lo que dice el código y los documentos no
@@ -178,6 +185,13 @@ E.
 
 ## Fuera del alcance, a sabiendas
 
+- **Los rechazos anteriores al paso 1d pueden contar en los dos bloques** (visto por el ejecutor en la
+  opinión previa del paso 3). Antes de la decisión 22, Marta podía rechazar a alguien que el agente
+  seguía procesando y que después descartó: cuenta en los descartes del agente por su código y en los
+  rechazos finales como «sin causal». Corregirlo exige una migración, y la decisión 8 dice que no hay.
+- **«Plazas abiertas» del panel sigue contando la plaza de Pedro como ocupada** aunque esté rechazado. Es
+  el mismo caso que la plaza que no se libera, más abajo, visto desde la analítica.
+
 - **Rechazar a quien ya terminó el proceso no libera su plaza** (visto por el ejecutor en la opinión
   previa del 1d; el usuario decide dejarlo el 2026-09-27). Pedro termina, ocupa la plaza y la oferta
   se cierra por llena; Marta lo rechaza tras la entrevista y la oferta sigue cerrada, sin que el
@@ -224,8 +238,9 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
 | 1b | Guardar la causal: lista, campo, validación, auditoría y la página Candidatos | backend | Hecho: `74f04b0`. Sin PR |
 | 1c | Fusionar `develop` (fin del flujo de revelar, de Henry) en la rama | backend | Hecho: `f5f81dc`, revisado |
 | 1d | No se rechaza a un descartado por el agente (decisión 22); rechazar a alguien en proceso detiene al agente (decisión 23); resto del DTO con «revelado» | backend | Hecho: `6082e1a`. Sin PR |
-| 2 | Selector en la ventana de rechazo, detalle opcional, la causal en las dos fichas y en la auditoría, sin botón de rechazar para los descartados por el agente, etiqueta de `recruiter_rejected` | portal | Revisado y aprobado; pendiente de commit. Sin PR |
-| 3 | Bloque «Motivos de rechazo final» en el panel global, y la exclusión de `recruiter_rejected` de las cifras del agente | backend y portal | Brief escrito |
+| 2 | Selector en la ventana de rechazo, detalle opcional, la causal en las dos fichas y en la auditoría, sin botón de rechazar para los descartados por el agente, etiqueta de `recruiter_rejected` | portal | Hecho: `7d8e67f`. Sin PR |
+| 3 | Bloque «Motivos de rechazo final» en el panel global, y la exclusión de `recruiter_rejected` de las cifras del agente | backend y portal | Revisado y aprobado; pendiente de commit. Sin PR |
+| Cierre | Traer `develop`, fusionar en `develop` los dos repositorios, pruebas a mano en el servidor de pruebas y paso a `main` (`brief-cierre-fusion-y-pruebas.md`) | los dos | Brief escrito; empieza tras el paso 3 |
 | 4 | **Condicional**: rechazar a quien terminó el proceso libera su plaza y reabre la búsqueda | backend | Solo si el equipo responde que sí a la pregunta 1; fuera de las 3 jornadas |
 
 ## Registro de avance
@@ -297,6 +312,22 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
   respondían (el revisor de permisos del modo automático estaba caído). Tipos sin errores; la
   contratación, sin cambios; un rechazo antiguo se ve igual en las dos fichas. Decisión del ejecutor
   aceptada: quitar del comentario de la ventana la parte que decía que la observación era obligatoria.
+- **2026-09-28** — Paso 2 commiteado (`7d8e67f`). `develop` avanzó en los dos repositorios, sin tocar la
+  zona del frente; se trae en el cierre. Brief del paso 3 al día (línea base 155/1.603 y reutilizar las
+  etiquetas del paso 2) y escrito el brief del cierre.
+- **2026-09-28** — El usuario fusionó `develop` en las dos ramas: backend `61770a8` (hasta `17a10ee`) y
+  portal `b351b3f`. Revisadas: frente al `develop` fusionado solo difieren los archivos del frente, en
+  los dos. Portal: tipos sin errores. Backend: compila; **157 suites y 1.613 pruebas (1.604 pasan, 9
+  omitidas)** con la caché limpia, **nueva línea base**. La despedida sigue siendo idéntica a la de la
+  cancelación. `develop` del backend ya va cuatro commits por delante (facturación): se traen en el
+  cierre. Opinión previa del paso 3 contestada; decisión 24 precisada.
+- **2026-09-28** — Paso 3 revisado y aprobado. El criterio único vive en el servicio de métricas en dos
+  funciones, `isAgentRejection` (por candidato) y `agentStageHistory` (por historial), y todas las
+  cifras de la decisión 24 las usan. Backend: compila; **158 suites y 1.627 pruebas (1.618 pasan, 9
+  omitidas)** con la caché limpia, 14 más en una prueba nueva. Portal: tipos sin errores. Nueve casos a
+  mano del paso 3 en `pruebas-a-mano.md`. Decisiones del ejecutor aceptadas: el total del bloque va en
+  una etiqueta junto al título, y «sin causal» viaja como causal nula, no como un código inventado.
+  **Con esto están cubiertos los seis puntos de aceptación**; falta el cierre.
 
 ## Antes de desplegar
 
