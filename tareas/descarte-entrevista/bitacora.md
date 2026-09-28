@@ -95,6 +95,39 @@ abajo, que ganan sobre él).
     un valor inventado revienta al guardar con un 500. Es anterior a este frente, pero está en el
     bloque que el paso 1b reescribe (decisión 7). Encontrado por el ejecutor en la opinión previa del
     1b; confirmado por el usuario el 2026-09-24.
+21. **Los descartes del agente y los rechazos del reclutador están separados** (punto de aceptación
+    añadido el 2026-09-25). Cada uno vive en su campo —el error de la etapa, el del agente; la causal,
+    la del reclutador— y cada bloque de la analítica lee solo el suyo: «Motivos de descarte» el
+    primero, «Motivos de rechazo final» el segundo. El paso 3 lo prueba en las dos direcciones.
+22. **No se puede rechazar a un candidato que el agente ya descartó.** Sin esta regla, la misma
+    persona cuenta en los dos bloques: el agente descarta a Ana por una pregunta de WhatsApp y días
+    después Marta la rechaza desde su ficha. El backend responde 400 (**paso 1d**) y la ficha del
+    portal no muestra el botón de rechazar a ese candidato (**paso 2**). **Solo el rechazo**: la
+    contratación queda como está (ver *Fuera del alcance*). Decidido el 2026-09-25; recortado a solo
+    el rechazo el 2026-09-27.
+23. **Si Marta rechaza a alguien que sigue en proceso, el agente se detiene** (paso 1d). Se reusa el
+    camino con el que el agente saca a alguien del proceso: estado «descartado», flujo detenido,
+    enlace de agenda anulado y cupo liberado para el siguiente de la cola (usuario, 2026-09-27):
+    - Se guarda el código de descarte nuevo `recruiter_rejected` (se añade a la lista de motivos del
+      embudo, con su texto en el portal en el paso 2).
+    - El candidato recibe **la misma despedida** que en un descarte automático, **si el agente ya le
+      había escrito en esta oferta** (conversación viva, etapa conversacional en el historial o
+      «listo para agendar»). A quien nunca se contactó no se le escribe por primera vez para
+      despedirlo.
+    - La detención va **en segundo plano** tras guardar el rechazo; si falla, error en el log y
+      correo de alerta a soporte, porque la persona puede seguir recibiendo mensajes.
+    - **El cupo se libera**, como en cualquier descarte, aunque en el cobro por procesado el siguiente
+      cueste un crédito.
+    - Quien ya terminó el proceso no tiene nada que detener: solo se guarda el rechazo, como hoy.
+24. **La analítica del agente separa por el código, no por el estado** (opción A, usuario,
+    2026-09-27). Luis, rechazado por Marta a mitad del proceso, tiene el mismo estado «descartado» que
+    Sofía, descartada por el agente, y así debe ser porque es lo que detiene al agente. Por eso, en
+    las cifras del agente, un candidato cuenta como descartado solo si su estado es «descartado» **y**
+    su código no es `recruiter_rejected`. Afecta a cuatro cifras, todas en el paso 3: motivos de
+    descarte, descartados por etapa, caídos por etapa del embudo, y el total de descartados con la
+    columna de la tabla de ofertas. **El total de descartados pasa a ser solo del agente**; el
+    bloque de Marta muestra su propio total.
+
 
 ## Lo que dice el código y los documentos no
 
@@ -113,12 +146,13 @@ E.
   que la corrección queda en la auditoría. El servicio lo impide. El paso 1 lo corrige, igual que
   el que dice que la observación es obligatoria al rechazar.
 - **C. Rechazar no implica haber entrevistado.** Se puede decidir sobre cualquier candidato
-  desbloqueado. En las empresas que pagan por plaza, eso es el ganador de una plaza, el revelado
-  del grupo o el añadido a mano. En las que pagan por candidato procesado, es el que ya costó algo
-  —se indexó su hoja de vida o se le escribió— o el añadido a mano, así que se puede rechazar a
-  alguien que va a mitad del embudo. De ahí el título del bloque (decisión 12). Corregido el
-  2026-09-24: el criterio del modelo por procesados cambió en `develop` ese día; antes todo
-  candidato de ese modelo estaba desbloqueado.
+  desbloqueado. En las empresas que pagan por plaza, **desde el 2026-09-25 lo están todos**: Henry
+  quitó el grupo oculto y el flujo de revelar. En las que pagan por candidato procesado, es el que ya
+  costó algo —se indexó su hoja de vida o se le escribió— o el añadido a mano. En los dos modelos se
+  puede rechazar a alguien a mitad del embudo, y en el de plaza también a alguien que el agente ya
+  descartó (esto último lo cierra la decisión 22). De ahí el título del bloque (decisión 12).
+  Corregido dos veces: el 2026-09-24 (cambio del modelo por procesados) y el 2026-09-25 (fin del
+  revelado).
 - **D. El mapa del portal de `planning.md` está incompleto.** La razón del rechazo se ve también
   en la página Candidatos, que se alimenta del servicio de candidatos del backend. Ese servicio no
   es «el detalle del candidato» de la oferta: la ficha de la oferta lee la participación
@@ -144,6 +178,22 @@ E.
 
 ## Fuera del alcance, a sabiendas
 
+- **Rechazar a quien ya terminó el proceso no libera su plaza** (visto por el ejecutor en la opinión
+  previa del 1d; el usuario decide dejarlo el 2026-09-27). Pedro termina, ocupa la plaza y la oferta
+  se cierra por llena; Marta lo rechaza tras la entrevista y la oferta sigue cerrada, sin que el
+  agente traiga a nadie. Para seguir buscando, Marta reabre la oferta o amplía las plazas a mano.
+  **Probablemente intencional**: en el cobro por plaza, la plaza de Pedro ya se cobró, y rellenarla
+  sola cobraría otra vez sin que nadie lo pidiera; el comentario original del método del desenlace
+  decía que rechazar no devuelve lo cobrado y que volver a llenar la plaza sería «una decisión
+  aparte». No se sabe si se acordó con negocio. Si algún día se quiere cambiar, es un frente propio:
+  toca el conteo de plazas, el cierre y la reapertura de la oferta, y la facturación.
+
+- **La contratación no se toca.** Este frente trata de rechazos. Con el cambio de Henry, «Marcar como
+  contratado» aparece en todos los candidatos, también a mitad del proceso o ya descartados por el
+  agente, y contratar a alguien en proceso no detiene al agente. Se sabe y no es de este frente
+  (usuario, 2026-09-27).
+
+
 - **Corregir una decisión ya tomada** (decisión 10).
 - **La causal en el detalle de cada oferta de la analítica** (decisión 12).
 - **Hacer que el DTO valide de verdad**, incluido el tope de 1000 caracteres. Encender la
@@ -156,7 +206,13 @@ E.
 
 ## Preguntas abiertas
 
-Ninguna.
+**Para el equipo** (anotada el 2026-09-27, se pregunta el 2026-09-28):
+
+1. **Cuando se rechaza a un candidato que ya terminó el proceso y ocupó la plaza, ¿el sistema debería
+   volver a buscar a otro, aunque el cliente que paga por plaza pague de nuevo?** Hoy no lo hace (ver
+   *Fuera del alcance*). Si la respuesta es **no**, el comportamiento actual es el correcto y se cierra.
+   Si es **sí**, entra la fase 4 de *Pasos*, que **no cabe en las 3 jornadas**: se avisa a la dirección
+   antes de empezarla.
 
 ## Pasos
 
@@ -165,9 +221,12 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
 | Paso | Qué | Repositorio | Estado |
 | --- | --- | --- | --- |
 | 1a | Mover la lista de motivos a su carpeta y sacar el desenlace a su servicio, sin cambiar nada | backend | Hecho: `7b141b9`, en `develop` por el PR #89 |
-| 1b | Guardar la causal: lista, campo, validación, auditoría y la página Candidatos | backend | Revisado y aprobado; pendiente de commit. Sin PR |
-| 2 | Selector en la ventana de rechazo, detalle opcional y la causal en las dos fichas | portal | Pendiente |
-| 3 | Bloque «Motivos de rechazo final» en el panel global | backend y portal | Pendiente |
+| 1b | Guardar la causal: lista, campo, validación, auditoría y la página Candidatos | backend | Hecho: `74f04b0`. Sin PR |
+| 1c | Fusionar `develop` (fin del flujo de revelar, de Henry) en la rama | backend | Hecho: `f5f81dc`, revisado |
+| 1d | No se rechaza a un descartado por el agente (decisión 22); rechazar a alguien en proceso detiene al agente (decisión 23); resto del DTO con «revelado» | backend | Brief escrito |
+| 2 | Selector en la ventana de rechazo, detalle opcional, la causal en las dos fichas y en la auditoría, sin botón de rechazar para los descartados por el agente, etiqueta de `recruiter_rejected` | portal | Brief escrito |
+| 3 | Bloque «Motivos de rechazo final» en el panel global, y la exclusión de `recruiter_rejected` de las cifras del agente | backend y portal | Brief escrito |
+| 4 | **Condicional**: rechazar a quien terminó el proceso libera su plaza y reabre la búsqueda | backend | Solo si el equipo responde que sí a la pregunta 1; fuera de las 3 jornadas |
 
 ## Registro de avance
 
@@ -206,6 +265,24 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
   de la página Candidatos (1) y la del desenlace, que pasa de 11 a 21 casos. La prueba del esquema
   vive en `src/offers/schemas/test/`, siguiendo la convención de una carpeta de pruebas por
   subcarpeta.
+- **2026-09-25** — Paso 1c: fusión de `develop` (`f5f81dc`), con los commits de Henry que quitan el
+  flujo de revelar y los de Elvis sobre cupo y mensajes. Revisada: frente a `develop` solo difieren
+  los 9 archivos del 1b, y nuestras pruebas siguen enteras. Compila; **153 suites y 1.586 pruebas
+  (1.577 pasan, 9 omitidas)** con la caché limpia = las 1.570 de `develop` más nuestras 16. Queda un
+  resto para el 1d: la descripción del desenlace en el DTO todavía dice «revelado del pool». Añadidas
+  las decisiones 21 y 22 y el punto de aceptación de la separación de descartes.
+- **2026-09-27** — Decisiones 23 y 24: rechazar o contratar a alguien en proceso detiene al agente,
+  y la analítica del agente separa por el código `recruiter_rejected`. Retirada la nota de avisar a
+  Henry: el frente se integra a su cambio. **Alcance**: el 1d suma unas horas de backend; con lo
+  gastado en el 1a, las 3 jornadas quedan sin margen.
+- **2026-09-27** — Las decisiones 22 y 23 se recortan a solo el rechazo: la contratación sale del
+  frente (*Fuera del alcance*). Escrito el brief del paso 1d, que sigue el precedente de la
+  cancelación de oferta para detener al agente.
+- **2026-09-27** — Opinión previa del 1d contestada: la despedida llega a todo el que el agente ya
+  contactó, y la detención va en segundo plano con alerta a soporte. La plaza de quien terminó y es
+  rechazado queda como está, probablemente intencional: pregunta 1 para el equipo y fase 4 condicional.
+  Escritos por adelantado los briefs de los pasos 2 y 3 y `pruebas-a-mano.md`. **Pendiente del usuario**:
+  si veta mostrar la etiqueta de la causal en la pestaña de auditoría (punto 7 del brief del paso 2).
 
 ## Antes de desplegar
 

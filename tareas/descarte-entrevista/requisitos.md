@@ -39,6 +39,9 @@ La lista la define Essperto-R y es **la misma para todas las empresas**:
 - [ ] El **detalle en texto es opcional** para todas las causales y **obligatorio para «Otro»**.
 - [ ] **No se puede guardar el descarte sin causal.**
 - [ ] La analítica puede **agrupar los descartes por causal**.
+- [ ] **Los descartes del reclutador están separados de los automáticos del agente.** Son dos cosas
+      distintas y no se mezclan ni en los datos ni en la analítica (añadido el 2026-09-25; cómo se
+      cumple, en la bitácora, decisiones 21 y 22).
 
 ## Decisiones, pasos y despliegue
 
