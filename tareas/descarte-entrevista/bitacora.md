@@ -223,8 +223,8 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
 | 1a | Mover la lista de motivos a su carpeta y sacar el desenlace a su servicio, sin cambiar nada | backend | Hecho: `7b141b9`, en `develop` por el PR #89 |
 | 1b | Guardar la causal: lista, campo, validación, auditoría y la página Candidatos | backend | Hecho: `74f04b0`. Sin PR |
 | 1c | Fusionar `develop` (fin del flujo de revelar, de Henry) en la rama | backend | Hecho: `f5f81dc`, revisado |
-| 1d | No se rechaza a un descartado por el agente (decisión 22); rechazar a alguien en proceso detiene al agente (decisión 23); resto del DTO con «revelado» | backend | Brief escrito |
-| 2 | Selector en la ventana de rechazo, detalle opcional, la causal en las dos fichas y en la auditoría, sin botón de rechazar para los descartados por el agente, etiqueta de `recruiter_rejected` | portal | Brief escrito |
+| 1d | No se rechaza a un descartado por el agente (decisión 22); rechazar a alguien en proceso detiene al agente (decisión 23); resto del DTO con «revelado» | backend | Hecho: `6082e1a`. Sin PR |
+| 2 | Selector en la ventana de rechazo, detalle opcional, la causal en las dos fichas y en la auditoría, sin botón de rechazar para los descartados por el agente, etiqueta de `recruiter_rejected` | portal | Revisado y aprobado; pendiente de commit. Sin PR |
 | 3 | Bloque «Motivos de rechazo final» en el panel global, y la exclusión de `recruiter_rejected` de las cifras del agente | backend y portal | Brief escrito |
 | 4 | **Condicional**: rechazar a quien terminó el proceso libera su plaza y reabre la búsqueda | backend | Solo si el equipo responde que sí a la pregunta 1; fuera de las 3 jornadas |
 
@@ -283,9 +283,26 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
   rechazado queda como está, probablemente intencional: pregunta 1 para el equipo y fase 4 condicional.
   Escritos por adelantado los briefs de los pasos 2 y 3 y `pruebas-a-mano.md`. **Pendiente del usuario**:
   si veta mostrar la etiqueta de la causal en la pestaña de auditoría (punto 7 del brief del paso 2).
+- **2026-09-27** — Paso 1d revisado y aprobado. Compila; **155 suites y 1.603 pruebas (1.594 pasan,
+  9 omitidas)** con la caché limpia (commit `6082e1a`): 17 más que la base, en dos archivos de prueba nuevos (orquestador y
+  controlador) y la del desenlace. Decisiones del ejecutor aceptadas: el correo de alerta lo envía el
+  orquestador, porque su envío es privado, y el método atrapa sus propios fallos; una cuarta señal de
+  «ya contactado», el flujo de la etapa ya arrancado; y el texto de la despedida copiado de la
+  cancelación, no extraído: **si cambia uno, hay que cambiar los dos**.
+- **2026-09-27** — Opinión previa del paso 2 contestada. La pestaña de auditoría, que solo existe en
+  modo de desarrollo, muestra para la causal el código y la etiqueta juntos (usuario). Las pruebas a
+  mano pasan al servidor de pruebas.
+- **2026-09-28** — Paso 2 revisado y aprobado, leyendo los archivos y con el `git diff` y la
+  comprobación de tipos que corrió el usuario, porque la consola del planificador y la del ejecutor no
+  respondían (el revisor de permisos del modo automático estaba caído). Tipos sin errores; la
+  contratación, sin cambios; un rechazo antiguo se ve igual en las dos fichas. Decisión del ejecutor
+  aceptada: quitar del comentario de la ventana la parte que decía que la observación era obligatoria.
 
 ## Antes de desplegar
 
+- 🔴 **Las pruebas a mano se corren en el servidor de pruebas**, con el frente entero fusionado en
+  `develop` y antes de pasar a `main` (usuario, 2026-09-27). Con candidatos de números del equipo:
+  ahí WhatsApp está encendido. Detalle en `pruebas-a-mano.md`.
 - 🔴 **Nada del frente entra en `develop` hasta terminarlo** (decidido por el usuario el
   2026-09-24). `develop` va al servidor de pruebas y `main` a producción. El paso 1a ya entró (PR #89)
   porque no cambia comportamiento; del 1b en adelante, todo se commitea en la rama y se fusiona **junto

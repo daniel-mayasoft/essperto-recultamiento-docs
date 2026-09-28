@@ -84,10 +84,11 @@ se toca**. Si al trabajar crees que debería, dilo en la opinión previa.
 
 ### 7 · La causal en la pestaña de auditoría
 
-Hoy la pestaña muestra los datos del registro tal cual, así que la causal saldría como `no_show`. Se
-muestra con su etiqueta: **solo para la clave `reason`** de las entradas de rechazo; el resto de la
-pestaña queda igual. *Recomendado por el planificador y pendiente de que el usuario no lo vete; si lo
-veta, este punto sale del paso.*
+La pestaña solo aparece en el modo de desarrollo y muestra los datos del registro tal cual. Para la
+clave `reason` de las entradas de rechazo, el valor se muestra **con el código y la etiqueta juntos**:
+`salary_expectation_mismatch — Expectativa salarial fuera de rango` (decidido por el usuario el
+2026-09-27). **Solo esa clave**: el nombre de la clave, la acción y el resto de la pestaña quedan como
+están.
 
 ### 8 · Los textos
 
@@ -116,6 +117,22 @@ etiqueta del detalle opcional y el aviso de detalle obligatorio con «Otro». La
   archivo enorme: solo lo necesario, en su sitio.
 - **Boy scout** (decisión 19): solo importaciones sin usar en los archivos tocados.
 - **Sin comentarios** en el código, **sin formateador**, **sin PR a `develop`**.
+
+## Opinión previa del ejecutor (2026-09-27), verificada e incorporada
+
+| Punto | Decidido |
+| --- | --- |
+| Contratar y rechazar usan la misma función del portal | **Se le añade la causal como dato opcional.** La petición de contratar sale idéntica, y el reporte lo confirma |
+| Luis no tiene un «estado» que diga «Rechazado por el reclutador» | Correcto: sale en la columna «Motivo de descarte». Corregido el caso en `pruebas-a-mano.md` |
+| La página Candidatos no tiene el título «Razón de rechazo» | La causal va **dentro del aviso que ya existe**, encima del detalle, sin título nuevo. Un rechazo antiguo queda idéntico |
+| La etiqueta del código nuevo aparece también en otros tres sitios | Correcto y deseable. La exclusión de las cifras del agente sigue siendo del paso 3 |
+| El embudo de la oferta | No se toca |
+| Comentario falso en los tipos del portal | Se deja: no es de este cambio |
+| Las pruebas a mano no se pueden correr en local | **Se corren en el servidor de pruebas**, con números del equipo. Lista rehecha con el orden, los casos que faltaban y qué buscar en el log |
+| Punto 7, la auditoría | **Código y etiqueta juntos**, solo en la clave `reason` (usuario) |
+| La contratación | Sin cambios fuera de la función compartida |
+
+**Se puede empezar.**
 
 ## Verificación
 
