@@ -134,6 +134,14 @@ abajo, que ganan sobre él).
       panel, la tabla y el detalle. Luis cuenta como que pasó las etapas anteriores y **desaparece de
       la etapa donde Marta lo sacó**: ni entró, ni pasó, ni cayó. Así no se queda «en curso» para
       siempre y la tasa de esa etapa no lo juzga.
+25. **«Motivos de rechazo final» también en la vista de cada oferta de la analítica** (usuario,
+    2026-09-29; **cambia la decisión 12**, que lo dejaba solo en el panel global). La vista de la oferta
+    ya muestra los motivos del agente dentro de «Descartados por etapa»; le faltaba el bloque de Marta.
+    Mismo cálculo y misma forma que en el panel. Es el **paso 3b**. **Amplía el alcance**: con el margen
+    ya gastado, pasa de las 3 jornadas; el usuario decide seguir.
+26. **Se arregla el mensaje de las filas de la tabla de ofertas de la analítica**, que sale a la
+    izquierda y queda fuera de la pantalla. Es un bug ajeno al frente (de julio): se menciona, el usuario
+    decide arreglarlo, y va en el paso 3b en su propio commit.
 
 
 ## Lo que dice el código y los documentos no
@@ -237,8 +245,9 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
 | 1c | Fusionar `develop` (fin del flujo de revelar, de Henry) en la rama | backend | Hecho: `f5f81dc`, revisado |
 | 1d | No se rechaza a un descartado por el agente (decisión 22); rechazar a alguien en proceso detiene al agente (decisión 23); resto del DTO con «revelado» | backend | Hecho: `6082e1a`. Sin PR |
 | 2 | Selector en la ventana de rechazo, detalle opcional, la causal en las dos fichas y en la auditoría, sin botón de rechazar para los descartados por el agente, etiqueta de `recruiter_rejected` | portal | Hecho: `7d8e67f`. Sin PR |
-| 3 | Bloque «Motivos de rechazo final» en el panel global, y la exclusión de `recruiter_rejected` de las cifras del agente | backend y portal | Revisado y aprobado; pendiente de commit. Sin PR |
-| Cierre | Traer `develop`, fusionar en `develop` los dos repositorios, pruebas a mano en el servidor de pruebas y paso a `main` (`brief-cierre-fusion-y-pruebas.md`) | los dos | Brief escrito; empieza tras el paso 3 |
+| 3 | Bloque «Motivos de rechazo final» en el panel global, y la exclusión de `recruiter_rejected` de las cifras del agente | backend y portal | Hecho: backend `52bc97c`, portal `172f8c8`. Sin PR |
+| 3b | «Motivos de rechazo final» en la vista de cada oferta (decisión 25) y el mensaje de la tabla de ofertas (decisión 26) | backend y portal | Hecho: backend #96, portal #67, en `develop`. Probado |
+| Cierre | Traer `develop`, fusionar en `develop` los dos repositorios, pruebas a mano en el servidor de pruebas y paso a `main` (`brief-cierre-fusion-y-pruebas.md`) | los dos | Etapas 1 a 4 hechas (2026-09-29): en `develop`, desplegado en pruebas y probado. **Pendiente la etapa 5, `main`**, que el usuario hará junto con el próximo cambio de otro compañero |
 | 4 | **Condicional**: rechazar a quien terminó el proceso libera su plaza y reabre la búsqueda | backend | **Descartada**: el equipo confirmó el 2026-09-29 que el comportamiento actual es el correcto |
 
 ## Registro de avance
@@ -329,6 +338,53 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
 - **2026-09-29** — El equipo responde la pregunta de la plaza: rechazar no debe buscar a otro, el
   reclutador elige al siguiente del listado. Pregunta cerrada, fase 4 descartada. No queda ninguna
   pregunta abierta.
+- **2026-09-29** — Cierre, etapa 1. Paso 3 commiteado (backend `52bc97c`, portal `172f8c8`). Backend:
+  `develop` fusionado en la rama (`5272bd8`), al día con el remoto; frente al `develop` fusionado solo
+  difieren los 15 archivos del frente. Compila; **161 suites y 1.651 pruebas (1.642 pasan, 9
+  omitidas)** con la caché limpia; la despedida sigue idéntica a la de la cancelación. Portal:
+  `develop` solo trae un cambio en `public/politica-de-privacidad.html`, sin relación con el frente; no
+  hace falta traerlo a la rama, el PR lo resuelve solo. **Listo para la etapa 2**: los dos PR a
+  `develop`. Arranque en local de esta fusión sin hacer: lo cubre el despliegue en el servidor de
+  pruebas, porque la fusión no toca el registro de piezas del backend.
+- **2026-09-29** — Cierre, etapas 2 y 3. PR fusionados en `develop`: backend #95 (`d978a00`) y portal
+  #66 (`02d0d3d`), sin commits del frente fuera. Desplegado en el servidor de pruebas y comprobado en
+  él: el backend arrancó sin errores, su imagen trae `recruiter_rejected`, la del portal trae «Motivos
+  de rechazo final», y la documentación de la API ya tiene el campo `reason`. Siguen las pruebas a
+  mano.
+- **2026-09-29** — Pruebas a mano con solo dos números del equipo, repartidas en tres ofertas usadas en
+  orden, sin que un número tenga dos conversaciones abiertas a la vez: **oferta 1**, Pedro y Sara
+  terminan y se rechazan; **oferta 2**, Ana descartada por el agente y Luis rechazado a mitad; **oferta
+  3**, el candidato de la cola. **Ofertas 1 y 2: bien** (usuario). La oferta 3 se hace **fuera de la
+  ventana de primer contacto, de 20:00 a 8:00 hora de Colombia**: pausar la oferta no sirve, porque el
+  bombeo de la cola solo se detiene con la oferta cancelada.
+- **2026-09-29** — El primer Luis de la oferta 2 no aceptó el tratamiento de datos, así que lo descartó
+  el agente y el rechazo a mitad del proceso no se había probado; se repitió con un Luis nuevo que
+  aceptó, contestó una pregunta y se detuvo. **Bien** (usuario): despedida recibida, agente detenido, y
+  en la analítica «Descartados por etapa» se queda en 2 (Ana y el primer Luis, los dos del agente)
+  mientras «Motivos de rechazo final» suma la causal del nuevo.
+- **2026-09-29** — **El rechazo antiguo se ve igual que antes** (usuario). **La oferta 3 se sustituye por
+  una revisión de código** (usuario, por lo difícil de preparar). Un candidato en cola nunca contactado
+  nace sin conversación (`flowState` nulo), en la etapa de preguntas y con un historial de solo captación
+  y compatibilidad, que no son etapas conversacionales: las cuatro señales de «ya contactado» de
+  `stopAfterRecruiterRejection` dan falso y sale sin mensaje. Vale igual para los del portal de empleo y
+  los de carga masiva. La prueba automática «nunca contactado» pasa, aunque arma la conversación en cola
+  sin empezar en vez de nula; la lógica cubre las dos formas. Además, la prueba nocturna quizá no habría
+  servido: con el modo de pruebas de los portales encendido, la ventana de primer contacto no se aplica.
+  **Solo queda**, antes de `main`, preguntar al equipo si lo suyo en `develop` necesita algo para
+  desplegar.
+- **2026-09-29** — Paso 3b revisado y aprobado, en `feat/offer-detail-final-rejections` desde `develop`.
+  Backend: el detalle de la oferta añade `finalRejections` llamando a la misma función del panel;
+  compila, **161 suites y 1.652 pruebas (1.643 pasan, 9 omitidas)**, una más que la base. Portal: el
+  aviso de la tabla pasa arriba, y la tarjeta va tras «Descartados por etapa», copiada de la del
+  panel y sin textos nuevos; tipos sin errores. Dos casos a mano en `pruebas-a-mano.md`. En el detalle,
+  una oferta cancelada cuenta: es una sola oferta elegida, como ya hacen sus otras cifras.
+- **2026-09-29** — **Frente terminado en `develop`.** Paso 3b fusionado (backend #96, portal #67),
+  desplegado en pruebas y con sus dos casos en verde. Todos los puntos de aceptación cumplidos
+  (`requisitos.md`) y todas las pruebas a mano en verde (`pruebas-a-mano.md`). `planning.md` queda con
+  el mapa del código tal como quedó. **Solo falta pasar `develop` a `main`**: el usuario lo hará cuando
+  otro compañero tenga cambios que subir. Ese día, antes de desplegar: backend y portal en la misma
+  ventana (*Antes de desplegar*), y preguntar al equipo si lo suyo en `develop` necesita algo. El
+  alcance real pasó de las 3 jornadas acordadas (ver `requisitos.md`).
 
 ## Antes de desplegar
 

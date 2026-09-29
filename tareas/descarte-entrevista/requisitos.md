@@ -33,22 +33,31 @@ La lista la define Essperto-R y es **la misma para todas las empresas**:
 
 ## Aceptación
 
-- [ ] Al descartar a un candidato tras la entrevista, el responsable **elige una causal de la lista fija**.
-- [ ] La lista es **definida por Essperto-R, igual para todos los tenants**: la empresa no la configura ni
+**Cumplida el 2026-09-29**, probada en el servidor de pruebas (`pruebas-a-mano.md`). En `develop`,
+pendiente de pasar a `main`.
+
+- [x] Al descartar a un candidato tras la entrevista, el responsable **elige una causal de la lista fija**.
+- [x] La lista es **definida por Essperto-R, igual para todos los tenants**: la empresa no la configura ni
       la amplía.
-- [ ] El **detalle en texto es opcional** para todas las causales y **obligatorio para «Otro»**.
-- [ ] **No se puede guardar el descarte sin causal.**
-- [ ] La analítica puede **agrupar los descartes por causal**.
-- [ ] **Los descartes del reclutador están separados de los automáticos del agente.** Son dos cosas
+- [x] El **detalle en texto es opcional** para todas las causales y **obligatorio para «Otro»**.
+- [x] **No se puede guardar el descarte sin causal.**
+- [x] La analítica puede **agrupar los descartes por causal**: en el panel global y en la vista de cada
+      oferta (decisión 25).
+- [x] **Los descartes del reclutador están separados de los automáticos del agente.** Son dos cosas
       distintas y no se mezclan ni en los datos ni en la analítica (añadido el 2026-09-25; cómo se
-      cumple, en la bitácora, decisiones 21 y 22).
+      cumple, en la bitácora, decisiones 21 a 24).
+
+**Alcance real:** se pasó de las 3 jornadas acordadas. Lo que no estaba en la estimación: separar el
+desenlace a su propio servicio (paso 1a), integrar el fin del flujo de revelar de otro frente, detener
+al agente cuando el reclutador rechaza a alguien en proceso (paso 1d) y el bloque en la vista de cada
+oferta (paso 3b).
 
 ## Decisiones, pasos y despliegue
 
 Todo está en **`bitacora.md`**, que es la fuente única de la verdad de este frente. El mapa del código
-está en `planning.md`. Lo más importante: **hoy el detalle en texto es obligatorio en todo rechazo**, así
-que volverlo opcional cambia un comportamiento que ya funciona; **los rechazos ya guardados no tienen
-causal**; y **backend y portal se despliegan a la vez**.
+está en `planning.md`. Lo más importante: **el detalle en texto era obligatorio en todo rechazo** y pasó
+a opcional, un cambio visible sobre un flujo en producción; **los rechazos anteriores no tienen causal**;
+y **backend y portal se despliegan a la vez**.
 
 ## Alcance y estimación acordados (2026-09-23)
 

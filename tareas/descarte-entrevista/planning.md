@@ -50,23 +50,27 @@ la bitácora).
 | Qué | Dónde | Para qué sirve aquí |
 | --- | --- | --- |
 | El desenlace de contratación | `src/offers/enums/hiring-outcome.enum.ts` | Los tres valores: pendiente, contratado, rechazado |
-| Los campos guardados | `src/offers/schemas/offer.schema.ts` (participación del candidato: desenlace, observación, fecha y quién) | **Aquí nace el campo nuevo**, `hiringOutcomeReason` (decisión 3). ⚠️ Dos comentarios de estos campos no dicen la verdad (punto B de la bitácora) |
-| La lista nueva | Un enum propio, `HiringRejectionReason`, en `src/offers/enums/rejection/`, junto a `rejection-reason.enum.ts` (decisión 16) | **No se reusa `RejectionReason`**, que es el del embudo automático (decisión 3) |
-| La regla | `src/offers/hiring-outcome.service.ts` → `HiringOutcomeService.setCandidateHiringOutcome` (decisión 17) | Valida la observación, comprueba que esté desbloqueado, impide cambiar una decisión ya tomada, escribe la auditoría y guarda. **Aquí va toda la validación nueva** (decisión 7) |
-| La entrada de la API | `src/offers/offers.controller.ts` → `POST /offers/:id/candidates/:candidateId/hiring-outcome` | Comprueba permisos de gestión de la oferta y llama directamente al servicio del desenlace |
-| Lo que acepta la API | `src/offers/dto/set-candidate-hiring-outcome.dto.ts` | La causal se declara aquí para la documentación de la API, pero **sus decoradores no validan nada** (punto A). El tope de 1000 caracteres tampoco rige hoy |
-| Lo que ve la página Candidatos | `src/offers/candidates.service.ts` | Alimenta la **página Candidatos** del portal, no la ficha de la oferta (punto D). La causal tiene que salir también por aquí |
-| La analítica | `src/metrics/metrics.service.ts` (motivos de rechazo y rechazo por etapa) y `src/metrics/metrics.controller.ts` | **Hoy agrupa por el error de etapa del embudo, no por esta decisión.** Que la causal llegue a la analítica es trabajo aparte dentro de este frente |
+| Los campos guardados | `src/offers/schemas/offer.schema.ts` (participación del candidato: desenlace, causal, observación, fecha y quién) | `hiringOutcomeReason`, restringido a la lista y nulo por defecto (decisión 3). ⚠️ Un código de la lista **no se retira nunca** (punto G) |
+| La lista de causales | `HiringRejectionReason`, en `src/offers/enums/rejection/`, junto a `rejection-reason.enum.ts` (decisión 16) | **No se reusa `RejectionReason`**, que es el del embudo automático (decisión 3). Ese otro enum suma `RECRUITER_REJECTED` (decisión 23) |
+| La regla | `src/offers/hiring-outcome.service.ts` → `HiringOutcomeService.setCandidateHiringOutcome` (decisión 17) | Toda la validación: desenlace, causal, «Otro» con detalle, no rechazar a quien el agente descartó (decisiones 5 a 7, 20 y 22). Comprueba el desbloqueo, impide cambiar una decisión, audita y guarda |
+| La entrada de la API | `src/offers/offers.controller.ts` → `POST /offers/:id/candidates/:candidateId/hiring-outcome` | Comprueba permisos, llama al servicio del desenlace y, si es un rechazo, lanza en segundo plano la detención del agente |
+| Detener al agente | `src/offers/pipeline/pipeline-orchestrator.service.ts` → `stopAfterRecruiterRejection` | Saca del proceso con `markFailed` y `recruiter_rejected`; despedida solo a quien el agente ya contactó; si falla, log y correo de alerta (decisión 23). ⚠️ El texto de la despedida está **copiado** del de la cancelación: si cambia uno, se cambia el otro |
+| Lo que acepta la API | `src/offers/dto/set-candidate-hiring-outcome.dto.ts` | La causal se declara aquí para la documentación de la API, pero **sus decoradores no validan nada** (punto A) |
+| Lo que ve la página Candidatos | `src/offers/candidates.service.ts` | Alimenta la **página Candidatos** del portal, no la ficha de la oferta (punto D). Devuelve también la causal |
+| La analítica | `src/metrics/metrics.service.ts` | `isAgentRejection` (por candidato) y `agentStageHistory` (por historial), junto a `normalizeRejectionReason`: las dos piezas del criterio que separan al agente del reclutador (decisión 24). `finalRejections` arma el bloque del reclutador para el panel y para el detalle de cada oferta (decisiones 12, 13 y 25) |
 
 ### Portal (`../../../../esscoti-frontend`)
 
 | Qué | Dónde |
 | --- | --- |
-| Los dos botones, la ventana de rechazo, la llamada a la API y **la ficha del candidato en la oferta** | `app/routes/offers.$id.tsx` (ventana de rechazo, la llamada a `hiring-outcome`, y la razón del rechazo en la ficha). La ficha lee la participación directamente de la oferta |
-| **La página Candidatos**, que también muestra la razón del rechazo | `app/routes/candidates.tsx` (punto D de la bitácora) |
+| Los dos botones, la ventana de rechazo con el selector de causal, la llamada a la API y **la ficha del candidato en la oferta** | `app/routes/offers.$id.tsx`. La ficha lee la participación directamente de la oferta. El botón de rechazar no sale a quien el agente descartó |
+| **La lista de causales en el portal**, con su etiqueta | `app/lib/hiring-rejection-reasons.ts`. Única fuente de la lista en el portal |
+| **La página Candidatos**, que también muestra la causal | `app/routes/candidates.tsx` (punto D de la bitácora) |
 | Los tipos del candidato que llegan del backend | `app/lib/models.ts` |
-| Los textos que ve Marta | `app/i18n/locales/es.ts` **y `app/i18n/locales/en.ts`**, bajo `candidates.hiringOutcome` |
-| La pantalla de analítica | `app/routes/analytics.tsx` |
+| Los textos que ve Marta | `app/i18n/locales/es.ts` **y `app/i18n/locales/en.ts`**, bajo `candidates.hiringOutcome` (las causales en `reasons`) y `rejection.recruiter_rejected` |
+| La etiqueta de `recruiter_rejected` | `app/lib/status-labels.ts` |
+| La pestaña de auditoría (solo en modo de desarrollo) | `app/components/offer-audit-log.tsx`: la causal sale como «código — etiqueta» |
+| La pantalla de analítica | `app/routes/analytics.tsx`: «Motivos de rechazo final» en el panel y en la vista de cada oferta; sus tipos viven en la propia pantalla |
 | Permisos para ver los botones | `app/lib/permissions.ts` (gestión de todas las ofertas o de las asignadas) |
 
 ## Lo que había que decidir — cerrado en la bitácora
