@@ -196,11 +196,9 @@ E.
   previa del 1d; el usuario decide dejarlo el 2026-09-27). Pedro termina, ocupa la plaza y la oferta
   se cierra por llena; Marta lo rechaza tras la entrevista y la oferta sigue cerrada, sin que el
   agente traiga a nadie. Para seguir buscando, Marta reabre la oferta o amplía las plazas a mano.
-  **Probablemente intencional**: en el cobro por plaza, la plaza de Pedro ya se cobró, y rellenarla
-  sola cobraría otra vez sin que nadie lo pidiera; el comentario original del método del desenlace
-  decía que rechazar no devuelve lo cobrado y que volver a llenar la plaza sería «una decisión
-  aparte». No se sabe si se acordó con negocio. Si algún día se quiere cambiar, es un frente propio:
-  toca el conteo de plazas, el cierre y la reapertura de la oferta, y la facturación.
+  **Intencional, confirmado por el equipo el 2026-09-29** (ver *Preguntas abiertas*): el reclutador
+  elige al siguiente del listado. Si algún día se quiere cambiar, es un frente propio: toca el conteo
+  de plazas, el cierre y la reapertura de la oferta, y la facturación.
 
 - **La contratación no se toca.** Este frente trata de rechazos. Con el cambio de Henry, «Marcar como
   contratado» aparece en todos los candidatos, también a mitad del proceso o ya descartados por el
@@ -220,13 +218,13 @@ E.
 
 ## Preguntas abiertas
 
-**Para el equipo** (anotada el 2026-09-27, se pregunta el 2026-09-28):
+Ninguna.
 
-1. **Cuando se rechaza a un candidato que ya terminó el proceso y ocupó la plaza, ¿el sistema debería
-   volver a buscar a otro, aunque el cliente que paga por plaza pague de nuevo?** Hoy no lo hace (ver
-   *Fuera del alcance*). Si la respuesta es **no**, el comportamiento actual es el correcto y se cierra.
-   Si es **sí**, entra la fase 4 de *Pasos*, que **no cabe en las 3 jornadas**: se avisa a la dirección
-   antes de empezarla.
+**Cerrada el 2026-09-29, respondida por el equipo:** *¿rechazar a quien terminó el proceso y ocupó la
+plaza debería hacer que el sistema busque a otro?* **No.** El sistema procesa una cantidad fija de
+candidatos por oferta, aunque las plazas ya estén llenas, y sigue procesando a todos los relacionados con
+ella. Rechazar solo deja registrada la decisión; el reclutador ve el listado y contacta al siguiente. El
+comportamiento actual es el correcto y la fase 4 no se hace.
 
 ## Pasos
 
@@ -241,7 +239,7 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
 | 2 | Selector en la ventana de rechazo, detalle opcional, la causal en las dos fichas y en la auditoría, sin botón de rechazar para los descartados por el agente, etiqueta de `recruiter_rejected` | portal | Hecho: `7d8e67f`. Sin PR |
 | 3 | Bloque «Motivos de rechazo final» en el panel global, y la exclusión de `recruiter_rejected` de las cifras del agente | backend y portal | Revisado y aprobado; pendiente de commit. Sin PR |
 | Cierre | Traer `develop`, fusionar en `develop` los dos repositorios, pruebas a mano en el servidor de pruebas y paso a `main` (`brief-cierre-fusion-y-pruebas.md`) | los dos | Brief escrito; empieza tras el paso 3 |
-| 4 | **Condicional**: rechazar a quien terminó el proceso libera su plaza y reabre la búsqueda | backend | Solo si el equipo responde que sí a la pregunta 1; fuera de las 3 jornadas |
+| 4 | **Condicional**: rechazar a quien terminó el proceso libera su plaza y reabre la búsqueda | backend | **Descartada**: el equipo confirmó el 2026-09-29 que el comportamiento actual es el correcto |
 
 ## Registro de avance
 
@@ -328,6 +326,9 @@ Rama `feat/hiring-rejection-reason`, desde `develop`, en los dos repositorios.
   mano del paso 3 en `pruebas-a-mano.md`. Decisiones del ejecutor aceptadas: el total del bloque va en
   una etiqueta junto al título, y «sin causal» viaja como causal nula, no como un código inventado.
   **Con esto están cubiertos los seis puntos de aceptación**; falta el cierre.
+- **2026-09-29** — El equipo responde la pregunta de la plaza: rechazar no debe buscar a otro, el
+  reclutador elige al siguiente del listado. Pregunta cerrada, fase 4 descartada. No queda ninguna
+  pregunta abierta.
 
 ## Antes de desplegar
 

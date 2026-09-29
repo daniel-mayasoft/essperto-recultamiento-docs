@@ -57,7 +57,7 @@ Solo con todas las pruebas en verde. `develop` a `main` en los dos repositorios 
 **de backend y portal en la misma ventana** (decisión 15 y *Antes de desplegar*). Después, marcar el
 frente como terminado en la bitácora.
 
-## Lo que no bloquea
+## Sin preguntas abiertas
 
-La pregunta al equipo sobre la plaza de quien terminó el proceso (bitácora, *Preguntas abiertas*). Si la
-respuesta es «sí», la fase 4 es un frente aparte, con aviso a la dirección, y no retrasa este cierre.
+La pregunta al equipo sobre la plaza de quien terminó el proceso quedó respondida el 2026-09-29: el
+comportamiento actual es el correcto y la fase 4 no se hace (bitácora, *Preguntas abiertas*).
