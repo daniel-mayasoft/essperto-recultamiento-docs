@@ -12,6 +12,25 @@ está cada pieza** y **qué hay que comprobar antes de que alguien toque código
    antes de tocar código, y lo que ya salió mal. Se escribió para otro frente, pero las reglas son de la
    casa.
 3. `../../../../esscoti-backend/CLAUDE.md` — credenciales y datos de producción.
+4. `../descarte-entrevista/bitacora.md` — **la tarea anterior, ya terminada, como ejemplo de cómo se
+   lleva un frente**: una bitácora como fuente única de la verdad (decisiones numeradas, lo que el
+   código dice y los documentos no, pasos, despliegue), creada por el planificador al empezar. Esta
+   tarea todavía no tiene la suya.
+
+> **Verificado contra `develop` el 2026-09-29**, después de que entraran la tarea del descarte y la
+> fusión del trabajo de plazos de la prueba psicométrica: la validación del backend, los tres botones
+> apagados del listado, el aviso del formulario y el Computrabajo preseleccionado siguen donde dice este
+> documento. **LinkedIn sigue sin existir en el código.**
+
+**Lo aprendido en la tarea anterior, para no repetirlo:**
+
+- **La estimación de 3 jornadas se superó**, por cuatro causas: ordenar el código antes de cambiarlo,
+  cambios de otros compañeros que entraron a mitad de camino, efectos que solo aparecieron al probar, y
+  una ampliación de alcance. Si al planificar algo apunta a pasarse de lo acordado, **se dice al usuario
+  antes de empezar**, no al terminar.
+- **El alcance es el de la tarea, no el del código.** Que dos casos compartan código no significa que
+  una decisión tomada para uno se aplique al otro. Si un cambio aquí toca también un caso hermano, se
+  pregunta.
 
 **El cambio en sí es de una línea; el riesgo está en lo que viene después.** Quitar la validación es
 trivial. Lo que no es trivial es que, a partir de ahí, **existirán ofertas sin ninguna plataforma**, un
