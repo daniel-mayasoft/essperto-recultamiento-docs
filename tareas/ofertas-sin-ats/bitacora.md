@@ -99,6 +99,20 @@ Las tres primeras vienen de `requisitos.md` (2026-09-23); aquí solo se numeran.
     ofertas. Pasa a decir, sin condición, que la oferta está activa y el sistema filtra y hace avanzar
     a los candidatos que entran. Es cierta para Laura y para Pedro; Pedro deja de oír «captando».
     Las decisiones 12 y 13 amplían el paso 1, que no tenía commit: van en el mismo diff.
+14. **El formulario público de postulación cuenta como canal de publicación** (usuario,
+    2026-10-01; ver punto L). Sofía, sin portales pero con el formulario encendido en Mi Compañía,
+    comparte el enlace de la oferta y los candidatos se registran solos: no debe oír que se cargan a
+    mano. «Sin canales» pasa a ser: sin ningún portal habilitado **y** con el formulario apagado.
+    - **En el backend, una sola pregunta, «¿esta oferta tiene canales de publicación?»**, que usan
+      los dos puntos del agente de WhatsApp (decisiones 5 y 12). Hoy: algún portal en la oferta, o el
+      formulario encendido en la empresa. **Excepción a no abstraer para dos usos, confirmada por el
+      usuario el 2026-10-01**: la tarea de canales cambia esa respuesta (canales elegidos por oferta,
+      LinkedIn entre ellos) y así la cambia en un solo sitio. Si leer la empresa falla, cuenta como
+      formulario apagado y queda en el log, con el mismo criterio que la decisión 9.
+    - **En el portal (paso 2)**, el aviso del formulario sale sin ningún portal habilitado y con el
+      formulario apagado.
+    - **LinkedIn no se cuenta aparte**: hoy solo puede publicar con el formulario abierto.
+    - Los textos aprobados (decisiones 5, 7 y 12) no cambian.
 
 ## Lo que dice el código y los documentos no
 
@@ -168,6 +182,17 @@ del planning. Esa fusión no toca la creación de la oferta ni su validación; s
   por miembro o en la validación del piso y el techo, sin llegar a la de plataformas; las demás usan
   el modo demo. Leído el 2026-09-30; el paso 1 lo confirma corriendo las pruebas.
 
+- **L. LinkedIn y el formulario público ya existen** (corrige la decisión 2 y el punto H). Entraron
+  en `develop` el 2026-10-01 con la rama de captación por redes de Elvis, en los dos repositorios,
+  después de crear nuestras ramas. Comprobado leyendo esa fusión:
+  - **El formulario público** se enciende por empresa en Mi Compañía. Cada oferta tiene «Compartir»,
+    con un enlace y un QR; quien se registra entra como candidato de enlace público. **Visible hoy.**
+  - **LinkedIn** se vincula a la empresa **aparte de los portales**, y se publica a mano desde la
+    ficha de cada oferta, no al crearla. **El panel está escondido**: la publicación en redes está
+    aplazada. El backend rechaza publicar en LinkedIn si el formulario no está abierto.
+  - No toca la creación de la oferta ni el agente de WhatsApp. En el portal toca el formulario de la
+    oferta, en otra zona que el aviso.
+
 ## Fuera del alcance, a sabiendas
 
 - **Añadir un portal a las ofertas ya creadas cuando la empresa lo configura después** (punto I,
@@ -198,7 +223,9 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
 
 | Paso | Qué | Repositorio | Estado |
 | --- | --- | --- | --- |
-| 1 | Quitar la validación, probar el caso nuevo y cambiar la confirmación del agente de WhatsApp (`brief-paso1-backend.md`), y los textos del agente de las decisiones 11 a 13 | backend | Aprobado (2026-10-01). Pendiente de commit |
+| 1 | Quitar la validación, probar el caso nuevo y cambiar la confirmación del agente de WhatsApp (`brief-paso1-backend.md`), y los textos del agente de las decisiones 11 a 13 | backend | Hecho: `d6faaf9`. Sin PR |
+| 1b | Fusionar `develop` (captación por redes) en las dos ramas | los dos | Hecho: backend `569d7a5`; portal igual a `develop` (`cbc47b1`). Revisado |
+| 1c | La pregunta única «¿la oferta tiene canales?» con el formulario público (decisión 14; `brief-paso1c-formulario-publico.md`) | backend | Brief escrito |
 | 2 | Encender los tres botones y cambiar el aviso del formulario | portal | Propuesto |
 | Cierre | Fusión en `develop`, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | Propuesto |
 
@@ -247,6 +274,17 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
   plataformas de cada oferta: no hubo que añadir nada. Compila; **165 suites y 1.661 pruebas que
   pasan, 9 omitidas**, con la caché limpia, corrido por el planificador: **nueva línea base**. Listo
   para commit; sigue el paso 2.
+- **2026-10-01** — Paso 1 commiteado (backend `d6faaf9`; documentación `9fb7ce2`). Al preparar el
+  paso 2 aparece en `develop` la rama de captación por redes (punto L). Decisión 14: el formulario
+  público cuenta como canal. **Antes de seguir**: fusionar `develop` en las dos ramas (el usuario) y
+  revisar cada fusión; luego una cuarta ronda corta del backend, en un commit nuevo, y el brief del
+  paso 2. **Alcance**: con esta ronda, las 2,5 jornadas quedan con poco margen.
+- **2026-10-01** — Paso 1b revisado. Backend: `develop` fusionado (`569d7a5`); frente a `develop`
+  solo difieren los siete archivos del paso 1. Hubo que instalar las dependencias que trae la rama de
+  Elvis (`npm ci`, sin tocar el archivo de versiones): sin ellas no compila. Compila; **175 suites y
+  1.742 pruebas que pasan, 9 omitidas**, con la caché limpia: **nueva línea base**. Portal: avanzó
+  hasta `develop` sin commits propios, dependencias instaladas, tipos sin errores. ⚠️ **Quien levante
+  el entorno después de esta fusión tiene que reinstalar dependencias en los dos repositorios.**
 
 ## Antes de desplegar
 
