@@ -106,10 +106,8 @@ monta la creación.
   el resultado, no con la lectura.
 - `npx jest --clearCache`, `npm run build` y `npm test`, **una vez** sobre el conjunto. El resultado
   frente a la línea base va en el reporte.
-- **A mano, en local**: una empresa sin portales y sin ofertas crea una desde el botón del listado
-  vacío. Se crea, el formulario todavía muestra el aviso viejo (lo cambia el paso 2), y en el log
-  del backend salen tres avisos de «orquestador no configurado» y ningún despacho. Luego se le carga un
-  candidato a mano y se comprueba que entra en la oferta.
+- **A mano**: no en este paso. Las pruebas a mano van al servidor de pruebas, en el cierre (ver
+  *Antes de desplegar* de la bitácora).
 
 ## Qué entregar
 

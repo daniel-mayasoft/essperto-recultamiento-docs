@@ -54,6 +54,51 @@ Las tres primeras vienen de `requisitos.md` (2026-09-23); aquí solo se numeran.
    demo, el agente diría que los candidatos se cargan a mano. El fallo queda en el log.
 10. **Una oferta sin canales y fuera de modo demo lleva la frase nueva aunque no nazca activa.** Hoy
     la creación siempre la deja activa; es solo para que ninguna variante prometa una búsqueda.
+11. **El agente de WhatsApp anticipa la búsqueda solo en condicional** (usuario, 2026-10-01). Sin
+    esto, el agente puede decirle a Laura «confírmame y el sistema empieza a buscar candidatos» y, un
+    minuto después, que los candidatos se cargan a mano. El agente **no sabe antes de crear la oferta
+    si tendrá canales** —ninguna herramienta ni instrucción se lo dice—, así que el texto le hace
+    hablar en condicional («si tienes canales, el sistema buscará candidatos») y lo remite al
+    resultado. La condición es sobre **la oferta**, no sobre la empresa, para que siga siendo cierta
+    cuando se elijan canales por oferta, y habla de «canales de publicación», no de «ATS»
+    (decisión 3). Cambian dos textos que lee el modelo, y solo en esa frase:
+    - Las instrucciones generales, en el paso de confirmar, pasan a: «Solo si el reclutador confirma,
+      llama a `create_offer` para publicarla. Si la oferta va a tener canales de publicación, el
+      sistema empezará a buscar candidatos; el resultado de `create_offer` dice si es así. NUNCA
+      crees la oferta sin confirmación.»
+    - La descripción de la herramienta de crear la oferta pasa a: «Publica la oferta usando el ÚLTIMO
+      borrador generado con draft_offer. Si va a tener canales de publicación, el sistema empieza a
+      buscar candidatos. Llamar SOLO después de que el reclutador confirme explícitamente el
+      borrador.»
+    **Se conserva «publicar»** (corregido el 2026-10-01; una primera versión decía «crear»). En las
+    instrucciones del agente, publicar es que la oferta deje de ser borrador y quede en marcha en
+    Essperto («Borrador = pendiente de publicar»), no subirla a un portal. En ese sentido, la oferta de
+    Laura sí se publica.
+    No tiene prueba automática: se revisa en el diff y con una conversación por WhatsApp de Laura y
+    otra de Pedro en el cierre.
+12. **El agente no promete que llegarán candidatos a una oferta sin canales** (usuario, 2026-10-01).
+    Laura pregunta al día siguiente «¿ya llegaron candidatos?»; hoy el agente le contesta que la
+    oferta está publicada y que le avisará cuando lleguen, y no llegará nadie si ella no los carga.
+    Cambian dos textos:
+    - Lo que devuelve la consulta de **una** oferta sin candidatos: si la oferta no tiene canales, la
+      instrucción al agente pasa a «Responde que la oferta no tiene canales de publicación, así que
+      los candidatos no llegan solos: se cargan a mano desde el portal de Essperto.» Con canales,
+      como hoy. **Sin excepción de modo demo**: allí el candidato entra enseguida y la oferta casi
+      nunca está vacía.
+    - La regla general de las instrucciones para ofertas sin candidatos cambia su ejemplo, que
+      promete («Aún no llegan postulantes, apenas la publicamos. Te aviso en cuanto haya
+      novedades.»), por uno neutro: «Si la oferta aún no tiene candidatos, dilo con naturalidad (ej.
+      "Todavía no hay candidatos en esta oferta.") en vez de quedarte en silencio o volver a
+      preguntar.» **Neutro y no dos ejemplos, uno por caso**: el agente solo sabe si la oferta tiene
+      canales cuando consulta una sola; al consultar varias o la lista, la herramienta no se lo dice
+      y tendría que adivinar cuál usar (usuario, 2026-10-01).
+    La respuesta de varias ofertas a la vez («Sin postulantes todavía.») no se toca: es un dato, no
+    una promesa.
+13. **«En proceso» deja de decir que el sistema capta candidatos** (usuario, 2026-10-01). La
+    definición aparece en tres sitios: las instrucciones generales y los dos resúmenes de la lista de
+    ofertas. Pasa a decir, sin condición, que la oferta está activa y el sistema filtra y hace avanzar
+    a los candidatos que entran. Es cierta para Laura y para Pedro; Pedro deja de oír «captando».
+    Las decisiones 12 y 13 amplían el paso 1, que no tenía commit: van en el mismo diff.
 
 ## Lo que dice el código y los documentos no
 
@@ -133,6 +178,9 @@ del planning. Esa fusión no toca la creación de la oferta ni su validación; s
   bloque de errores: si ese guardado falla, Laura oye que no se pudo crear y, si reintenta, la oferta
   queda duplicada. Es anterior a este frente. La decisión 9 evita que la lectura del modo demo sume
   un caso más.
+- **Elegir canales al crear la oferta por WhatsApp.** El usuario cree que el agente debería ofrecer
+  esa elección (2026-10-01). Se revisa en la tarea de canales de publicación; si entra, la decisión 11
+  se vuelve a tocar allí.
 - **El texto de los botones y avisos del listado está escrito a mano en español**, fuera de los
   textos traducidos. El texto nuevo sí va a los textos; los que se quitan, se quitan.
 
@@ -150,7 +198,7 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
 
 | Paso | Qué | Repositorio | Estado |
 | --- | --- | --- | --- |
-| 1 | Quitar la validación, probar el caso nuevo y cambiar la confirmación del agente de WhatsApp (`brief-paso1-backend.md`) | backend | Brief escrito |
+| 1 | Quitar la validación, probar el caso nuevo y cambiar la confirmación del agente de WhatsApp (`brief-paso1-backend.md`), y los textos del agente de las decisiones 11 a 13 | backend | Aprobado (2026-10-01). Pendiente de commit |
 | 2 | Encender los tres botones y cambiar el aviso del formulario | portal | Propuesto |
 | Cierre | Fusión en `develop`, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | Propuesto |
 
@@ -171,9 +219,42 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
   del embudo y una prueba suya, uno de ellos un reformateo) que no tocan la zona: no se traen ahora,
   **se traen en el cierre**. Decisiones 9 y 10, y un caso nuevo en *Fuera del alcance*. Corregida la
   prueba a mano del brief: en local el orquestador no está configurado.
+- **2026-10-01** — Paso 1 revisado por el planificador, leyendo el diff preparado: cinco archivos,
+  índice y árbol coincidiendo. Compila; **164 suites y 1.659 pruebas que pasan, 9 omitidas**, con la
+  caché limpia: 7 más que la línea base. Decisiones del ejecutor aceptadas: la prueba de la creación
+  configura también la clave de los robots y la dirección base, para que cada envío llegue de verdad
+  a mirar la credencial, y exige los tres avisos del log; se reutiliza la imitación del control de
+  entrada que ya tenía nombre en español, sin renombrarla. **Prueba a mano en local sin hacer.**
+  **Pendiente del usuario**: dos textos que el modelo del agente de WhatsApp lee antes de crear la
+  oferta (la descripción de la herramienta y las instrucciones generales) siguen diciendo que crearla
+  pone al sistema a buscar candidatos.
+- **2026-10-01** — Decisión 11: se cambian los dos textos, con la búsqueda en condicional y sobre
+  la oferta. La elección de canales por WhatsApp queda para la tarea de canales. Vuelve al ejecutor
+  junto con la pregunta sobre el aviso de Jest de un proceso que no cierra limpio. La prueba a mano
+  en local se retira: las pruebas a mano van al servidor de pruebas, en el cierre (usuario).
+- **2026-10-01** — **Paso 1 revisado y aprobado.** Seis archivos, índice y árbol coincidiendo; los
+  dos textos de la decisión 11, literales. Compila; **164 suites y 1.659 pruebas que pasan, 9
+  omitidas**, con la caché limpia, corrido por el planificador: **nueva línea base**. El aviso de Jest
+  de un proceso que no cierra limpio ya salía antes del cambio. Listo para commit; sigue el paso 2.
+- **2026-10-01** — Antes del commit, el usuario pide revisar «Publica»: se conserva (decisión 11
+  corregida). Revisados todos los textos del agente de WhatsApp que hablan de publicar, buscar o
+  recibir candidatos, buscando las palabras y leyendo cada uno en su contexto; la búsqueda no cubre
+  una promesa escrita con otras palabras. Entran las decisiones 12 y 13. Quedan sin tocar: el resumen
+  de varias ofertas, la foto del candidato leída de los portales y «Borrador = pendiente de
+  publicar». El paso 1 vuelve al ejecutor.
+- **2026-10-01** — **Paso 1 aprobado, tercera ronda.** Siete archivos, índice y árbol coincidiendo;
+  los textos de las decisiones 11 a 13, literales. La consulta de ofertas del agente ya traía las
+  plataformas de cada oferta: no hubo que añadir nada. Compila; **165 suites y 1.661 pruebas que
+  pasan, 9 omitidas**, con la caché limpia, corrido por el planificador: **nueva línea base**. Listo
+  para commit; sigue el paso 2.
 
 ## Antes de desplegar
 
+- 🔴 **Las pruebas a mano se corren en el servidor de pruebas**, no en local (usuario, 2026-10-01),
+  con el frente entero en `develop`. Si allí está encendido el modo de pruebas de los portales, ese
+  modo ya se saltaba la validación: ver crearse la oferta no prueba el paso 1, que queda cubierto por
+  las pruebas automáticas. Allí se prueba lo que ve la persona: crear y cargar a mano, el agente de
+  WhatsApp con Laura y con Pedro, y el aviso del formulario.
 - **Backend primero, o los dos en la misma ventana.** Con el backend nuevo y el portal viejo, los
   botones siguen apagados y no pasa nada. Con el portal nuevo y el backend viejo, la empresa sin
   portales crea la oferta y recibe el error del backend.
