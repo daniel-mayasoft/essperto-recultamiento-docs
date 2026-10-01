@@ -58,6 +58,23 @@ oferta nazca sin plataformas. El servicio de ofertas ya sabe leer si una empresa
 en un método privado; **reutiliza esa lectura en vez de escribir una segunda** contra la empresa.
 Cómo exponerla —hacerla pública u otra forma— lo propones en la opinión previa.
 
+## Opinión previa del ejecutor (2026-10-01), verificada e incorporada
+
+| Punto | Decidido |
+| --- | --- |
+| Línea base 162 suites y 1.652 pruebas que pasan, 9 omitidas; `develop` avanzó tres commits ajenos a la zona | Correcto. No se traen ahora; se traen en el cierre |
+| «No se despacha nada» no se puede probar imitando los tres envíos, porque se llaman siempre | **Aceptado, con un ajuste**: los tres envíos reales se ejecutan, con el orquestador y la clave configurados en la prueba, y se vigila el método que despacha la tarea al orquestador en vez de interceptar la red. Control negativo: con una credencial habilitada, sí se despacha |
+| En local se verán tres avisos de «orquestador no configurado», no de «sin credencial» | **Aceptado.** Error del brief. Lo de «sin credencial» lo cubre la prueba automática |
+| Hacer pública la lectura del modo demo del servicio de ofertas, sin otro cambio, y llamarla solo si la oferta nace sin plataformas | **Aceptado** |
+| Si esa lectura falla, el agente diría «no se pudo crear» de una oferta que existe | **Decisión 9**: cuenta como «no es demo», se registra en el log y lleva su prueba |
+| Oferta sin plataformas que no nace activa | **Decisión 10**: lleva la frase nueva en las dos variantes |
+| Ampliar la prueba existente del modo demo apagado para comprobar que la plataforma nace pendiente | **Aceptado** |
+
+**El mismo problema del punto de la decisión 9 ya existe con el guardado de preguntas y EvaluaTest**
+del agente. Queda fuera (ver *Fuera del alcance* de la bitácora): no se toca.
+
+**Se puede empezar.**
+
 ## 🔴 Dónde se para
 
 - **Nada del portal.** Es el paso 2.
@@ -81,7 +98,8 @@ monta la creación.
     cubre una prueba existente, dilo y no la dupliques).
 - **Agente**: oferta creada sin plataformas → el texto lleva la frase nueva y no la de «ya comenzó
   a buscar»; con una plataforma → el texto es el de hoy; sin plataformas en una empresa en modo
-  demo → el texto es el de hoy.
+  demo → el texto es el de hoy; sin plataformas y con la lectura del modo demo fallando → la frase
+  nueva, sin «no se pudo crear».
 - **Control negativo** en las dos: invierte la expectativa, comprueba que falla, bórralo.
 - **Punto K**: varias pruebas existentes crean ofertas con una empresa sin credenciales. Las del
   límite por miembro fallan antes de llegar a la validación y no deberían cambiar; confírmalo con
@@ -90,7 +108,7 @@ monta la creación.
   frente a la línea base va en el reporte.
 - **A mano, en local**: una empresa sin portales y sin ofertas crea una desde el botón del listado
   vacío. Se crea, el formulario todavía muestra el aviso viejo (lo cambia el paso 2), y en el log
-  del backend salen las tres líneas de «sin credenciales» y ningún despacho. Luego se le carga un
+  del backend salen tres avisos de «orquestador no configurado» y ningún despacho. Luego se le carga un
   candidato a mano y se comprueba que entra en la oferta.
 
 ## Qué entregar

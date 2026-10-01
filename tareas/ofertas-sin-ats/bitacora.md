@@ -48,6 +48,12 @@ Las tres primeras vienen de `requisitos.md` (2026-09-23); aquí solo se numeran.
    buscar candidatos»), aunque la oferta nazca sin plataformas: en la demo el candidato se inyecta
    solo y empieza a recibir mensajes (usuario, 2026-09-30). Es una excepción a la condición de la
    decisión 5.
+9. **Si falla la lectura del modo demo, cuenta como «no es demo»** (usuario, 2026-10-01, a propuesta
+   del ejecutor en la opinión previa del paso 1). Laura no debe oír «no se pudo crear» de una oferta
+   que sí existe, porque al reintentar la duplicaría. El coste es que, con la base caída en plena
+   demo, el agente diría que los candidatos se cargan a mano. El fallo queda en el log.
+10. **Una oferta sin canales y fuera de modo demo lleva la frase nueva aunque no nazca activa.** Hoy
+    la creación siempre la deja activa; es solo para que ninguna variante prometa una búsqueda.
 
 ## Lo que dice el código y los documentos no
 
@@ -121,6 +127,12 @@ del planning. Esa fusión no toca la creación de la oferta ni su validación; s
 
 - **Añadir un portal a las ofertas ya creadas cuando la empresa lo configura después** (punto I,
   decisión 6).
+- **El agente de WhatsApp puede decir «no se pudo crear» de una oferta que sí se creó** (visto por
+  el planificador en la opinión previa del paso 1; el usuario lo deja fuera el 2026-10-01). Después
+  de crear, el agente guarda las preguntas de filtro y la prueba de EvaluaTest dentro del mismo
+  bloque de errores: si ese guardado falla, Laura oye que no se pudo crear y, si reintenta, la oferta
+  queda duplicada. Es anterior a este frente. La decisión 9 evita que la lectura del modo demo sume
+  un caso más.
 - **El texto de los botones y avisos del listado está escrito a mano en español**, fuera de los
   textos traducidos. El texto nuevo sí va a los textos; los que se quitan, se quitan.
 
@@ -154,6 +166,11 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
   brief del paso 1. Abierta la pregunta 6, sobre el modo demo.
 - **2026-09-30** — Decisión 8: en modo demo el agente mantiene el mensaje de hoy. Brief del paso 1
   completo. Solo queda abierta la comprobación del índice en pruebas.
+- **2026-10-01** — Opinión previa del paso 1 contestada. Línea base: **162 suites y 1.652 pruebas
+  que pasan, 9 omitidas**. `develop` avanzó tres commits de verificación de requisitos (orquestador
+  del embudo y una prueba suya, uno de ellos un reformateo) que no tocan la zona: no se traen ahora,
+  **se traen en el cierre**. Decisiones 9 y 10, y un caso nuevo en *Fuera del alcance*. Corregida la
+  prueba a mano del brief: en local el orquestador no está configurado.
 
 ## Antes de desplegar
 
