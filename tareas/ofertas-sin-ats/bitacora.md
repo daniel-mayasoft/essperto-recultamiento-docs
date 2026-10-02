@@ -225,7 +225,7 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
 | --- | --- | --- | --- |
 | 1 | Quitar la validación, probar el caso nuevo y cambiar la confirmación del agente de WhatsApp (`brief-paso1-backend.md`), y los textos del agente de las decisiones 11 a 13 | backend | Hecho: `d6faaf9`. Sin PR |
 | 1b | Fusionar `develop` (captación por redes) en las dos ramas | los dos | Hecho: backend `569d7a5`; portal igual a `develop` (`cbc47b1`). Revisado |
-| 1c | La pregunta única «¿la oferta tiene canales?» con el formulario público (decisión 14; `brief-paso1c-formulario-publico.md`) | backend | Brief escrito |
+| 1c | La pregunta única «¿la oferta tiene canales?» con el formulario público (decisión 14; `brief-paso1c-formulario-publico.md`) | backend | Aprobado (2026-10-01). Pendiente de commit |
 | 2 | Encender los tres botones y cambiar el aviso del formulario | portal | Propuesto |
 | Cierre | Fusión en `develop`, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | Propuesto |
 
@@ -285,6 +285,16 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
   1.742 pruebas que pasan, 9 omitidas**, con la caché limpia: **nueva línea base**. Portal: avanzó
   hasta `develop` sin commits propios, dependencias instaladas, tipos sin errores. ⚠️ **Quien levante
   el entorno después de esta fusión tiene que reinstalar dependencias en los dos repositorios.**
+- **2026-10-01** — Opinión previa del 1c contestada: se lee el campo de la empresa y no el estado
+  del enlace, que no existe hasta que alguien lo pide y además crearía una dependencia circular. La
+  pregunta se llama `hasPublicationChannels` y recibe la oferta entera. En la consulta refleja cómo
+  está el formulario hoy, no cuando se creó la oferta.
+- **2026-10-01** — **Paso 1c revisado y aprobado.** Cinco archivos, índice y árbol coincidiendo.
+  Compila; **176 suites y 1.748 pruebas que pasan, 9 omitidas**, con la caché limpia, corrido por el
+  planificador: **nueva línea base**. Decisiones del ejecutor aceptadas: la pregunta acepta la lista
+  de plataformas sin tipar y comprueba ella misma que sea una lista, porque la consulta del agente
+  trabaja con la oferta sin tipar; y el fallo de lectura se resuelve dentro de la pregunta, sin
+  bloque de errores en el agente. Listo para commit; sigue el paso 2.
 
 ## Antes de desplegar
 
