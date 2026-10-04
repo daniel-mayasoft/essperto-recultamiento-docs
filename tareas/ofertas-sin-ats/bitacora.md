@@ -113,6 +113,13 @@ Las tres primeras vienen de `requisitos.md` (2026-09-23); aquí solo se numeran.
       formulario apagado.
     - **LinkedIn no se cuenta aparte**: hoy solo puede publicar con el formulario abierto.
     - Los textos aprobados (decisiones 5, 7 y 12) no cambian.
+15. **Una empresa en modo demo no ve el aviso del formulario del portal** (usuario, 2026-10-04). Sus
+    ofertas nacen sin canales y el candidato de prueba entra solo; quien presenta la demo crea la
+    oferta desde el portal delante del cliente. Es la misma excepción que la decisión 8 para el
+    agente. La marca del modo demo ya llega al portal en los datos de la empresa; solo falta
+    declararla en su tipo.
+16. **El aviso en inglés**: «You have no publication channels enabled. The offer will be created,
+    but you'll have to add candidates manually.» (usuario, 2026-10-04).
 
 ## Lo que dice el código y los documentos no
 
@@ -226,7 +233,7 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
 | 1 | Quitar la validación, probar el caso nuevo y cambiar la confirmación del agente de WhatsApp (`brief-paso1-backend.md`), y los textos del agente de las decisiones 11 a 13 | backend | Hecho: `d6faaf9`. Sin PR |
 | 1b | Fusionar `develop` (captación por redes) en las dos ramas | los dos | Hecho: backend `569d7a5`; portal igual a `develop` (`cbc47b1`). Revisado |
 | 1c | La pregunta única «¿la oferta tiene canales?» con el formulario público (decisión 14; `brief-paso1c-formulario-publico.md`) | backend | Aprobado (2026-10-01). Pendiente de commit |
-| 2 | Encender los tres botones y cambiar el aviso del formulario | portal | Propuesto |
+| 2 | Encender los tres botones y cambiar el aviso del formulario (`brief-paso2-portal.md`) | portal | Brief escrito |
 | Cierre | Fusión en `develop`, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | Propuesto |
 
 ## Registro de avance
@@ -295,6 +302,11 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
   de plataformas sin tipar y comprueba ella misma que sea una lista, porque la consulta del agente
   trabaja con la oferta sin tipar; y el fallo de lectura se resuelve dentro de la pregunta, sin
   bloque de errores en el agente. Listo para commit; sigue el paso 2.
+- **2026-10-02** — Paso 1c commiteado (backend `fce7c54`; documentación `08ae406`). `develop` no
+  avanzó. Escritos el brief del paso 2 y `pruebas-a-mano.md`, con los casos del portal y del agente
+  para el cierre. Abierta la decisión 15.
+- **2026-10-04** — Decisiones 15 (sin aviso en modo demo) y 16 (el aviso en inglés). Brief del paso 2
+  completo. `develop` sigue sin avanzar.
 
 ## Antes de desplegar
 
