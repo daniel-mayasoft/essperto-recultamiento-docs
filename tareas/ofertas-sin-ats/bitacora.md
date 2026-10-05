@@ -148,8 +148,10 @@ del planning. Esa fusión no toca la creación de la oferta ni su validación; s
   al formulario: el botón del listado vacío, el que ve una empresa sin ninguna oferta. Ese botón
   no está apagado. Hoy una empresa nueva sin portales abre el formulario, ve el aviso de que «se
   guardará pero no podrá publicarse», y al guardar recibe el rechazo del backend. Los otros tres
-  —crear, crear con IA y copiar— sí están apagados, con su texto al pasar el ratón. Las cuatro
-  entradas llegan al mismo formulario y al mismo aviso, en el primer paso de la creación.
+  —crear, crear con IA y copiar— sí están apagados, con su texto al pasar el ratón. Hay una quinta
+  entrada, vista por el ejecutor en la opinión previa del paso 2: el listado abre el asistente de IA
+  si su dirección lleva el parámetro de «abrir IA», aunque el botón esté apagado; hoy ninguna pantalla
+  enlaza así. Las cinco llegan al mismo formulario y al mismo aviso, en el primer paso de la creación.
 - **E. Con cero plataformas, ningún proceso automático avisa de nada.** Recorrido camino por camino:
   - *Publicación al crear*: los tres envíos a los robots buscan la credencial de su portal; sin
     ella escriben una línea en el log y salen. No hay aviso al reclutador ni correo.
@@ -213,6 +215,9 @@ del planning. Esa fusión no toca la creación de la oferta ni su validación; s
 - **Elegir canales al crear la oferta por WhatsApp.** El usuario cree que el agente debería ofrecer
   esa elección (2026-10-01). Se revisa en la tarea de canales de publicación; si entra, la decisión 11
   se vuelve a tocar allí.
+- **El aviso de Mi Compañía** («No hay ninguna plataforma ATS habilitada. Las ofertas no se
+  publicarán en ninguna plataforma») exige además que la credencial tenga usuario, y el listado y el
+  formulario no. Sigue siendo cierto; no se toca (visto por el ejecutor en el paso 2).
 - **El texto de los botones y avisos del listado está escrito a mano en español**, fuera de los
   textos traducidos. El texto nuevo sí va a los textos; los que se quitan, se quitan.
 
@@ -233,7 +238,7 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
 | 1 | Quitar la validación, probar el caso nuevo y cambiar la confirmación del agente de WhatsApp (`brief-paso1-backend.md`), y los textos del agente de las decisiones 11 a 13 | backend | Hecho: `d6faaf9`. Sin PR |
 | 1b | Fusionar `develop` (captación por redes) en las dos ramas | los dos | Hecho: backend `569d7a5`; portal igual a `develop` (`cbc47b1`). Revisado |
 | 1c | La pregunta única «¿la oferta tiene canales?» con el formulario público (decisión 14; `brief-paso1c-formulario-publico.md`) | backend | Aprobado (2026-10-01). Pendiente de commit |
-| 2 | Encender los tres botones y cambiar el aviso del formulario (`brief-paso2-portal.md`) | portal | Brief escrito |
+| 2 | Encender los tres botones y cambiar el aviso del formulario (`brief-paso2-portal.md`) | portal | Aprobado (2026-10-04). Pendiente de commit |
 | Cierre | Fusión en `develop`, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | Propuesto |
 
 ## Registro de avance
@@ -307,6 +312,15 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
   para el cierre. Abierta la decisión 15.
 - **2026-10-04** — Decisiones 15 (sin aviso en modo demo) y 16 (el aviso en inglés). Brief del paso 2
   completo. `develop` sigue sin avanzar.
+- **2026-10-04** — Opinión previa del paso 2 contestada: el brief cuadra con el código. Se quita el
+  envoltorio del texto al pasar el ratón de crear y crear con IA, que queda vacío; el texto nuevo se
+  llama `noPublicationChannels`. Corregido el punto D (cinco entradas) y dos casos más en
+  `pruebas-a-mano.md`.
+- **2026-10-04** — **Paso 2 revisado y aprobado.** Cinco archivos, índice y árbol coincidiendo. Los
+  tres botones solo se apagan sin empresa cargada (y copiar, también durante una copia); el aviso
+  sale sin portales, con el formulario apagado y fuera de modo demo, desde los textos del portal en
+  los dos idiomas. Tipos sin errores, corrido por el planificador; sin rastro de los textos viejos.
+  **Con esto el frente está completo en la rama**; falta el cierre.
 
 ## Antes de desplegar
 

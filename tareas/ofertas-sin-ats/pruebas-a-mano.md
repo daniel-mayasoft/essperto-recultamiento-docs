@@ -31,7 +31,10 @@ Laura puede ser la misma empresa que Sofía, encendiendo el formulario después 
 | P6 | Sofía | Abre el formulario de creación | Sin aviso | |
 | P7 | Pedro | Abre el formulario de creación | Sin aviso; todo como antes | |
 | P8 | Laura, con el portal en inglés | Abre el formulario de creación | El aviso en inglés | |
-| P9 | Una empresa en modo demo, sin portales ni formulario | Abre el formulario de creación | Sin aviso | |
+| P9 | Una empresa en modo demo, sin portales ni formulario | Mira los botones y abre el formulario de creación | Crear, crear con IA y copiar encendidos; sin aviso | |
+
+Si el formulario se abre desde el listado vacío antes de que carguen los datos de la empresa, el
+aviso tarda un instante en salir. Pasaba igual antes del cambio: no es un fallo.
 
 ## Agente de WhatsApp (pasos 1 y 1c)
 
