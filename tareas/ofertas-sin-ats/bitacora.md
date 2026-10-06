@@ -42,8 +42,11 @@ Las tres primeras vienen de `requisitos.md` (2026-09-23); aquí solo se numeran.
    tarea del paso nuevo de canales de publicación al crear la oferta, que incluye la opción «sin
    portal» (usuario, 2026-09-30).
 7. **El aviso del formulario dice**: «No tienes canales de publicación habilitados. La oferta se
-   creará, pero los candidatos tendrás que cargarlos a mano.» (usuario, 2026-09-30). Va a los textos
-   del portal, en español y en inglés, y sustituye al aviso actual.
+   creará, pero los candidatos tendrás que cargarlos manualmente.» (usuario, 2026-09-30; **«a mano»
+   pasa a «manualmente» el 2026-10-06**, en las pruebas del cierre, por tono y para coincidir con el
+   inglés). Va a los textos del portal, en español y en inglés, y sustituye al aviso actual. Las
+   instrucciones del agente de WhatsApp siguen diciendo «a mano»: el agente las redacta con sus
+   palabras y no se tocan.
 8. **En una empresa en modo demo, el agente de WhatsApp dice lo de hoy** («el sistema ya comenzó a
    buscar candidatos»), aunque la oferta nazca sin plataformas: en la demo el candidato se inyecta
    solo y empieza a recibir mensajes (usuario, 2026-09-30). Es una excepción a la condición de la
@@ -120,6 +123,14 @@ Las tres primeras vienen de `requisitos.md` (2026-09-23); aquí solo se numeran.
     declararla en su tipo.
 16. **El aviso en inglés**: «You have no publication channels enabled. The offer will be created,
     but you'll have to add candidates manually.» (usuario, 2026-10-04).
+17. **Los textos escritos a mano del recorrido de creación pasan a los textos del portal**
+    (usuario, 2026-10-06, en las pruebas del cierre). Con el portal en inglés, el botón «Crear con
+    IA», toda su ventana y la confirmación al cancelar la creación salían en español. Se suman los
+    del mismo recorrido: el mensaje tras generar con IA, «Copiar oferta» y su error. Es un error
+    anterior a este frente; entra porque el usuario lo pide. Los errores del backend quedan fuera. Va
+    en el paso 2b, junto con «manualmente» (decisión 7). En la opinión previa del 2b se suma el
+    mensaje verde tras copiar una oferta («Oferta copiada…»), por ser del mismo recorrido; los textos
+    fijos de dentro de los pasos del formulario quedan fuera (ver *Fuera del alcance*).
 
 ## Lo que dice el código y los documentos no
 
@@ -202,6 +213,17 @@ del planning. Esa fusión no toca la creación de la oferta ni su validación; s
   - No toca la creación de la oferta ni el agente de WhatsApp. En el portal toca el formulario de la
     oferta, en otra zona que el aviso.
 
+## Hallazgos ajenos al frente
+
+- 🔴 **La entrada de mensajes de WhatsApp no comprueba que vengan de Meta** (visto el 2026-10-06, en
+  las pruebas del cierre). Es pública y acepta cualquier mensaje: no se verifica la firma que Meta
+  envía con cada uno (buscada en todo el backend por sus nombres habituales, sin resultado; una
+  verificación escrita de otra forma no la cubre esa búsqueda). Es la misma en producción. Quien
+  conozca la dirección del servidor y el teléfono de un reclutador puede escribir a la línea del
+  agente como si fuera él: crear ofertas en su empresa o consultar sus candidatos. Para el equipo.
+- **El archivo de despliegue del servidor de pruebas tiene en claro las llaves de AWS.** Para quien
+  lleve la seguridad.
+
 ## Fuera del alcance, a sabiendas
 
 - **Añadir un portal a las ofertas ya creadas cuando la empresa lo configura después** (punto I,
@@ -215,6 +237,26 @@ del planning. Esa fusión no toca la creación de la oferta ni su validación; s
 - **Elegir canales al crear la oferta por WhatsApp.** El usuario cree que el agente debería ofrecer
   esa elección (2026-10-01). Se revisa en la tarea de canales de publicación; si entra, la decisión 11
   se vuelve a tocar allí.
+- **El interruptor «Portales de empleo» de la pestaña Flujo de Mi Compañía sigue diciendo
+  «Obligatorio»** (visto por el usuario en las pruebas del cierre, 2026-10-06). Es decorativo: no
+  guarda nada. Es el resto de cuando la pestaña pintaba las etapas obligatorias del recorrido (la
+  captación); al reorganizarla en septiembre quedó en «De dónde llegan los candidatos» y ahora se lee
+  como «los portales son obligatorios», que esta tarea hizo falso. **Se queda como está y se arregla
+  en la tarea de canales de publicación** (usuario), con esta idea, a diseñar allí:
+  - **Todo o nada, como dato propio de la empresa.** Apagado: las ofertas nuevas se crean sin ningún
+    portal, aunque haya portales habilitados. Encendido: cada portal según su propio interruptor.
+  - **No reescribe los interruptores de cada portal**: al volver a encenderlo, cada uno queda como
+    estaba (Pedro tenía elempleo apagado por falta de créditos y sigue apagado).
+  - **Solo afecta a las ofertas nuevas.**
+  - **Es el valor por defecto**, como los interruptores de las etapas; cómo convive con elegir
+    canales por oferta se decide en esa tarea.
+  - Lo tendría que contar también la pregunta «¿esta oferta tiene canales?» (decisión 14) y el aviso
+    del formulario.
+- **Textos fijos en español dentro de los pasos del formulario de creación** (vistos por el ejecutor
+  en la opinión previa del 2b): los errores de los pasos de prueba psicométrica, verificación y
+  documentos («Selecciona…, o desactiva este paso»), «Cargo / perfil psicométrico», «Puntaje mínimo
+  (%)», «Certificación laboral», y en las preguntas filtro «Esperado: Sí/No» y su selector. Para un
+  repaso de idiomas aparte.
 - **El aviso de Mi Compañía** («No hay ninguna plataforma ATS habilitada. Las ofertas no se
   publicarán en ninguna plataforma») exige además que la credencial tenga usuario, y el listado y el
   formulario no. Sigue siendo cierto; no se toca (visto por el ejecutor en el paso 2).
@@ -223,11 +265,13 @@ del planning. Esa fusión no toca la creación de la oferta ni su validación; s
 
 ## Preguntas abiertas
 
-4. **El índice en el servidor de pruebas** (punto J). En producción está comprobado (usuario,
-   2026-09-30): **no hay ningún índice único** sobre las plataformas, solo el `_id` y el de búsqueda
-   del código. Falta correr la misma consulta en pruebas antes del cierre.
+Ninguna.
+
 Cerradas el 2026-09-30: la 1 (decisión 4), la 2 (decisiones 5 y 7), la 3 (decisión 5), la 5
-(decisión 6) y la 6 (decisión 8).
+(decisión 6) y la 6 (decisión 8). **La 4, el índice de la base, cerrada el 2026-10-06**: ni en
+producción (2026-09-30) ni en el servidor de pruebas hay un índice único sobre las plataformas. En
+pruebas aparece además el índice único del enlace público (`publicApply.token`), sobre otro campo
+y solo para las ofertas que tienen enlace: no afecta.
 
 ## Pasos
 
@@ -239,7 +283,8 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
 | 1b | Fusionar `develop` (captación por redes) en las dos ramas | los dos | Hecho: backend `569d7a5`; portal igual a `develop` (`cbc47b1`). Revisado |
 | 1c | La pregunta única «¿la oferta tiene canales?» con el formulario público (decisión 14; `brief-paso1c-formulario-publico.md`) | backend | Aprobado (2026-10-01). Pendiente de commit |
 | 2 | Encender los tres botones y cambiar el aviso del formulario (`brief-paso2-portal.md`) | portal | Aprobado (2026-10-04). Pendiente de commit |
-| Cierre | Fusión en `develop`, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | Propuesto |
+| 2b | «Manualmente» y los textos del recorrido de creación, traducibles (decisiones 7 y 17; `brief-paso2b-textos.md`) | portal | Aprobado (2026-10-06), en `fix/offers-without-ats-copy`. Pendiente de commit, PR y despliegue en pruebas |
+| Cierre | Fusión en `develop`, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | En `develop` (backend #100, portal #72) y desplegado en pruebas. Pendientes: pruebas a mano, índices en pruebas y `main` |
 
 ## Registro de avance
 
@@ -321,6 +366,26 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
   sale sin portales, con el formulario apagado y fuera de modo demo, desde los textos del portal en
   los dos idiomas. Tipos sin errores, corrido por el planificador; sin rastro de los textos viejos.
   **Con esto el frente está completo en la rama**; falta el cierre.
+- **2026-10-05** — Cierre, etapas 1 a 3, hechas por el usuario: `develop` fusionado otra vez en las
+  dos ramas (backend `af7541f`, portal `81c1a7d`), PR fusionados en `develop` (backend #100, portal
+  #72) y desplegado en el servidor de pruebas. Revisado por el planificador: lo del frente está
+  entero en `develop`, sin el rechazo ni los textos viejos. La fusión del backend trajo cinco commits
+  ajenos al frente; uno **retira la API del agente** (una de las cinco entradas del punto A, que pasan
+  a ser cuatro) y no toca nada nuestro. Backend en `af7541f`: compila; **182 suites y 1.865 pruebas
+  que pasan**, 1 suite y 41 pruebas omitidas (las nuevas omitidas son pruebas contra servicios reales
+  que otros añadieron, apagadas por defecto); las cuatro suites del frente, 15 pruebas, en verde.
+  Portal en `81c1a7d`: tipos sin errores. **Siguen las pruebas a mano** (`pruebas-a-mano.md`) y,
+  antes de `main`, la consulta de índices en el servidor de pruebas.
+- **2026-10-06** — Pruebas a mano en curso (`pruebas-a-mano.md`): índices en pruebas bien (pregunta 4
+  cerrada); modo de pruebas de los portales encendido; P3, P2, P4, P5 (reducida) y P8 bien. Las del
+  agente de WhatsApp no se hacen: todavía no está en uso (usuario). De las pruebas salen la decisión 17
+  y el paso 2b, «manualmente» (decisión 7), el interruptor «Obligatorio» para la tarea de canales, y
+  dos hallazgos de seguridad ajenos al frente.
+- **2026-10-06** — **Paso 2b revisado y aprobado**, en `fix/offers-without-ats-copy` desde `develop`
+  (`c07b619`). Cinco archivos, índice y árbol coincidiendo. Los textos en español son idénticos a los
+  que había escritos a mano; las claves existen en los dos idiomas, incluido el «Cancelar» reutilizado;
+  la interpolación del título no se escapa (configuración del portal). Tipos sin errores, corrido por
+  el planificador; ninguno de los textos de la lista queda escrito a mano.
 
 ## Antes de desplegar
 
