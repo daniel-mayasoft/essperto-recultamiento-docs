@@ -43,14 +43,13 @@ ofertas no traen candidatos de los portales.
 | P3 | Laura | Ya con una oferta: mira crear, crear con IA y copiar | Los tres encendidos, sin «Configura al menos un ATS…» al pasar el ratón; copiar dice «Copiar oferta» | **Bien** (2026-10-06) |
 | P4 | Laura | Abre el formulario por crear, por crear con IA y por copiar | Las tres veces, el mismo aviso | **Bien** (2026-10-06). El usuario pide «manualmente» en vez de «a mano» (decisión 7 corregida) |
 | P5 | Laura | Carga un candidato a mano desde la oferta, y otro con la carga masiva | Los dos entran en la oferta y empiezan su recorrido | **Bien, reducida** (2026-10-06): solo el alta individual, por decisión del usuario; el candidato entró y le llegó el primer mensaje. La carga masiva queda comprobada solo leyendo el código (punto G) |
-| P6 | Sofía | Abre el formulario de creación | Sin aviso | |
-| P7 | Pedro | Abre el formulario de creación | Sin aviso; todo como antes | |
+| P6 | Sofía | Abre el formulario de creación | Sin aviso | **Bien** (2026-10-07, según el usuario) |
+| P7 | Pedro | Abre el formulario de creación | Sin aviso; todo como antes | **Bien** (2026-10-07, según el usuario) |
 | P8 | Laura, con el portal en inglés | Abre el formulario de creación | El aviso en inglés | **Bien** (2026-10-06). De esta prueba salió el paso 2b: el resto del recorrido mezclaba idiomas |
-| P9 | Una empresa en modo demo, sin portales ni formulario | Mira los botones y abre el formulario de creación | Crear, crear con IA y copiar encendidos; sin aviso | |
-
-| P10 | Laura, en español | Abre el formulario de creación | El aviso dice «…tendrás que cargarlos manualmente.» (paso 2b) | |
-| P11 | Cualquiera, con el portal en inglés | Recorre «Create with AI» (botón, ventana, generar), cancela una creación, copia una oferta | Todo en inglés: botón, ventana, contador, mensajes verdes, confirmación con «Yes»/«No», «Copy offer» (paso 2b) | |
-| P12 | Cualquiera, en español | El mismo recorrido | Los mismos textos de antes, en español (paso 2b) | |
+| P9 | Una empresa en modo demo, sin portales ni formulario | Mira los botones y abre el formulario de creación | Crear, crear con IA y copiar encendidos; sin aviso | **Bien** (2026-10-07, según el usuario) |
+| P10 | Laura, en español | Abre el formulario de creación | El aviso dice «…tendrás que cargarlos manualmente.» (paso 2b) | **Bien** (2026-10-07, según el usuario) |
+| P11 | Cualquiera, con el portal en inglés | Recorre «Create with AI» (botón, ventana, generar), cancela una creación, copia una oferta | Todo en inglés: botón, ventana, contador, mensajes verdes, confirmación con «Yes»/«No», «Copy offer» (paso 2b) | **Bien** (2026-10-07, según el usuario) |
+| P12 | Cualquiera, en español | El mismo recorrido | Los mismos textos de antes, en español (paso 2b) | **Bien** (2026-10-07, según el usuario) |
 
 Si el formulario se abre desde el listado vacío antes de que carguen los datos de la empresa, el
 aviso tarda un instante en salir. Pasaba igual antes del cambio: no es un fallo.

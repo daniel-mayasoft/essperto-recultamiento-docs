@@ -397,6 +397,8 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
   ⚠️ **Pruebas a mano sin resultado apuntado** en `pruebas-a-mano.md`: P1, P6, P7, P9 a P12 y las
   del agente de WhatsApp (estas, a propósito: el agente todavía no está en uso). Si se corrieron,
   falta anotarlo; si no, quedan como riesgo conocido del paso a producción.
+- **2026-10-07** — P6, P7 y P9 a P12, **bien**, según el usuario. La P1 no aplica (cubierta por la P4)
+  y las del agente de WhatsApp quedan sin hacer a propósito.
 
 ## Antes de desplegar
 
