@@ -88,6 +88,15 @@ crearla con IA y al copiar una existente.
 - **El documento para la dirección no menciona deuda técnica ni autores.** Se presenta como una decisión
   de diseño de esta tarea.
 
+### ⚠️ Riesgo sobre la estimación (2026-10-07)
+
+Las 3 jornadas se acordaron antes de cerrar «Ofertas sin ATS», y esa tarea dejó aquí, a propósito, cosas
+que no estaban en el alcance de arriba: el interruptor «Portales de empleo» de Mi Compañía, el formulario
+público como canal, LinkedIn como casilla y la posible elección de canales por WhatsApp (detalle en
+`planning.md`, sección *Actualizado el 2026-10-07*). **Con todas dentro, 3 jornadas no alcanzan.** El
+planificador tiene que proponer al usuario qué entra y qué no **antes de empezar**, no al terminar.
+
 ### Punto de partida
 
-Rama nueva desde `develop`, **después de `../ofertas-sin-ats/` o junto con ella**.
+Rama nueva desde `develop`. **«Ofertas sin ATS» ya está cerrada** (en `develop` y en `main` desde el
+2026-10-07), así que esta tarea no depende de nada pendiente.

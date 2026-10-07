@@ -281,10 +281,10 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
 | --- | --- | --- | --- |
 | 1 | Quitar la validación, probar el caso nuevo y cambiar la confirmación del agente de WhatsApp (`brief-paso1-backend.md`), y los textos del agente de las decisiones 11 a 13 | backend | Hecho: `d6faaf9`. Sin PR |
 | 1b | Fusionar `develop` (captación por redes) en las dos ramas | los dos | Hecho: backend `569d7a5`; portal igual a `develop` (`cbc47b1`). Revisado |
-| 1c | La pregunta única «¿la oferta tiene canales?» con el formulario público (decisión 14; `brief-paso1c-formulario-publico.md`) | backend | Aprobado (2026-10-01). Pendiente de commit |
-| 2 | Encender los tres botones y cambiar el aviso del formulario (`brief-paso2-portal.md`) | portal | Aprobado (2026-10-04). Pendiente de commit |
-| 2b | «Manualmente» y los textos del recorrido de creación, traducibles (decisiones 7 y 17; `brief-paso2b-textos.md`) | portal | Aprobado (2026-10-06), en `fix/offers-without-ats-copy`. Pendiente de commit, PR y despliegue en pruebas |
-| Cierre | Fusión en `develop`, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | En `develop` (backend #100, portal #72) y desplegado en pruebas. Pendientes: pruebas a mano, índices en pruebas y `main` |
+| 1c | La pregunta única «¿la oferta tiene canales?» con el formulario público (decisión 14; `brief-paso1c-formulario-publico.md`) | backend | Hecho: `fce7c54` |
+| 2 | Encender los tres botones y cambiar el aviso del formulario (`brief-paso2-portal.md`) | portal | Hecho: `6f13882` |
+| 2b | «Manualmente» y los textos del recorrido de creación, traducibles (decisiones 7 y 17; `brief-paso2b-textos.md`) | portal | Hecho: `bc004de`, PR #73 |
+| Cierre | Fusión en `develop`, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | **Hecho** (2026-10-07): todo en `develop` y en `main`. Ver *Registro de avance* |
 
 ## Registro de avance
 
@@ -386,6 +386,17 @@ Rama `feat/offers-without-ats`, desde `develop`, en los dos repositorios.
   que había escritos a mano; las claves existen en los dos idiomas, incluido el «Cancelar» reutilizado;
   la interpolación del título no se escapa (configuración del portal). Tipos sin errores, corrido por
   el planificador; ninguno de los textos de la lista queda escrito a mano.
+- **2026-10-07** — **Frente cerrado** (usuario). Revisado por el estratega sobre `develop`
+  (backend `d96be7b`, portal `4ffee9c`), que ya trae encima trabajo de otros (flujo asíncrono, planes,
+  analíticas de uso, el hotfix de publicación en Computrabajo). Los cuatro commits del frente
+  —backend `d6faaf9` y `fce7c54`, portal `6f13882` y `bc004de`— están en `develop` **y en `main`**.
+  En `develop` no queda el rechazo por falta de plataformas ni los textos viejos del listado y del
+  formulario; la pregunta única `hasPublicationChannels` y el aviso en los dos idiomas siguen en su
+  sitio. Backend: compila; **189 suites y 1.997 pruebas que pasan**, 1 suite y 43 pruebas omitidas.
+  Portal: tipos sin errores.
+  ⚠️ **Pruebas a mano sin resultado apuntado** en `pruebas-a-mano.md`: P1, P6, P7, P9 a P12 y las
+  del agente de WhatsApp (estas, a propósito: el agente todavía no está en uso). Si se corrieron,
+  falta anotarlo; si no, quedan como riesgo conocido del paso a producción.
 
 ## Antes de desplegar
 

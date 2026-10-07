@@ -18,10 +18,10 @@ disponible**, y siempre lo hay.
 
 ## Aceptación
 
-- [ ] **Se puede crear una oferta sin ningún portal de empleo ni red social configurados** en la empresa.
-- [ ] **La carga masiva y la carga individual están siempre disponibles**, así que siempre hay al menos un
+- [x] **Se puede crear una oferta sin ningún portal de empleo ni red social configurados** en la empresa.
+- [x] **La carga masiva y la carga individual están siempre disponibles**, así que siempre hay al menos un
       canal.
-- [ ] Si la empresa **no tiene ningún portal ni red habilitados**, al crear la oferta se **advierte que los
+- [x] Si la empresa **no tiene ningún portal ni red habilitados**, al crear la oferta se **advierte que los
       candidatos habrá que cargarlos a mano**.
 
 > **Movido a otra tarea el 2026-09-23:** «se puede crear una oferta aunque se deshabiliten todos sus

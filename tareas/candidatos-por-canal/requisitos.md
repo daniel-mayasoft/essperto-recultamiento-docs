@@ -14,10 +14,31 @@ portales de empleo, la **carga individual**, la **carga masiva** y **LinkedIn**.
 - [ ] **Respeta los filtros existentes**: empresa, oferta, grupo de ofertas, rango de fechas y estado.
 - [ ] **Los canales sin candidatos en el periodo se muestran en cero.**
 
+## 🔴 Actualizado el 2026-10-07: buena parte ya está hecha
+
+**Elvis añadió el 2026-09-30 una tabla «Calidad por canal de entrada»** en la analítica (commit `054a480`,
+en `develop`). Ya cuenta cada candidato por su origen **en esta oferta**: la carga individual, la carga
+masiva y el enlace público tienen su propia fila, y los de portal se reparten por portal. Antes de
+planificar hay que releer el código y ver qué queda de esta lista. Lo que se ve desde fuera, sin
+comprobar todavía:
+
+- **Probablemente hecho**: cada canal manual en su fila, y el origen por oferta.
+- **Probablemente pendiente**:
+  - el nombre, que es «Calidad por canal de entrada» y no «Candidatos por canal»;
+  - **los portales siguen saliendo de la ficha de la persona**, así que se mantiene el doble conteo por
+    otras ofertas que describe `planning.md`;
+  - **LinkedIn no tiene fila propia**: sus candidatos entran por el enlace público, con LinkedIn como
+    detalle de origen, y caen en la fila del enlace público;
+  - los canales sin candidatos en cero.
+
+**La estimación de 2,5 jornadas probablemente sobra.** Hay que rehacerla con lo que de verdad falte y
+proponérsela al usuario antes de empezar.
+
 ## Relación con otras tareas
 
-- **LinkedIn (Elvis)**: el canal LinkedIn todavía no existe en el sistema. Hasta que se integre, aparece en
-  cero. Ver `planning.md`.
+- **LinkedIn (Elvis)**: ~~todavía no existe~~ **existe desde el 2026-10-01**, modelado aparte de los
+  portales; sus candidatos llegan por el enlace público (ver arriba). Ver también
+  `../canales-de-publicacion/planning.md`.
 
 Lo que hay que decidir antes de implementar está en `planning.md`.
 
