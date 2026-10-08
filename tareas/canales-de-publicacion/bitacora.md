@@ -25,8 +25,7 @@ de *Lo que dice el código*, más abajo, que ganan sobre él. La tarea hermana, 
    - **Entra**: el paso con los tres portales, sus valores por defecto y los no configurados
      deshabilitados; la oferta guarda solo lo elegido, comprobado en el backend; el punto único de
      decisión; la regla de Pandapé y Computrabajo (decisión 6); **el interruptor «Portales de
-     empleo»** como valor por defecto del paso (idea de diseño en *Fuera del alcance* de ofertas sin
-     ATS).
+     empleo»**, que al final vive solo en el portal (decisión 11).
    - **Pendiente, al final si sobra**: elegir canales al crear por WhatsApp. El agente todavía no está
      en uso y el simulador del servidor de pruebas no llega a su línea: solo se podría comprobar con
      pruebas automáticas.
@@ -53,25 +52,32 @@ de *Lo que dice el código*, más abajo, que ganan sobre él. La tarea hermana, 
    solo sale donde se eligió, también al reintentar— pero no en la forma: los reintentos no pasan por
    el punto único, y la «republicación» no existe en el código. No es un recorte que haya que
    comunicar. Va con la decisión 7, que cierra el único hueco.
-6. **La republicación de Pandapé en Computrabajo: un dato de la empresa que solo lee el paso**
-   (usuario, 2026-10-07; punto C). Lo integró Elvis el 2026-08-03 («feat(pandape): republicar en
+6. **La republicación de Pandapé en Computrabajo pasa a depender de un dato de la empresa**
+   (usuario, 2026-10-08; punto C). Lo integró Elvis el 2026-08-03 («feat(pandape): republicar en
    Computrabajo al publicar de verdad»), pensado para el único cliente que usa Pandapé (usuario), y hoy
-   está fijo en el código para todas las empresas. Rehecha el mismo día: la primera versión la volvía
-   configurable desde la pestaña Flujo; el usuario la simplifica.
-   - 🔴 **La lógica de Elvis no se toca.** La publicación en Pandapé sigue pidiendo siempre la
-     republicación, igual que hoy, al crear y al reintentar. No hay interruptor en la pestaña Flujo ni
-     cambia nada de lo que se le manda al robot. Los fallos que tenga esa lógica son de su tarea
-     (*Fuera del alcance*).
-   - **Uno a muchos.** En la configuración del Pandapé de la empresa se guarda **la lista de portales
-     en los que republica**: hoy, Computrabajo. Si mañana republica también en elempleo, se añade a la
-     lista; si otro portal republica en alguno, tiene su propia lista. Los valores son los portales de
-     Essperto, no los 16 que ofrece Pandapé: el dato solo sirve para el paso. LinkedIn no entra: no es
-     un portal y no sale en el paso (decisión 1).
-   - **El valor dice la verdad** (usuario): toda empresa que configure Pandapé queda con Computrabajo en
-     la lista, la actual y las nuevas, porque el robot republica para todas. Un «apagado» que el robot
-     no respeta haría que el paso no avisara y la oferta saliera igual en Computrabajo, gastando
-     créditos. Se descartó a sabiendas que la publicación leyera la lista: tocaba la lógica de Elvis y
-     mandaba al robot una combinación que nunca ha corrido (publicar sin republicar).
+   está fijo en el código para todas las empresas. Es la tercera versión: la primera la hacía
+   configurable desde la pestaña Flujo y la segunda dejaba la lógica intacta con un dato que solo
+   leía el paso; esta es la más barata y la única en que el dato no puede mentir.
+   - **Cómo funciona hoy** (releído el 2026-10-08): la publicación de Pandapé le pide al robot que
+     republique en Computrabajo con **una sola línea fija en «sí»**, sin ninguna condición, y es el
+     único sitio del backend que lo pide. La republicación la hace Pandapé con su propia cuenta y sus
+     créditos, en su paso «Divulgación»; no usa las credenciales de Computrabajo de la empresa. La
+     prueba de Pandapé de las herramientas de desarrollo no manda esa línea y el robot entonces no
+     republica.
+   - **El cambio en lo de Elvis es esa línea**: deja de ser «sí» fijo y lee el dato de la empresa.
+     Cómo publica el robot no cambia. Los reintentos pasan por la misma publicación, así que lo
+     respetan solos.
+   - **El dato: aparte de las credenciales, uno a muchos.** Un dato propio de la empresa que dice en
+     qué portales republica cada portal de origen; hoy, como mucho, Pandapé → [Computrabajo]. Si mañana
+     hay otro destino u otro origen, se añade sin rehacer nada. **No va dentro de la entrada de
+     Pandapé de las credenciales**: guardar desde Mi Compañía rehace cada entrada desde cero con solo
+     el portal, el usuario, la contraseña y si está encendido, y lo borraría (comprobado el
+     2026-10-08). LinkedIn no entra: no es un portal (decisión 1).
+   - **El switch**, en el modal de edición de Pandapé en Mi Compañía: «Republicar en Computrabajo», la
+     única opción por ahora. En los demás portales no aparece.
+   - **Cada empresa**: la actual se escribe **a mano en la base** con Pandapé ligado a Computrabajo, y
+     sigue igual que hoy. Una empresa nueva que configura Pandapé nace **apagada**: no republica y el
+     paso no avisa —**cambia respecto a hoy**, a propósito (usuario)—, hasta que encienda el switch.
    - **El paso**, cuando la empresa tiene el enlace y Pandapé está marcado (Pedro con Pandapé y
      Computrabajo):
      1. Computrabajo sale **desmarcado** y con un aviso sutil: la oferta saldrá en Computrabajo a
@@ -89,11 +95,14 @@ de *Lo que dice el código*, más abajo, que ganan sobre él. La tarea hermana, 
      empresa, no de la oferta original.
    - **El backend no tiene regla para esto**: publica lo elegido. Publicar dos veces en Computrabajo,
      aceptado en la confirmación, es una elección válida.
-   - **Lo que queda para Elvis**: confirmar que la republicación usa la cuenta de Pandapé y no la de
-     Computrabajo de la empresa (lo que dice el código, punto C). Lo demás lo contestó el usuario: era
-     solo para ese cliente, no debe salir dos veces (lo cubre el paso) y los reintentos quedan fuera.
-   - 🔴 **Al desplegar**: la empresa que ya tiene Pandapé tiene que quedar con Computrabajo en la lista.
-     Va a *Antes de desplegar*.
+   - **Lo que queda para Elvis**: si el robot respeta que no se le pida republicar cuando publica de
+     verdad. Esa combinación solo ha corrido en la prueba, que además deja borrador; afecta solo a
+     empresas nuevas con el switch apagado, y hoy no hay ninguna. Lo demás lo contestó el usuario: era
+     solo para ese cliente, no debe salir dos veces (lo cubre el paso) y los duplicados por reintento
+     quedan fuera.
+   - 🔴 **Al desplegar, el dato de la empresa actual se escribe ANTES que el backend.** Si el backend
+     va primero, sus ofertas dejan de republicarse hasta que alguien lo escriba. El código viejo ignora
+     el dato, así que escribirlo antes no rompe nada. En *Antes de desplegar*.
 7. **La pieza de cada portal se niega a publicar si ese portal no está apuntado en la oferta**
    (usuario, 2026-10-07). Cierra el hueco del reintento automático (punto B) sin tocar los reintentos.
    🔴 **No debe romper las herramientas de desarrollo que publican a propósito** —«Crear borrador en
@@ -105,7 +114,33 @@ de *Lo que dice el código*, más abajo, que ganan sobre él. La tarea hermana, 
 8. **«Configurado» en el paso es tener usuario y contraseña** (usuario, 2026-10-07). Un portal sin uno
    de los dos sale como no configurado. Coincide con lo que exige la publicación y con el aviso de Mi
    Compañía (ver *Fuera del alcance* de ofertas sin ATS); hoy la lista de la oferta solo mira que no
-   esté apagado (punto G).
+   esté apagado (punto G). El backend ya entrega por la API si un portal tiene contraseña guardada, sin
+   la contraseña (punto H).
+9. **Las entradas sin casillas usan los portales por defecto de la empresa** (usuario, 2026-10-08). El
+   agente de WhatsApp, Maya por WhatsApp y el alta del superadmin no preguntan por los canales. Si la
+   petición **no trae** elección, la oferta sale con los portales habilitados de la empresa, con la
+   regla de hoy (punto G): lo mismo que obtiene quien pasa por el paso sin tocar nada. Si la trae
+   **vacía**, la oferta nace sin portales (ofertas sin ATS). El superadmin usa la misma petición que el
+   portal, así que puede mandar la elección sin cambios. **Que el agente y Maya pregunten por los
+   canales va al final**, como paso propio, si sobra tiempo.
+10. **El backend rechaza la creación si se elige un portal que la empresa no puede usar** (usuario,
+    2026-10-08): no configurado (decisión 8) o apagado. Caso: Pedro tiene el asistente abierto, un
+    compañero apaga elempleo, y Pedro crea con elempleo marcado; recibe «elempleo ya no está habilitado
+    en tu empresa», el asistente conserva lo escrito y él lo desmarca. Quitarlo en silencio le haría
+    creer que salió en elempleo.
+11. **El interruptor general «Portales de empleo» vive solo en el portal** (usuario, 2026-10-08).
+    Apagado: apaga todos los portales y sus interruptores quedan grises. Encendido: los interruptores
+    se pueden tocar, pero siguen apagados; el reclutador enciende los que quiera. No se guarda: al
+    cargar sale encendido si algún portal lo está. Lo que sí se guarda es el apagado de cada portal,
+    igual que apagarlos uno por uno. Rara pero coherente: si se enciende sin encender ningún portal y se
+    recarga, vuelve a salir apagado. Sustituye la idea de diseño de ofertas sin ATS (todo o nada como
+    dato propio, sin tocar cada portal): sin dato en el backend, `hasPublicationChannels` y el aviso no
+    cambian por él.
+12. **La forma de la arquitectura** (usuario, 2026-10-08; decisión 3). La misma que en redes sociales
+    —una interfaz, una pieza por portal y un registro—, pero las piezas se arman dentro del servicio de
+    ofertas y apuntan a sus tres funciones de publicación, que se quedan donde están, intactas. Sacarlas
+    a piezas independientes sería mover cientos de líneas y crear una dependencia en círculo (el
+    servicio usaría las piezas y las piezas al servicio).
 
 ## Lo que dice el código y los documentos no
 
@@ -135,7 +170,7 @@ Comprobado leyendo `develop` el 2026-10-07 (backend `d96be7b`, portal `4ffee9c`)
   «Divulgación» de Pandapé, que ofrece 16 portales; el aviso que ya existe dice «tu cuenta de Pandapé no
   tiene créditos para ese portal», y la publicación de Pandapé no lee las credenciales de Computrabajo
   de la empresa. Así que una empresa con Pandapé y **sin** Computrabajo configurado en Essperto también
-  acaba en Computrabajo. Elvis lo confirma (decisión 6).
+  acaba en Computrabajo. Con la decisión 6, eso pasa a depender del dato de la empresa.
 - **D. La publicación en Computrabajo cambió esta semana** (Elvis el 2026-10-05, Henry el 2026-10-06):
   hay un estado nuevo, **borrador** (la oferta existe en Computrabajo pero no quedó publicada), y la
   extracción de candidatos también mira los borradores. No afecta a este frente: la forma en que
@@ -149,6 +184,10 @@ Comprobado leyendo `develop` el 2026-10-07 (backend `d96be7b`, portal `4ffee9c`)
 - **G. La lista de la oferta y la publicación no exigen lo mismo** (2026-10-07). La lista apunta todo
   portal que la empresa no tenga apagado, aunque le falte usuario o contraseña; la publicación exige los
   dos. Esa oferta queda pendiente en ese portal y el aviso diario la marca como fallida. Decisión 8.
+- **H. El backend ya no entrega las contraseñas por la API** (2026-10-08; `035a3e6`, en `develop` y en
+  `main`). Portales, EvaluaTest y antecedentes salen sin contraseña, con la señal de si hay una
+  guardada. El portal puede saber si un portal está configurado (decisión 8) sin verla. La deuda que lo
+  contaba en `CLAUDE.md` estaba desfasada; corregida.
 
 Releído el 2026-10-07 por el planificador nuevo (backend `d96be7b`, sin cambios; portal `f94bfb3`, un
 commit de Elvis que abre en otra pestaña «Conectar un proveedor» del paso psicométrico, sin relación
@@ -156,26 +195,34 @@ con la publicación): A a F se sostienen, con los matices de B y C.
 
 ## Fuera del alcance, a sabiendas
 
-- **La lógica de la republicación de Pandapé en Computrabajo** (decisión 6; usuario, 2026-10-07). Que
-  republique para todas las empresas, que lo vuelva a pedir en cada reintento y que eso pueda duplicar
-  la vacante es de la tarea de Elvis. Este frente no lo cambia, ni para bien ni para mal.
-- **Que la empresa pueda apagar la republicación.** No hay interruptor: el dato de la decisión 6 solo
-  informa al paso.
-- **Elegir canales al crear por WhatsApp**: al final, si sobra (decisión 1).
+- **La lógica de la republicación de Pandapé en Computrabajo, salvo su línea** (decisión 6; usuario).
+  Que la vuelva a pedir en cada reintento y que eso pueda duplicar la vacante es de la tarea de Elvis.
+  Este frente solo hace que la petición dependa del dato de la empresa.
+- **Elegir canales al crear por WhatsApp, en el agente y en Maya**: al final, si sobra (decisiones 1
+  y 9).
 - **El formulario público como casilla por oferta, LinkedIn como casilla y que las ofertas viejas ganen
   un portal** (decisión 1).
 
 ## Preguntas abiertas
 
 1. ~~El punto único solo en la creación~~: cerrada (decisión 5).
-2. **Pandapé y Computrabajo** (decisión 6): solo queda que Elvis confirme que la republicación usa la
-   cuenta de Pandapé. No bloquea: el diseño ya parte de lo que dice el código.
+2. **Pandapé y Computrabajo** (decisión 6): a Elvis, si el robot respeta publicar de verdad sin
+   republicar. No bloquea: solo afecta a empresas nuevas con el switch apagado.
 3. ~~Las pruebas a mano de ofertas sin ATS sin resultado anotado~~: cerrada el 2026-10-07, bien según
    el usuario; anotadas en esa tarea.
 
 ## Pasos
 
-Rama nueva desde `develop`, en los dos repositorios. Sin pasos hasta acordar el alcance.
+Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10-08.
+
+| Paso | Qué | Repositorio | Qué ve una persona | Estado |
+| --- | --- | --- | --- | --- |
+| 1 | La pieza de cada portal, el registro, el punto único al crear y la negativa a publicar un portal no apuntado en la oferta (decisiones 3, 5, 7 y 12) | backend | Nada: se publica igual que hoy | Sin brief |
+| 2 | La creación recibe, comprueba y guarda lo elegido (decisiones 8 a 10); el dato de republicación, su guardado y la línea de Elvis (decisión 6) | backend | Una empresa nueva con Pandapé deja de republicar | Sin brief |
+| 3 | El paso nuevo del asistente, con el aviso y la confirmación de Computrabajo (decisión 6) | portal | El paso | Sin brief |
+| 4 | El switch de republicación en el modal de Pandapé y el interruptor general (decisiones 6 y 11) | portal | Los dos interruptores | Sin brief |
+| Cierre | Fusión, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | — | — |
+| Final, si sobra | Elegir canales por WhatsApp, en el agente y en Maya (decisión 9) | backend | La pregunta en la conversación | — |
 
 ## Registro de avance
 
@@ -193,9 +240,15 @@ Rama nueva desde `develop`, en los dos repositorios. Sin pasos hasta acordar el 
   la lógica de Elvis no se toca; la empresa guarda en qué portales republica su Pandapé, solo para el
   paso; Computrabajo sale desmarcado con aviso y se puede marcar tras confirmar. De las preguntas para
   Elvis queda una, que no bloquea. Sin brief.
+- **2026-10-08** — Alcance cerrado. Decisión 6 rehecha por tercera vez: la línea de Elvis lee un dato
+  de la empresa, aparte de las credenciales, con un switch en el modal de Pandapé; la empresa actual
+  se escribe a mano. Decisiones 9 a 12: entradas sin casillas, rechazo del portal no disponible,
+  interruptor general solo en el portal y forma de la arquitectura. Punto H; corregida la deuda de
+  contraseñas en `CLAUDE.md`. Partido en cuatro pasos. Sigue el brief del paso 1.
 
 ## Antes de desplegar
 
-- 🔴 **La empresa que ya usa Pandapé tiene que quedar con Computrabajo en su lista de republicación**
-  (decisión 6). Sin eso, su paso no avisa y la oferta sale igual en Computrabajo por Pandapé. Cómo se
-  hace —migración o valor al leer— lo decide el brief del backend.
+- 🔴 **Escribir a mano en la base, ANTES de desplegar el backend, que el Pandapé de la empresa que ya
+  lo usa republica en Computrabajo** (decisión 6). Si el backend va primero, sus ofertas dejan de
+  republicarse hasta que se escriba. El código viejo ignora el dato. La consulta exacta la deja el
+  paso 2.
