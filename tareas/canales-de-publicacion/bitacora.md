@@ -221,7 +221,7 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
 | Paso | Qué | Repositorio | Qué ve una persona | Estado |
 | --- | --- | --- | --- | --- |
 | 1 | La pieza de cada portal, el registro, el punto único al crear y la negativa a publicar un portal no apuntado en la oferta (decisiones 3, 5, 7 y 12) | backend | Nada: se publica igual que hoy | Aprobado (`brief-paso1-piezas-y-punto-unico.md`); sin commit |
-| 2 | La creación recibe, comprueba y guarda lo elegido (decisiones 8 a 10); el dato de republicación, su guardado y la línea de Elvis (decisión 6) | backend | Una empresa nueva con Pandapé deja de republicar | Sin brief |
+| 2 | La creación recibe, comprueba y guarda lo elegido (decisiones 8 a 10); el dato de republicación, su guardado y la línea de Elvis (decisión 6) | backend | Una empresa nueva con Pandapé deja de republicar | Brief escrito (`brief-paso2-eleccion-y-republicacion.md`) |
 | 3 | El paso nuevo del asistente, con el aviso y la confirmación de Computrabajo (decisión 6) | portal | El paso | Sin brief |
 | 4 | El switch de republicación en el modal de Pandapé y el interruptor general (decisiones 6 y 11) | portal | Los dos interruptores | Sin brief |
 | Cierre | Fusión, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | — | — |
@@ -279,10 +279,15 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   servicio: lo que pesa son las tres funciones de publicación y sus traductores, que la decisión 12
   deja donde están. Compila; **195 suites y 2.030 pruebas que pasan**, igual que antes, corrido por el
   planificador. Índice y árbol coincidiendo.
+- **2026-10-08** — Paso 1 commiteado (backend `4733ddb`). Brief del paso 2 escrito. Al prepararlo: la
+  petición que edita la empresa escribe sin las validaciones del esquema, así que el dato de
+  republicación lo filtra la propia petición; las ofertas ya tienen `atsRepublish` (el informe de
+  Pandapé), falso amigo del dato nuevo. Propuesto por el planificador: en modo demo la elección se
+  ignora y no se comprueba (la oferta nace sin portales, como hoy).
 
 ## Antes de desplegar
 
 - 🔴 **Escribir a mano en la base, ANTES de desplegar el backend, que el Pandapé de la empresa que ya
   lo usa republica en Computrabajo** (decisión 6). Si el backend va primero, sus ofertas dejan de
-  republicarse hasta que se escriba. El código viejo ignora el dato. La consulta exacta la deja el
-  paso 2.
+  republicarse hasta que se escriba. El código viejo ignora el dato. La instrucción exacta la entrega
+  el ejecutor del paso 2 y se copia aquí.
