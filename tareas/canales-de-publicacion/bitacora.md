@@ -104,7 +104,10 @@ de *Lo que dice el código*, más abajo, que ganan sobre él. La tarea hermana, 
      va primero, sus ofertas dejan de republicarse hasta que alguien lo escriba. El código viejo ignora
      el dato, así que escribirlo antes no rompe nada. En *Antes de desplegar*.
 7. **La pieza de cada portal se niega a publicar si ese portal no está apuntado en la oferta**
-   (usuario, 2026-10-07). Cierra el hueco del reintento automático (punto B) sin tocar los reintentos.
+   (usuario, 2026-10-07). Cierra el hueco del reintento automático (punto B). Para eso los tres
+   reintentos piden la publicación a la pieza del portal en vez de llamar a la función directamente;
+   cómo eligen el portal no cambia (corregido el 2026-10-08: decía «sin tocar los reintentos», y sin
+   ese cambio la negativa no llega al hueco).
    🔴 **No debe romper las herramientas de desarrollo que publican a propósito** —«Crear borrador en
    Pandapé», las pruebas de crear en cada portal— (aviso del usuario). Leído el 2026-10-07: esas
    pruebas despachan el robot por su propio camino, no por las tres funciones de publicación que
@@ -217,7 +220,7 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
 
 | Paso | Qué | Repositorio | Qué ve una persona | Estado |
 | --- | --- | --- | --- | --- |
-| 1 | La pieza de cada portal, el registro, el punto único al crear y la negativa a publicar un portal no apuntado en la oferta (decisiones 3, 5, 7 y 12) | backend | Nada: se publica igual que hoy | Sin brief |
+| 1 | La pieza de cada portal, el registro, el punto único al crear y la negativa a publicar un portal no apuntado en la oferta (decisiones 3, 5, 7 y 12) | backend | Nada: se publica igual que hoy | Brief escrito (`brief-paso1-piezas-y-punto-unico.md`) |
 | 2 | La creación recibe, comprueba y guarda lo elegido (decisiones 8 a 10); el dato de republicación, su guardado y la línea de Elvis (decisión 6) | backend | Una empresa nueva con Pandapé deja de republicar | Sin brief |
 | 3 | El paso nuevo del asistente, con el aviso y la confirmación de Computrabajo (decisión 6) | portal | El paso | Sin brief |
 | 4 | El switch de republicación en el modal de Pandapé y el interruptor general (decisiones 6 y 11) | portal | Los dos interruptores | Sin brief |
@@ -245,6 +248,12 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   se escribe a mano. Decisiones 9 a 12: entradas sin casillas, rechazo del portal no disponible,
   interruptor general solo en el portal y forma de la arquitectura. Punto H; corregida la deuda de
   contraseñas en `CLAUDE.md`. Partido en cuatro pasos. Sigue el brief del paso 1.
+- **2026-10-08** — Rama `feat/publication-channels`. Línea base en `develop` (`d96be7b`), medida por
+  el planificador con la caché limpia: **compila; 192 suites y 2.020 pruebas que pasan, 1 suite y 43
+  omitidas**. Brief del paso 1 escrito. Al prepararlo: la prueba de reintentos sustituye las funciones
+  de publicación después de construir el servicio (las piezas tienen que llamarlas al publicar), y la
+  de crear sin portales exige tres avisos del log que el punto único elimina (se cambian por «no se
+  llama a ninguna»). Decisión 7 corregida: los reintentos pasan por la pieza.
 
 ## Antes de desplegar
 
