@@ -254,6 +254,16 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   de publicación después de construir el servicio (las piezas tienen que llamarlas al publicar), y la
   de crear sin portales exige tres avisos del log que el punto único elimina (se cambian por «no se
   llama a ninguna»). Decisión 7 corregida: los reintentos pasan por la pieza.
+- **2026-10-08** — Opinión previa del paso 1 contestada. `develop` avanzó a `9736f86` (limpieza de
+  datos personales en los logs, una corrección del orquestador, pruebas contra desarrollo y una marca
+  para el aviso del robot): no toca el servicio de ofertas; **misma línea base**. Comprobado por el
+  ejecutor: cuatro sitios llaman a las tres funciones, diez despachos de robots y ninguna herramienta
+  de desarrollo pasa por las piezas, y los tres reintentos llevan la lista de la oferta. Corregido el
+  brief: 36 pruebas arman el servicio sin constructor (registro a la primera, la pieza llama a la
+  función al publicar), y cambia también la prueba del modo demo. Aceptados: el reintento genérico
+  cae en Computrabajo si no conoce el portal y luego actúa la negativa; una sola clase con una
+  instancia por portal; el punto único recorre el registro, así que un portal repetido en la lista se
+  publica una vez; los nombres.
 
 ## Antes de desplegar
 

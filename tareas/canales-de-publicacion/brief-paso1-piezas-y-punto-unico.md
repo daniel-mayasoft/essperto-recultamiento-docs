@@ -50,11 +50,12 @@ servicio de ofertas. **Esas tres funciones no se tocan: ni una línea dentro de 
 oferta y el portal. La oferta que recibe la pieza tiene que llevar su lista: en la creación es el
 documento recién guardado; en los reintentos, la oferta que ya cargan.
 
-🔴 **Trampa: la pieza llama a la función en el momento de publicar, no guarda una referencia tomada
-al construirse.** La prueba de reintentos (`retry-ats-publication.spec.ts`) sustituye las tres
-funciones en la instancia del servicio **después** de construirlo. Una pieza que se quedara con la
-función original al crearse se saltaría esa sustitución: la prueba llamaría a la de verdad, y podría
-seguir verde por motivos equivocados.
+🔴 **Trampa: el registro se arma la primera vez que se usa, y la pieza llama a la función en el
+momento de publicar.** (Corregido en la opinión previa: la primera versión decía que la prueba de
+reintentos construye el servicio y luego sustituye las funciones.) Esa prueba y otras 35 arman el
+servicio **sin ejecutar su constructor**, y sustituyen las tres funciones en la instancia. Un registro
+armado en el constructor no existiría en ellas; una pieza que guardara la función original se
+saltaría la sustitución.
 
 ### 3 · El registro, dentro del servicio de ofertas (decisión 12)
 
@@ -79,7 +80,9 @@ punto único, a un portal que no está en la lista **no se le llama**. Los dos c
 `offer-creation-without-platforms.spec.ts` exigen hoy tres avisos del log («sin credenciales ATS» y
 «deshabilitada»); después no habrá ninguno. Esas dos comprobaciones se cambian por **«no se llama a
 ninguna función de publicación»**, que es lo que de verdad importa. El resto de los casos queda
-igual. Dilo en el reporte.
+igual. Dilo en el reporte. **Lo mismo en `demo-mode-offer-creation.spec.ts`** (visto en la opinión
+previa): con el modo demo apagado espera las tres llamadas, y su empresa solo tiene Computrabajo;
+pasa a Computrabajo una vez y elempleo y Pandapé ninguna.
 
 ### 5 · Los tres reintentos pasan por la pieza
 
@@ -120,8 +123,8 @@ del manual. Con esto, la negativa vale también aquí, que es donde está el hue
   aviso en el log.
 - **El hueco del punto B**: aviso de fallo sin portal para una oferta sin Computrabajo → no se
   despacha nada. Con Computrabajo en la oferta → se relanza como hoy.
-- `retry-ats-publication.spec.ts` y las demás pruebas de publicación pasan **sin cambios**. La única
-  prueba existente que cambia es la del punto 4, y solo esas dos comprobaciones.
+- `retry-ats-publication.spec.ts` y las demás pruebas de publicación pasan **sin cambios**. Las únicas
+  pruebas existentes que cambian son las dos del punto 4, y solo esas comprobaciones.
 - **Control negativo** en las nuevas: invierte la expectativa, comprueba que falla, bórralo.
 - `npx jest --clearCache`, `npm run build` y `npm test`, **una vez**, frente a la línea base.
 
