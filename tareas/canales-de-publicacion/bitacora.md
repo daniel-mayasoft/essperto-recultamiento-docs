@@ -220,7 +220,7 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
 
 | Paso | Qué | Repositorio | Qué ve una persona | Estado |
 | --- | --- | --- | --- | --- |
-| 1 | La pieza de cada portal, el registro, el punto único al crear y la negativa a publicar un portal no apuntado en la oferta (decisiones 3, 5, 7 y 12) | backend | Nada: se publica igual que hoy | Brief escrito (`brief-paso1-piezas-y-punto-unico.md`) |
+| 1 | La pieza de cada portal, el registro, el punto único al crear y la negativa a publicar un portal no apuntado en la oferta (decisiones 3, 5, 7 y 12) | backend | Nada: se publica igual que hoy | Aprobado (`brief-paso1-piezas-y-punto-unico.md`); sin commit |
 | 2 | La creación recibe, comprueba y guarda lo elegido (decisiones 8 a 10); el dato de republicación, su guardado y la línea de Elvis (decisión 6) | backend | Una empresa nueva con Pandapé deja de republicar | Sin brief |
 | 3 | El paso nuevo del asistente, con el aviso y la confirmación de Computrabajo (decisión 6) | portal | El paso | Sin brief |
 | 4 | El switch de republicación en el modal de Pandapé y el interruptor general (decisiones 6 y 11) | portal | Los dos interruptores | Sin brief |
@@ -264,6 +264,21 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   cae en Computrabajo si no conoce el portal y luego actúa la negativa; una sola clase con una
   instancia por portal; el punto único recorre el registro, así que un portal repetido en la lista se
   publica una vez; los nombres.
+- **2026-10-08** — **Paso 1 revisado y aprobado.** Nueve archivos, índice y árbol coincidiendo; las
+  tres funciones de publicación sin tocar. Compila; **195 suites y 2.030 pruebas que pasan, 1 suite y
+  43 omitidas**, con la caché limpia, corrido por el planificador: **nueva línea base**. Decisiones del
+  ejecutor aceptadas: las piezas reciben la oferta guardada con su identificador, que el compilador
+  acepta en los cuatro caminos sin conversiones; se corrige la prosa de cabecera de la prueba de crear
+  sin portales, que ya era falsa, y se quita su ayuda para leer el log, que nadie usa; en el
+  reintento propio de elempleo, sin pieza no se publicaría, lo que no puede pasar. El título de la
+  prueba del modo demo apagado seguía diciendo «disparando los 3 bots»: se corrige antes del commit.
+- **2026-10-08** — **Paso 1, segunda ronda, aprobada** (a petición del usuario). El recorrido del
+  punto único sale del servicio de ofertas al registro (`publishToListedChannels`), que recibe el
+  logger para avisar; el armado de las tres piezas se queda en el servicio, porque necesita sus
+  funciones privadas. Corregido el título de la prueba del modo demo. No alivia el tamaño del
+  servicio: lo que pesa son las tres funciones de publicación y sus traductores, que la decisión 12
+  deja donde están. Compila; **195 suites y 2.030 pruebas que pasan**, igual que antes, corrido por el
+  planificador. Índice y árbol coincidiendo.
 
 ## Antes de desplegar
 
