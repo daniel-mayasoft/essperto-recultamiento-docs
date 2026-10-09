@@ -128,9 +128,10 @@ de *Lo que dice el código*, más abajo, que ganan sobre él. La tarea hermana, 
    canales va al final**, como paso propio, si sobra tiempo.
 10. **El backend rechaza la creación si se elige un portal que la empresa no puede usar** (usuario,
     2026-10-08): no configurado (decisión 8) o apagado. Caso: Pedro tiene el asistente abierto, un
-    compañero apaga elempleo, y Pedro crea con elempleo marcado; recibe «elempleo ya no está habilitado
-    en tu empresa», el asistente conserva lo escrito y él lo desmarca. Quitarlo en silencio le haría
-    creer que salió en elempleo.
+    compañero apaga elempleo, y Pedro crea con elempleo marcado; recibe «elempleo no está disponible
+    en tu empresa: le falta el usuario o la contraseña, o está apagado.» (texto aceptado en la opinión
+    previa del paso 2), el asistente conserva lo escrito y él lo desmarca. Quitarlo en silencio le
+    haría creer que salió en elempleo.
 11. **El interruptor general «Portales de empleo» vive solo en el portal** (usuario, 2026-10-08).
     Apagado: apaga todos los portales y sus interruptores quedan grises. Encendido: los interruptores
     se pueden tocar, pero siguen apagados; el reclutador enciende los que quiera. No se guarda: al
@@ -196,6 +197,16 @@ Releído el 2026-10-07 por el planificador nuevo (backend `d96be7b`, sin cambios
 commit de Elvis que abre en otra pestaña «Conectar un proveedor» del paso psicométrico, sin relación
 con la publicación): A a F se sostienen, con los matices de B y C.
 
+## Hallazgos ajenos al frente
+
+- 🔴 **La validación de las peticiones está apagada en todo el backend** (visto por el ejecutor en la
+  opinión previa del paso 2, comprobado por el planificador el 2026-10-08). La validación global está
+  comentada en el arranque y las rutas no llevan una propia, así que las reglas declaradas en cada
+  petición (tipos, valores permitidos, máximos) no se aplican: lo que llega pasa tal cual al servicio.
+  La edición de la empresa escribe además sin las validaciones del esquema y acepta claves con punto,
+  que la base toma como rutas dentro de un campo; las credenciales y otros campos están expuestos así
+  hoy. Este frente se protege por su cuenta (paso 2). Para el equipo.
+
 ## Fuera del alcance, a sabiendas
 
 - **La lógica de la republicación de Pandapé en Computrabajo, salvo su línea** (decisión 6; usuario).
@@ -220,10 +231,10 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
 
 | Paso | Qué | Repositorio | Qué ve una persona | Estado |
 | --- | --- | --- | --- | --- |
-| 1 | La pieza de cada portal, el registro, el punto único al crear y la negativa a publicar un portal no apuntado en la oferta (decisiones 3, 5, 7 y 12) | backend | Nada: se publica igual que hoy | Aprobado (`brief-paso1-piezas-y-punto-unico.md`); sin commit |
-| 2 | La creación recibe, comprueba y guarda lo elegido (decisiones 8 a 10); el dato de republicación, su guardado y la línea de Elvis (decisión 6) | backend | Una empresa nueva con Pandapé deja de republicar | Brief escrito (`brief-paso2-eleccion-y-republicacion.md`) |
-| 3 | El paso nuevo del asistente, con el aviso y la confirmación de Computrabajo (decisión 6) | portal | El paso | Sin brief |
-| 4 | El switch de republicación en el modal de Pandapé y el interruptor general (decisiones 6 y 11) | portal | Los dos interruptores | Sin brief |
+| 1 | La pieza de cada portal, el registro, el punto único al crear y la negativa a publicar un portal no apuntado en la oferta (decisiones 3, 5, 7 y 12) | backend | Nada: se publica igual que hoy | Hecho: `4733ddb` (`brief-paso1-piezas-y-punto-unico.md`) |
+| 2 | La creación recibe, comprueba y guarda lo elegido (decisiones 8 a 10); el dato de republicación, su guardado y la línea de Elvis (decisión 6) | backend | Una empresa nueva con Pandapé deja de republicar | Aprobado (`brief-paso2-eleccion-y-republicacion.md`); sin commit |
+| 3 | El paso nuevo del asistente, con el aviso y la confirmación de Computrabajo (decisión 6) | portal | El paso | Sin brief. ⚠️ Las empresas existentes llegan **sin** el dato de republicación (el campo no viene): tratarlo como «sin republicación» |
+| 4 | El switch de republicación en el modal de Pandapé y el interruptor general (decisiones 6 y 11) | portal | Los dos interruptores | Sin brief. ⚠️ Apagar el switch manda **lista vacía, nunca nulo**: el backend rechaza el nulo. «No viene» se pinta como apagado |
 | Cierre | Fusión, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | — | — |
 | Final, si sobra | Elegir canales por WhatsApp, en el agente y en Maya (decisión 9) | backend | La pregunta en la conversación | — |
 
@@ -284,10 +295,44 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   republicación lo filtra la propia petición; las ofertas ya tienen `atsRepublish` (el informe de
   Pandapé), falso amigo del dato nuevo. Propuesto por el planificador: en modo demo la elección se
   ignora y no se comprueba (la oferta nace sin portales, como hoy).
+- **2026-10-08** — Opinión previa del paso 2 contestada. `develop` sigue en `9736f86`. El brief daba
+  por hecho que la validación de la petición rechaza un valor que no es un portal: está apagada en
+  todo el backend (*Hallazgos ajenos*); corregido, lo comprueba el servicio. Aceptado: la lista con
+  elección toma la primera credencial de cada portal, la misma que usa la publicación, y la
+  disponibilidad se mira sobre ella; la comprobación va donde hoy se arma la lista, después de las
+  del plan (que no escriben) y antes de guardar; también en el modo de simulación; el dato de
+  republicación pasa por una sola normalización al editar y al crear empresa, que rechaza el nulo y
+  descarta las claves con punto que empiezan por él; sin el dato, la petición al robot dice «no» de
+  forma explícita. Del comentario de Elvis sobre la línea se quita solo la frase que deja de ser
+  cierta; el aviso de créditos y de que ese identificador no queda en la oferta se conserva. Nombres:
+  `selectedAtsPlatforms`, `atsCrossPosting` (con `sourcePlatform` y `targetPlatforms`) e
+  `isAvailableFor`.
+- **2026-10-08** — Paso 2 revisado. Once archivos, índice y árbol coincidiendo; ninguna prueba
+  existente cambia. Compila; **198 suites y 2.060 pruebas que pasan, 1 suite y 43 omitidas**, con la
+  caché limpia, corrido por el planificador. Decisiones del ejecutor aceptadas: el dato entra en los
+  campos protegidos de la empresa (eso ya descarta sus claves con punto) y se escribe aparte,
+  normalizado; la normalización rehace la entrada; una empresa nueva nace con la lista vacía; la
+  lista de la oferta sigue el orden de la elección; los tres textos de rechazo nuevos; el bloque que
+  arma la lista, reindentado a mano. **Una corrección antes de aprobar**: la línea de Elvis da por
+  hecho que cada entrada trae su lista de destinos; si una escrita a mano no la trae, la publicación
+  de Pandapé falla entera y solo queda en el log. `develop` avanzó a `7f22bb1` (solo el orquestador
+  del embudo, fuera de la zona): se trae en el cierre.
+- **2026-10-08** — **Paso 2, segunda ronda, aprobada.** Una entrada sin destinos cuenta como «no
+  republica», con su prueba. A petición del usuario, la resolución de qué credenciales entran en la
+  lista pasa al registro (`resolveListedCredentials`) y la normalización del dato de republicación a
+  su propio archivo en la carpeta de canales; comportamiento y textos idénticos. Trece archivos,
+  índice y árbol coincidiendo. Compila; **198 suites y 2.061 pruebas que pasan, 1 suite y 43
+  omitidas**, con la caché limpia, corrido por el planificador: **nueva línea base**. El reporte no
+  traía la verificación ni el mensaje de commit; los puso el planificador.
 
 ## Antes de desplegar
 
 - 🔴 **Escribir a mano en la base, ANTES de desplegar el backend, que el Pandapé de la empresa que ya
   lo usa republica en Computrabajo** (decisión 6). Si el backend va primero, sus ofertas dejan de
-  republicarse hasta que se escriba. El código viejo ignora el dato. La instrucción exacta la entrega
-  el ejecutor del paso 2 y se copia aquí.
+  republicarse hasta que se escriba. El código viejo ignora el dato. Primero en el servidor de pruebas
+  y después en producción; las dos bases se llaman igual, así que **confirma a qué servidor estás
+  conectado**. Para ver a qué empresas afecta:
+  `db.tenants.find({ "atsCredentials.platform": "pandape" }, { name: 1, atsCrossPosting: 1 })`.
+  Para escribirlo:
+  `db.tenants.updateMany({ "atsCredentials.platform": "pandape" }, { $set: { atsCrossPosting: [ { sourcePlatform: "pandape", targetPlatforms: ["computrabajo"] } ] } })`.
+  Entregada por el ejecutor del paso 2.

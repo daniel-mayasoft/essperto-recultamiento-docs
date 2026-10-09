@@ -49,8 +49,9 @@ reutiliza `atsIds`**, que solo sirve al modo de simulación (punto F).
 - **Comprobación** antes de guardar nada: cada elegido tiene que estar **disponible para la
   empresa**: con usuario, con contraseña y no apagado (decisión 8). Si alguno no lo está, la creación
   se rechaza con un error que nombra el portal, del tipo «elempleo no está disponible en tu empresa».
-  **No se crea la oferta ni se cobra nada.** Un valor que no es un portal lo rechaza la validación de
-  la petición.
+  **No se crea la oferta ni se cobra nada.** Un valor que no es un portal, o un campo que no es una
+  lista, lo rechaza **el propio servicio** con un error que nombra el valor. (Corregido en la opinión
+  previa: la validación de las peticiones está apagada en todo el backend y no rechazaría nada.)
 - **Modo demo**: la elección se ignora y no se comprueba; la oferta nace sin portales, como hoy.
 - **Modo de simulación**: los identificadores de prueba se siguen buscando como hoy, pero solo para
   los portales de la lista.
