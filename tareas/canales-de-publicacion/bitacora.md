@@ -145,6 +145,12 @@ de *Lo que dice el código*, más abajo, que ganan sobre él. La tarea hermana, 
     ofertas y apuntan a sus tres funciones de publicación, que se quedan donde están, intactas. Sacarlas
     a piezas independientes sería mover cientos de líneas y crear una dependencia en círculo (el
     servicio usaría las piezas y las piezas al servicio).
+13. **Sin los datos de la empresa no se crea desde el asistente** (usuario, 2026-10-09; opinión previa
+    del paso 3). Las casillas salen siempre de la empresa ya cargada; mientras no esté, el paso de
+    canales muestra «Cargando los portales de tu empresa…» y «Crear» queda desactivado. Si la consulta
+    de la empresa falló, no se puede crear hasta recargar la página y se pierde lo escrito (la consulta
+    hoy no se reintenta). Se descartó no mandar la elección: el backend publicaría en todos los portales
+    sin que nadie lo eligiera. El usuario no quiso que el texto mencionara recargar.
 
 ## Lo que dice el código y los documentos no
 
@@ -206,6 +212,10 @@ con la publicación): A a F se sostienen, con los matices de B y C.
   La edición de la empresa escribe además sin las validaciones del esquema y acepta claves con punto,
   que la base toma como rutas dentro de un campo; las credenciales y otros campos están expuestos así
   hoy. Este frente se protege por su cuenta (paso 2). Para el equipo.
+- **El asistente de creación vuelve al primer paso y pierde lo escrito si los datos de la empresa
+  llegan o cambian mientras está abierto** (visto por el ejecutor en la opinión previa del paso 3). Se
+  reinicia con cada cambio de la empresa, no solo al abrirse. Y si la consulta de la empresa falla, el
+  listado la ignora en silencio y no la reintenta. Pasa hoy; no se toca aquí.
 
 ## Fuera del alcance, a sabiendas
 
@@ -232,8 +242,8 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
 | Paso | Qué | Repositorio | Qué ve una persona | Estado |
 | --- | --- | --- | --- | --- |
 | 1 | La pieza de cada portal, el registro, el punto único al crear y la negativa a publicar un portal no apuntado en la oferta (decisiones 3, 5, 7 y 12) | backend | Nada: se publica igual que hoy | Hecho: `4733ddb` (`brief-paso1-piezas-y-punto-unico.md`) |
-| 2 | La creación recibe, comprueba y guarda lo elegido (decisiones 8 a 10); el dato de republicación, su guardado y la línea de Elvis (decisión 6) | backend | Una empresa nueva con Pandapé deja de republicar | Aprobado (`brief-paso2-eleccion-y-republicacion.md`); sin commit |
-| 3 | El paso nuevo del asistente, con el aviso y la confirmación de Computrabajo (decisión 6) | portal | El paso | Sin brief. ⚠️ Las empresas existentes llegan **sin** el dato de republicación (el campo no viene): tratarlo como «sin republicación» |
+| 2 | La creación recibe, comprueba y guarda lo elegido (decisiones 8 a 10); el dato de republicación, su guardado y la línea de Elvis (decisión 6) | backend | Una empresa nueva con Pandapé deja de republicar | Hecho: `3bd0b88` (`brief-paso2-eleccion-y-republicacion.md`) |
+| 3 | El paso nuevo del asistente, con el aviso y la confirmación de Computrabajo (decisión 6) | portal | El paso | Brief escrito (`brief-paso3-paso-del-asistente.md`), con los textos confirmados. ⚠️ Las empresas existentes llegan **sin** el dato de republicación (el campo no viene): tratarlo como «sin republicación» |
 | 4 | El switch de republicación en el modal de Pandapé y el interruptor general (decisiones 6 y 11) | portal | Los dos interruptores | Sin brief. ⚠️ Apagar el switch manda **lista vacía, nunca nulo**: el backend rechaza el nulo. «No viene» se pinta como apagado |
 | Cierre | Fusión, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | — | — |
 | Final, si sobra | Elegir canales por WhatsApp, en el agente y en Maya (decisión 9) | backend | La pregunta en la conversación | — |
@@ -324,6 +334,27 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   índice y árbol coincidiendo. Compila; **198 suites y 2.061 pruebas que pasan, 1 suite y 43
   omitidas**, con la caché limpia, corrido por el planificador: **nueva línea base**. El reporte no
   traía la verificación ni el mensaje de commit; los puso el planificador.
+- **2026-10-09** — Paso 2 commiteado (backend `3bd0b88`). Portal: `develop` sigue en `f94bfb3`. Brief
+  del paso 3 escrito. Al prepararlo: el asistente se puede abrir antes de que cargue la empresa (botón
+  del listado vacío), y unas casillas calculadas entonces saldrían todas desmarcadas y crearían la
+  oferta sin portales en silencio; y el «Atrás» del último paso de hoy vuelve dos pasos, saltando el
+  de documentos, que se corrige solo al dejar de ser el último. Textos del paso confirmados por el
+  usuario tal como se propusieron.
+- **2026-10-09** — Opinión previa del paso 3 contestada. Portal en `f94bfb3`, rama creada, tipos sin
+  errores. Decisión 13 (sin empresa no se crea) y un hallazgo ajeno. Aceptado: se guardan solo los
+  cambios de la persona y lo marcado se calcula de la empresa cargada; la indicación distingue «sin
+  configurar» de «apagado»; al cambiar Pandapé, Computrabajo vuelve a su valor por defecto; el
+  argumento nuevo del envío lo manda solo crear; una cuarta lista local de nombres de portal (ninguna
+  de las tres existentes se puede reutilizar); los nombres propuestos. Dos casos más para las pruebas
+  a mano: copiar una oferta que salió solo en Computrabajo, y el «Atrás» desde la agenda.
+- **2026-10-09** — **Paso 3 revisado por el planificador.** Cinco archivos, índice y árbol
+  coincidiendo; `develop` del portal sin moverse. Lo marcado se calcula de la empresa cargada más los
+  cambios de la persona; sin empresa, texto de carga y «Crear» desactivado; los cuatro casos de
+  Pandapé y el del enlace sin Computrabajo disponible, como en la decisión 6; la creación manda
+  siempre la elección, también vacía; editar no la manda; el «Atrás» ya no salta documentos. Textos
+  literales en los dos idiomas. Sin comentarios nuevos; nombres en inglés. Tipos sin errores, corrido
+  por el planificador. Una corrección antes del commit: los dos estados nuevos quedaron debajo del
+  comentario «Edit-mode vacancy confirmation state», que pasa a describirlos mal.
 
 ## Antes de desplegar
 
