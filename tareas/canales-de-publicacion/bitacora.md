@@ -243,8 +243,8 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
 | --- | --- | --- | --- | --- |
 | 1 | La pieza de cada portal, el registro, el punto único al crear y la negativa a publicar un portal no apuntado en la oferta (decisiones 3, 5, 7 y 12) | backend | Nada: se publica igual que hoy | Hecho: `4733ddb` (`brief-paso1-piezas-y-punto-unico.md`) |
 | 2 | La creación recibe, comprueba y guarda lo elegido (decisiones 8 a 10); el dato de republicación, su guardado y la línea de Elvis (decisión 6) | backend | Una empresa nueva con Pandapé deja de republicar | Hecho: `3bd0b88` (`brief-paso2-eleccion-y-republicacion.md`) |
-| 3 | El paso nuevo del asistente, con el aviso y la confirmación de Computrabajo (decisión 6) | portal | El paso | Brief escrito (`brief-paso3-paso-del-asistente.md`), con los textos confirmados. ⚠️ Las empresas existentes llegan **sin** el dato de republicación (el campo no viene): tratarlo como «sin republicación» |
-| 4 | El switch de republicación en el modal de Pandapé y el interruptor general (decisiones 6 y 11) | portal | Los dos interruptores | Sin brief. ⚠️ Apagar el switch manda **lista vacía, nunca nulo**: el backend rechaza el nulo. «No viene» se pinta como apagado |
+| 3 | El paso nuevo del asistente, con el aviso y la confirmación de Computrabajo (decisión 6) | portal | El paso | Hecho: `8ff8b17` (`brief-paso3-paso-del-asistente.md`). ⚠️ Las empresas existentes llegan **sin** el dato de republicación (el campo no viene): tratarlo como «sin republicación» |
+| 4 | El switch de republicación en el modal de Pandapé y el interruptor general (decisiones 6 y 11) | portal | Los dos interruptores | Aprobado (`brief-paso4-mi-compania.md`); sin commit. ⚠️ Apagar el switch manda **lista vacía, nunca nulo**: el backend rechaza el nulo. «No viene» se pinta como apagado |
 | Cierre | Fusión, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | — | — |
 | Final, si sobra | Elegir canales por WhatsApp, en el agente y en Maya (decisión 9) | backend | La pregunta en la conversación | — |
 
@@ -355,6 +355,35 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   literales en los dos idiomas. Sin comentarios nuevos; nombres en inglés. Tipos sin errores, corrido
   por el planificador. Una corrección antes del commit: los dos estados nuevos quedaron debajo del
   comentario «Edit-mode vacancy confirmation state», que pasa a describirlos mal.
+- **2026-10-09** — Paso 3 commiteado (portal `8ff8b17`), **sin** la corrección del comentario: va al
+  paso 4. Brief del paso 4 escrito. Al prepararlo: si el estado del interruptor general se recalcula
+  siempre a partir de los portales, encenderlo con todos apagados no hace nada, y cada cambio de un
+  portal recarga la empresa en la página. Textos del switch de Pandapé propuestos, pendientes del
+  usuario.
+- **2026-10-12** — Fusión de `develop` en la rama del backend (`87a584c`), revisada por el
+  planificador: trae solo `7f22bb1` (el orquestador del embudo, fuera de la zona). Compila; **198
+  suites y 2.061 pruebas que pasan, 1 suite y 43 omitidas**, con la caché limpia: sin cambios. El
+  portal no tiene fusión pendiente (`develop` sigue en `f94bfb3`). Textos del switch de Pandapé
+  confirmados por el usuario tal como se propusieron. `develop` está entero en `main` en los dos
+  repositorios (`main` solo suma los commits de fusión de los PR): nada de esta tarea está todavía en
+  `develop`.
+- **2026-10-12** — Opinión previa del paso 4 contestada, con dos cambios del planificador aceptados
+  por el usuario: el general nunca puede quedar apagado con un portal encendido (cada vez que llegan
+  los datos de la empresa y hay alguno encendido, pasa a encendido; solo se apaga en el primer
+  cálculo o a mano), y la función que enciende o apaga un portal pasa a recibir una lista en lugar
+  de crear una función nueva o copiar su filtro. Nombres con el término «Ats» que ya usa el código.
+- **2026-10-12** — **Paso 4 revisado y aprobado.** Cuatro archivos, índice y árbol coincidiendo;
+  `develop` del portal sin moverse. El general se calcula al llegar la empresa y no se apaga solo;
+  apagarlo apaga en una petición todos los portales con usuario, conservando sus contraseñas, y si
+  falla vuelve todo a como estaba; los interruptores de cada portal, grises con el general apagado;
+  «Editar» siempre activo; sin «Obligatorio». El switch de Pandapé sale encendido solo con el dato y
+  manda Pandapé → [Computrabajo] o la lista vacía, solo desde el modal de Pandapé (el ejecutor buscó
+  el dato en todo el portal: un solo envío). Corregido el comentario fuera de sitio del paso 3.
+  Textos literales. Tipos sin errores, corrido por el planificador. Decisiones del ejecutor aceptadas:
+  la función de encender o apagar dice si salió bien, para que el general vuelva a encendido si
+  falla; apagar el general sin portales con usuario no manda nada; el switch se desactiva mientras se
+  guarda. Dos casos más para las pruebas a mano: editar la contraseña de un portal apagado con el
+  general apagado, y «Recargar» tras encender el general sin portales.
 
 ## Antes de desplegar
 
