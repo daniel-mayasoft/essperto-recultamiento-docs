@@ -321,7 +321,7 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
 | 3b | Las notas del paso de canales a la derecha del nombre, en gris e itálica; bajan de línea si no caben (pedido en las pruebas a mano) | portal | El aspecto del paso | Hecho: `29fa609`, **directamente en `develop`** (usuario), sin subir todavía |
 | 3c | El paso de canales pide los datos de la empresa al entrar (decisión 14) | portal | Los cambios de otra pestaña llegan sin recargar | Aprobado; directo en `develop`, commit aparte encima del 3b |
 | Cierre | Fusión, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | — | Fusión hecha (backend #105, portal #77); pruebas a mano en curso (`pruebas-a-mano.md`) |
-| 5 | Sin elección, el mismo valor por defecto que el paso de canales (decisión 15) | backend | Una empresa con Pandapé ligado deja de publicar dos veces en Computrabajo por WhatsApp | Brief escrito (`brief-paso5-valor-por-defecto.md`); directo en `develop` |
+| 5 | Sin elección, el mismo valor por defecto que el paso de canales (decisión 15) | backend | Una empresa con Pandapé ligado deja de publicar dos veces en Computrabajo por WhatsApp | Aprobado (`brief-paso5-valor-por-defecto.md`); directo en `develop`, sin commit |
 | 6 | Maya pregunta por los canales (decisión 16) | backend | La pregunta en el recorrido de Maya | Sin brief |
 | 7 | El agente de WhatsApp pregunta por los canales (decisión 16) | backend | Los portales en el borrador del agente | Sin brief |
 
@@ -500,6 +500,26 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   Computrabajo. Decisiones 15 y 16: el valor por defecto en el backend, y Maya y el agente preguntan
   por los canales, dentro de la tarea. Pasos 5, 6 y 7. Brief del paso 5 escrito: la creación no lee
   hoy el dato de republicación, y sin él la regla no haría nada, sin fallar.
+- **2026-10-13** — Opinión previa del paso 5 contestada. `develop` en `dc57280`; línea base igual
+  (198 suites y 2.061 pruebas). Comprobado por el ejecutor: crean ofertas el portal (siempre con
+  elección), Maya y el agente (sin ella) y el superadmin (con o sin ella); el alta del superadmin de
+  una oferta ya publicada no pasa por la lista. Aceptado: el dato se añade a la lectura de la empresa
+  y llega a la resolución como tercer dato; el criterio del enlace se copia a una función pequeña
+  junto a la normalización, sin tocar la línea de la publicación de Pandapé; la disponibilidad de
+  Pandapé se pregunta a su pieza. **Trampa hallada por el ejecutor**: las pruebas de creación simulan
+  la lectura de la empresa devolviendo todos los datos de prueba, así que una prueba pasaría aunque
+  la lectura real no pidiera el dato; la prueba nueva simula la lectura respetando los campos pedidos,
+  con el control negativo de quitar el campo. En el modo de simulación la regla también quita
+  Computrabajo (coherente con el paso 2); con dos credenciales de Computrabajo se quitan las dos.
+- **2026-10-13** — **Paso 5 revisado y aprobado.** Cinco archivos en `develop`, índice y árbol
+  coincidiendo. La creación lee el dato de republicación y lo pasa a la resolución; sin elección,
+  Computrabajo sale si hay enlace y la pieza de Pandapé lo da por disponible; con elección y en modo
+  demo, sin cambios; la línea de la publicación de Pandapé, intacta. Siete casos del registro y uno
+  de creación con la lectura que respeta los campos pedidos (el reporte decía «ocho del registro»:
+  error al contar, no falta ninguno). Compila; **200 suites y 2.069 pruebas que pasan, 1 suite y 43
+  omitidas**, con la caché limpia, corrido por el planificador: **nueva línea base**. Decisiones del
+  ejecutor aceptadas: el dato es un argumento obligatorio de la resolución (un solo sitio la llama), y
+  la prueba de creación va sin miembro, como su hermana.
 
 ## Antes de desplegar
 
