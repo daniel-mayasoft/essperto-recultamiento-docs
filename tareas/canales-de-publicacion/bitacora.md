@@ -151,6 +151,15 @@ de *Lo que dice el código*, más abajo, que ganan sobre él. La tarea hermana, 
     de la empresa falló, no se puede crear hasta recargar la página y se pierde lo escrito (la consulta
     hoy no se reintenta). Se descartó no mandar la elección: el backend publicaría en todos los portales
     sin que nadie lo eligiera. El usuario no quiso que el texto mencionara recargar.
+14. **El paso de canales pide los datos de la empresa cada vez que se entra en él** (usuario,
+    2026-10-13; fallo hallado por el usuario en las pruebas a mano). La pantalla de ofertas los pide
+    una sola vez al abrirse, así que un cambio hecho en Mi Compañía desde otra pestaña no llegaba al
+    asistente hasta recargar. Con la republicación eso falla en silencio: encenderla en otra pestaña
+    dejaba Computrabajo marcado sin aviso y la oferta salía dos veces; apagarla dejaba el aviso y la
+    oferta no salía en Computrabajo. Los datos frescos son **solo del paso**: no se actualizan los de
+    la pantalla, porque eso reinicia el asistente y se pierde lo escrito (hallazgo ajeno del paso 3).
+    Mientras llegan, o si fallan, el paso se comporta como en la decisión 13. Queda sin cubrir un
+    cambio hecho en los segundos entre entrar al paso y pulsar «Crear».
 
 ## Lo que dice el código y los documentos no
 
@@ -216,6 +225,11 @@ con la publicación): A a F se sostienen, con los matices de B y C.
   llegan o cambian mientras está abierto** (visto por el ejecutor en la opinión previa del paso 3). Se
   reinicia con cada cambio de la empresa, no solo al abrirse. Y si la consulta de la empresa falla, el
   listado la ignora en silencio y no la reintenta. Pasa hoy; no se toca aquí.
+- 🔴 **La base del servidor de pruebas acepta conexiones desde internet con el usuario
+  administrador** (visto el 2026-10-12, en la B2 de las pruebas a mano). La conexión va a una IP
+  pública con usuario y contraseña de administrador; esa contraseña quedó además escrita en el
+  historial de una conversación de trabajo. Recomendado rotarla y cerrar el puerto al exterior. Para
+  quien lleve la seguridad.
 
 ## Fuera del alcance, a sabiendas
 
@@ -244,8 +258,10 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
 | 1 | La pieza de cada portal, el registro, el punto único al crear y la negativa a publicar un portal no apuntado en la oferta (decisiones 3, 5, 7 y 12) | backend | Nada: se publica igual que hoy | Hecho: `4733ddb` (`brief-paso1-piezas-y-punto-unico.md`) |
 | 2 | La creación recibe, comprueba y guarda lo elegido (decisiones 8 a 10); el dato de republicación, su guardado y la línea de Elvis (decisión 6) | backend | Una empresa nueva con Pandapé deja de republicar | Hecho: `3bd0b88` (`brief-paso2-eleccion-y-republicacion.md`) |
 | 3 | El paso nuevo del asistente, con el aviso y la confirmación de Computrabajo (decisión 6) | portal | El paso | Hecho: `8ff8b17` (`brief-paso3-paso-del-asistente.md`). ⚠️ Las empresas existentes llegan **sin** el dato de republicación (el campo no viene): tratarlo como «sin republicación» |
-| 4 | El switch de republicación en el modal de Pandapé y el interruptor general (decisiones 6 y 11) | portal | Los dos interruptores | Aprobado (`brief-paso4-mi-compania.md`); sin commit. ⚠️ Apagar el switch manda **lista vacía, nunca nulo**: el backend rechaza el nulo. «No viene» se pinta como apagado |
-| Cierre | Fusión, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | — | — |
+| 4 | El switch de republicación en el modal de Pandapé y el interruptor general (decisiones 6 y 11) | portal | Los dos interruptores | Hecho: `1f176c9` (`brief-paso4-mi-compania.md`). ⚠️ Apagar el switch manda **lista vacía, nunca nulo**: el backend rechaza el nulo. «No viene» se pinta como apagado |
+| 3b | Las notas del paso de canales a la derecha del nombre, en gris e itálica; bajan de línea si no caben (pedido en las pruebas a mano) | portal | El aspecto del paso | Hecho: `29fa609`, **directamente en `develop`** (usuario), sin subir todavía |
+| 3c | El paso de canales pide los datos de la empresa al entrar (decisión 14) | portal | Los cambios de otra pestaña llegan sin recargar | Aprobado; directo en `develop`, commit aparte encima del 3b |
+| Cierre | Fusión, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | — | Fusión hecha (backend #105, portal #77); pruebas a mano en curso (`pruebas-a-mano.md`) |
 | Final, si sobra | Elegir canales por WhatsApp, en el agente y en Maya (decisión 9) | backend | La pregunta en la conversación | — |
 
 ## Registro de avance
@@ -384,6 +400,39 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   falla; apagar el general sin portales con usuario no manda nada; el switch se desactiva mientras se
   guarda. Dos casos más para las pruebas a mano: editar la contraseña de un portal apagado con el
   general apagado, y «Recargar» tras encender el general sin portales.
+- **2026-10-12** — Escrito `pruebas-a-mano.md` para el cierre en el servidor de pruebas, con los
+  casos de los cuatro briefs y los que añadieron los ejecutores. Se recorren una por una con el
+  planificador (usuario).
+- **2026-10-12** — Paso 4 commiteado (portal `1f176c9`). **Fusionados en `develop`** por el usuario:
+  backend PR #105 (`dc57280`), portal PR #77 (`86e2e68`). Revisado por el planificador: `develop` es
+  idéntico a las ramas revisadas (backend `87a584c`, portal `1f176c9`), sin nada más. Siguen las
+  pruebas a mano en el servidor de pruebas, empezando por la B1 y la B2.
+- **2026-10-13** — Pruebas a mano: B1 (modo de simulación encendido), B2 (dato de republicación
+  escrito en las cuatro empresas con Pandapé del servidor de pruebas, antes del backend) y B3
+  (desplegado; siete pasos) bien. El usuario pide rediseñar las notas del paso de canales: a la
+  derecha del nombre del portal, en gris e itálica (**paso 3b**, rama
+  `fix/publication-channels-step-layout` desde `develop`). El aviso de Pandapé se mueve igual; si
+  no cabe, la nota baja de línea (usuario).
+- **2026-10-13** — El usuario encuentra un fallo en las pruebas: con Mi Compañía en otra pestaña, el
+  asistente no ve los cambios hasta recargar. Comprobado en el código: la pantalla de ofertas pide la
+  empresa una sola vez al abrirse. Decisión 14 y **paso 3c**, en la misma rama que el 3b.
+- **2026-10-13** — ⚠️ **El planificador cambió la copia local del portal a `develop`** para leer el
+  código del fallo, sin comprobar el árbol: el 3b estaba preparado encima, en su rama. No se perdió
+  nada (las dos ramas en el mismo commit; el cambio viajó). El planificador no vuelve a cambiar de
+  rama en los repositorios del usuario. **Paso 3b revisado y aprobado** por el planificador: una
+  rejilla de dos columnas en pantallas anchas, nota en gris e itálica alineada a la derecha, que se
+  parte dentro de su columna; en pantallas estrechas, debajo del nombre. Tipos sin errores. Opinión
+  previa del 3c contestada: petición dentro del asistente al entrar al paso, datos propios del paso,
+  marca de vigencia para descartar respuestas viejas; si el enlace con Pandapé cambia entre una
+  entrada y otra, Computrabajo vuelve a su valor por defecto (usuario).
+- **2026-10-13** — El usuario decide hacer el 3b y el 3c directamente en `develop`. 3b commiteado
+  (`29fa609`). **Paso 3c revisado y aprobado** por el planificador: un archivo, índice y árbol
+  coincidiendo. Al entrar al paso de canales el asistente vacía sus datos propios y pide la empresa;
+  una respuesta que llega después de salir del paso, cerrar el asistente o volver a entrar se ignora;
+  todo lo del paso —casillas, notas, aviso, la elección que se manda y «Crear»— lee esos datos, y el
+  resto del asistente sigue con los de la pantalla, sin reiniciarse. Si el enlace de Pandapé cambia
+  entre entradas, Computrabajo vuelve a su valor por defecto; la primera entrada tras abrir el
+  asistente no cuenta como cambio. Tipos sin errores, corrido por el planificador.
 
 ## Antes de desplegar
 
