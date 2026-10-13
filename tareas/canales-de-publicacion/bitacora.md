@@ -160,6 +160,31 @@ de *Lo que dice el código*, más abajo, que ganan sobre él. La tarea hermana, 
     la pantalla, porque eso reinicia el asistente y se pierde lo escrito (hallazgo ajeno del paso 3).
     Mientras llegan, o si fallan, el paso se comporta como en la decisión 13. Queda sin cubrir un
     cambio hecho en los segundos entre entrar al paso y pulsar «Crear».
+15. **Sin elección, el backend aplica el mismo valor por defecto que el paso de canales** (usuario,
+    2026-10-13). Caso: Medicall, con Pandapé ligado a Computrabajo y Computrabajo configurado, crea
+    una oferta por WhatsApp; hasta ahora entraban los dos, nuestro robot publicaba en Computrabajo y
+    Pandapé republicaba allí: **dos veces, sin aviso**. Pasa a ser: si la empresa tiene el enlace y
+    Pandapé está **disponible** (decisión 8), Computrabajo no entra en la lista; la oferta llega allí
+    por Pandapé, una vez. Con Pandapé no disponible, Computrabajo se queda (si no, la oferta no
+    llegaría a ninguno de los dos). Una elección explícita se respeta tal cual. Cambia la decisión 9
+    solo en esto. Era así antes de esta tarea; se corrige porque el usuario no quiere la doble
+    publicación por ningún camino.
+16. **El agente de WhatsApp y Maya preguntan por los canales al crear** (usuario, 2026-10-13). Deja de
+    ser «al final, si sobra»: entra en la tarea, a sabiendas de que son unos dos días más sobre una
+    estimación ya pasada. Se ofrecen solo los portales disponibles; si no hay ninguno, no se
+    pregunta. El valor por defecto es el del paso de canales, y en Computrabajo, con el enlace y
+    Pandapé elegido, va la nota de que se publicaría dos veces. **Maya** (recorrido con botones, y
+    WhatsApp no deja marcar varias opciones en un mensaje): «Todos» (el valor por defecto),
+    «Elegir» (portal por portal, Sí o No) o «Ninguno». **El agente**: el borrador muestra los portales
+    y el reclutador puede cambiarlos hablando; la herramienta de crear recibe la elección (toca la
+    decisión 11 de ofertas sin ATS). Orden: el valor por defecto en el backend (decisión 15), luego
+    Maya, luego el agente. Se supone Maya en uso: el usuario no lo sabe.
+17. **LinkedIn queda preparado como receta, no como código** (usuario, 2026-10-13; requisitos y
+    decisión 1). Hoy no funciona para nadie: la tarjeta de vincular cuentas de Mi Compañía y el panel
+    de publicar de la oferta están comentados en el portal («REDES (oculto)»), y el código prevé que
+    LinkedIn todavía no haya aprobado el permiso para publicar en páginas de empresa. Construirlo
+    ahora sería código que publica en la página de un cliente sin haberse ejecutado nunca. Ver
+    *Receta: LinkedIn en el paso de canales*.
 
 ## Lo que dice el código y los documentos no
 
@@ -236,10 +261,44 @@ con la publicación): A a F se sostienen, con los matices de B y C.
 - **La lógica de la republicación de Pandapé en Computrabajo, salvo su línea** (decisión 6; usuario).
   Que la vuelva a pedir en cada reintento y que eso pueda duplicar la vacante es de la tarea de Elvis.
   Este frente solo hace que la petición dependa del dato de la empresa.
-- **Elegir canales al crear por WhatsApp, en el agente y en Maya**: al final, si sobra (decisiones 1
-  y 9).
-- **El formulario público como casilla por oferta, LinkedIn como casilla y que las ofertas viejas ganen
-  un portal** (decisión 1).
+- **El formulario público como casilla por oferta y que las ofertas viejas ganen un portal**
+  (decisión 1).
+- **LinkedIn como casilla del paso de canales**, hasta que se habilite la publicación en redes: queda
+  la receta (decisión 17).
+
+## Receta: LinkedIn en el paso de canales
+
+Para quien lo haga cuando LinkedIn apruebe el permiso y Elvis descomente la publicación en redes
+(decisión 17). Calculado en una jornada o jornada y media.
+
+**Cómo es LinkedIn, frente a un portal.** Un portal publica una **ficha de empleo**: un robot entra
+con usuario y contraseña, llena los campos de la oferta, y los candidatos se postulan allí y se
+recogen después. LinkedIn publica **un post en la página de la empresa**: texto, imagen y enlace, por
+la conexión oficial de LinkedIn. Quien hace clic cae en el **formulario público de Essperto** y entra
+directo como candidato venido de LinkedIn; no hay nada que recoger. Por eso exige el formulario
+encendido. El texto y la imagen no se escriben dos veces: el sistema propone el texto a partir de la
+oferta y compone la imagen con el código QR del enlace.
+
+**Lo que hay que hacer:**
+1. **El paso de canales** suma una fila «LinkedIn», disponible si la empresa tiene una cuenta de
+   LinkedIn vinculada, con una página elegida, y el formulario público encendido. Si falta algo,
+   deshabilitada con su indicación. Hoy ninguna empresa cumple la primera condición.
+2. **El post, sin o con revisión** (a decidir entonces con el usuario y con Elvis): o se publica con
+   el texto propuesto y la imagen compuesta, sin que nadie los lea; o, al marcar LinkedIn, el mismo
+   paso enseña el borrador para retocarlo. Elvis tuvo un paso así en el asistente y lo quitó al
+   aplazar las redes; su código está en el historial del portal (lo cita un comentario del asistente).
+3. **La creación** recibe las redes elegidas en un campo propio, **aparte de los portales**: LinkedIn
+   no va a la lista de plataformas de la oferta ni a las piezas de portal del paso 1.
+4. **El backend**, después de crear la oferta, publica por el servicio de redes de Elvis, que ya
+   existe y ya registra el post en la oferta. Si falla (por ejemplo, la conexión caducada), avisa al
+   reclutador y deja reintentar desde la ficha, que ya existe.
+5. **WhatsApp** (decisión 16): el agente y Maya suman LinkedIn a lo que ofrecen, con las mismas
+   condiciones.
+6. **La pregunta de si la oferta tiene canales** no cambia: LinkedIn exige el formulario, que ya
+   cuenta.
+
+**Pregunta pendiente para Elvis**: por qué se aplazó, si hay fecha, y si el texto propuesto y la
+imagen con el QR se pueden generar solos, sin que nadie los toque.
 
 ## Preguntas abiertas
 
@@ -262,7 +321,9 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
 | 3b | Las notas del paso de canales a la derecha del nombre, en gris e itálica; bajan de línea si no caben (pedido en las pruebas a mano) | portal | El aspecto del paso | Hecho: `29fa609`, **directamente en `develop`** (usuario), sin subir todavía |
 | 3c | El paso de canales pide los datos de la empresa al entrar (decisión 14) | portal | Los cambios de otra pestaña llegan sin recargar | Aprobado; directo en `develop`, commit aparte encima del 3b |
 | Cierre | Fusión, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | — | Fusión hecha (backend #105, portal #77); pruebas a mano en curso (`pruebas-a-mano.md`) |
-| Final, si sobra | Elegir canales por WhatsApp, en el agente y en Maya (decisión 9) | backend | La pregunta en la conversación | — |
+| 5 | Sin elección, el mismo valor por defecto que el paso de canales (decisión 15) | backend | Una empresa con Pandapé ligado deja de publicar dos veces en Computrabajo por WhatsApp | Brief escrito (`brief-paso5-valor-por-defecto.md`); directo en `develop` |
+| 6 | Maya pregunta por los canales (decisión 16) | backend | La pregunta en el recorrido de Maya | Sin brief |
+| 7 | El agente de WhatsApp pregunta por los canales (decisión 16) | backend | Los portales en el borrador del agente | Sin brief |
 
 ## Registro de avance
 
@@ -433,6 +494,12 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   resto del asistente sigue con los de la pantalla, sin reiniciarse. Si el enlace de Pandapé cambia
   entre entradas, Computrabajo vuelve a su valor por defecto; la primera entrada tras abrir el
   asistente no cuenta como cambio. Tipos sin errores, corrido por el planificador.
+- **2026-10-13** — El usuario pregunta por LinkedIn en el paso de canales: hoy no funciona para nadie
+  (escondido en el portal); queda como receta (decisión 17). Pregunta si WhatsApp también deja
+  elegir canales: no (decisión 9), y por WhatsApp una empresa con Pandapé ligado publica dos veces en
+  Computrabajo. Decisiones 15 y 16: el valor por defecto en el backend, y Maya y el agente preguntan
+  por los canales, dentro de la tarea. Pasos 5, 6 y 7. Brief del paso 5 escrito: la creación no lee
+  hoy el dato de republicación, y sin él la regla no haría nada, sin fallar.
 
 ## Antes de desplegar
 
