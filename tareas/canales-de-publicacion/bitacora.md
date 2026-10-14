@@ -321,8 +321,8 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
 | 3b | Las notas del paso de canales a la derecha del nombre, en gris e itálica; bajan de línea si no caben (pedido en las pruebas a mano) | portal | El aspecto del paso | Hecho: `29fa609`, **directamente en `develop`** (usuario), sin subir todavía |
 | 3c | El paso de canales pide los datos de la empresa al entrar (decisión 14) | portal | Los cambios de otra pestaña llegan sin recargar | Aprobado; directo en `develop`, commit aparte encima del 3b |
 | Cierre | Fusión, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | — | Fusión hecha (backend #105, portal #77); pruebas a mano en curso (`pruebas-a-mano.md`) |
-| 5 | Sin elección, el mismo valor por defecto que el paso de canales (decisión 15) | backend | Una empresa con Pandapé ligado deja de publicar dos veces en Computrabajo por WhatsApp | Aprobado (`brief-paso5-valor-por-defecto.md`); directo en `develop`, sin commit |
-| 6 | Maya pregunta por los canales (decisión 16) | backend | La pregunta en el recorrido de Maya | Sin brief |
+| 5 | Sin elección, el mismo valor por defecto que el paso de canales (decisión 15) | backend | Una empresa con Pandapé ligado deja de publicar dos veces en Computrabajo por WhatsApp | Hecho: `251bf67`, directo en `develop` (`brief-paso5-valor-por-defecto.md`) |
+| 6 | Maya pregunta por los canales (decisión 16) | backend | La pregunta en el recorrido de Maya | Brief escrito (`brief-paso6-maya.md`), con los textos confirmados |
 | 7 | El agente de WhatsApp pregunta por los canales (decisión 16) | backend | Los portales en el borrador del agente | Sin brief |
 
 ## Registro de avance
@@ -520,6 +520,10 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   omitidas**, con la caché limpia, corrido por el planificador: **nueva línea base**. Decisiones del
   ejecutor aceptadas: el dato es un argumento obligatorio de la resolución (un solo sitio la llama), y
   la prueba de creación va sin miembro, como su hermana.
+- **2026-10-13** — Brief del paso 6 (Maya) escrito. Al prepararlo: Maya se llama a sí misma «prueba de
+  concepto», no tiene pruebas automáticas y guarda la sesión en memoria; entra por la **línea de
+  reclutamiento**, la que alcanza el simulador, así que sí se puede probar a mano. Los botones de
+  WhatsApp admiten tres por mensaje y 20 caracteres. Textos propuestos, pendientes del usuario.
 
 ## Antes de desplegar
 
