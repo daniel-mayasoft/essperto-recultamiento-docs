@@ -83,6 +83,24 @@ configura Pandapé con un usuario y una contraseña cualquiera: con el modo de s
 | G6 | Pedro | Con el general apagado, edita la contraseña de un portal apagado y guarda | El portal sigue apagado y el general también | |
 | G7 | Laura | Mira el general | Apagado; los «Editar» funcionan | |
 
+## M · Maya por WhatsApp (paso 6)
+
+Con el simulador de WhatsApp del servidor de pruebas, que escribe a la línea de reclutamiento.
+⚠️ Maya reconoce al reclutador por su teléfono: el número del simulador tiene que coincidir con el de
+un miembro de la empresa que se prueba.
+
+| # | Quién | Qué hace | Qué se espera | Resultado |
+| --- | --- | --- | --- | --- |
+| M1 | Pedro, sin Pandapé | Escribe «maya» y contesta hasta el contrato | «¿Dónde publico la oferta? Por defecto: Computrabajo y elempleo.», con «Por defecto», «Elegir» y «Ninguno» | |
+| M2 | Pedro | Pulsa «Por defecto» y confirma | El borrador dice «• Portales: Computrabajo y elempleo»; en la base, la oferta con los dos | |
+| M3 | Pedro | «Elegir»: Sí a Computrabajo, No a elempleo; confirma | Una pregunta por portal; en la base, solo Computrabajo | |
+| M4 | Pedro | «Ninguno» y confirma | El borrador dice «ninguno. Los candidatos se cargan manualmente.»; en la base, la lista vacía | |
+| M5 | Pedro | En la pregunta de canales escribe texto en vez de pulsar | Maya repite la pregunta | |
+| M6 | Pedro | Llega al borrador; en Mi Compañía apaga elempleo; confirma | «elempleo ya no está disponible en tu empresa. Elige de nuevo dónde publicar.» y la pregunta otra vez, ya sin elempleo | |
+| M7 | Pedro | Tras la M6, pulsa el «Confirmar» del borrador viejo del chat | Maya repite la pregunta de canales; no crea nada | |
+| M8 | Medicall, con Pandapé ligado | Llega a la pregunta | Por defecto sin Computrabajo, con «(Computrabajo ya sale a través de Pandapé.)»; con «Elegir», la nota en la pregunta de Computrabajo | |
+| M9 | Laura, sin portales | Recorre Maya | Sin la pregunta: del contrato al borrador, como antes | |
+
 ## Lo que no se prueba aquí, y por qué
 
 - **Que la republicación siga o no según el dato**: con el modo de simulación no se despacha el robot.

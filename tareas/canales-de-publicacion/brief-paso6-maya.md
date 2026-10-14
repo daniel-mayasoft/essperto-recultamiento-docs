@@ -85,7 +85,9 @@ admiten 20 caracteres.
 | Línea del borrador, sin portales | • Portales: ninguno. Los candidatos se cargan manualmente. |
 | Rechazo por portal no disponible | {portal} ya no está disponible en tu empresa. Elige de nuevo dónde publicar. |
 
-Los nombres de los portales, como los escribe el portal: Computrabajo, ElEmpleo, Pandapé.
+Los nombres de los portales, como los muestra el backend al reclutador: Computrabajo, elempleo,
+Pandapé (corregido en la opinión previa: decía «ElEmpleo», como el portal web; el usuario elige
+reusar la lista del backend).
 
 ## 🔴 Dónde se para
 

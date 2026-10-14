@@ -322,7 +322,7 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
 | 3c | El paso de canales pide los datos de la empresa al entrar (decisión 14) | portal | Los cambios de otra pestaña llegan sin recargar | Aprobado; directo en `develop`, commit aparte encima del 3b |
 | Cierre | Fusión, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | — | Fusión hecha (backend #105, portal #77); pruebas a mano en curso (`pruebas-a-mano.md`) |
 | 5 | Sin elección, el mismo valor por defecto que el paso de canales (decisión 15) | backend | Una empresa con Pandapé ligado deja de publicar dos veces en Computrabajo por WhatsApp | Hecho: `251bf67`, directo en `develop` (`brief-paso5-valor-por-defecto.md`) |
-| 6 | Maya pregunta por los canales (decisión 16) | backend | La pregunta en el recorrido de Maya | Brief escrito (`brief-paso6-maya.md`), con los textos confirmados |
+| 6 | Maya pregunta por los canales (decisión 16) | backend | La pregunta en el recorrido de Maya | Aprobado (`brief-paso6-maya.md`); directo en `develop`, sin commit |
 | 7 | El agente de WhatsApp pregunta por los canales (decisión 16) | backend | Los portales en el borrador del agente | Sin brief |
 
 ## Registro de avance
@@ -524,6 +524,27 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   concepto», no tiene pruebas automáticas y guarda la sesión en memoria; entra por la **línea de
   reclutamiento**, la que alcanza el simulador, así que sí se puede probar a mano. Los botones de
   WhatsApp admiten tres por mensaje y 20 caracteres. Textos propuestos, pendientes del usuario.
+- **2026-10-13** — Textos de Maya confirmados. Opinión previa del paso 6 contestada: una consulta
+  pública del servicio de ofertas (`getAtsPlatformOptions`) da a Maya los disponibles, el valor por
+  defecto y si Computrabajo llega por Pandapé, sin copiar la regla; en modo demo no devuelve portales;
+  el rechazo por portal no disponible pasa a tener su propio tipo de error, con el mismo texto; y
+  «Confirmar» solo crea desde el borrador (hoy actuaba en cualquier paso, y tras volver a la pregunta
+  el borrador viejo del chat habría creado la oferta sin elección). El usuario elige escribir
+  «elempleo» en minúscula, reusando la lista de nombres del backend que ya usan los avisos.
+- **2026-10-13** — **Paso 6 revisado.** Ocho archivos en `develop`, índice y árbol coincidiendo;
+  textos literales. Compila; **202 suites y 2.088 pruebas que pasan, 1 suite y 43 omitidas**, con la
+  caché limpia, corrido por el planificador. Decisiones del ejecutor aceptadas: la nota de la pregunta
+  general sale siempre que Computrabajo llega por Pandapé, también con Computrabajo sin configurar
+  (como el aviso del paso de canales); si tras un rechazo no queda ningún portal, borrador sin la
+  línea y creación sin elección. **Una corrección antes de aprobar**: si la consulta de la empresa
+  falla (por ejemplo, la base no responde), Maya no le contesta nada al reclutador, ni al llegar a la
+  pregunta ni al volver a ella tras un rechazo.
+- **2026-10-14** — **Paso 6 aprobado, segunda ronda.** Si la lectura de los portales falla, Maya manda
+  el mensaje de error de siempre, lo deja en el log y no cambia de paso: al llegar a la pregunta se
+  queda en el contrato (pulsarlo de nuevo reintenta); tras un rechazo se queda en el borrador. El texto
+  de error es uno solo, compartido. Compila; **202 suites y 2.090 pruebas que pasan, 1 suite y 43
+  omitidas**, con la caché limpia, corrido por el planificador: **nueva línea base**. Índice y árbol
+  coincidiendo.
 
 ## Antes de desplegar
 
