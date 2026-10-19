@@ -52,7 +52,7 @@ Tomadas con el usuario el 2026-10-19.
 10. **Script de relleno para lo viejo** (usuario, 2026-10-19; punto I), en vez de deducir el portal
     cada vez que se abre la analítica. Escribe una sola vez, solo donde el dato está vacío:
     - una participación de portal cuya persona comparte **un solo** portal con la oferta → ese portal,
-      en el detalle de origen (12.140 en producción);
+      en el detalle de origen (12.140 en producción; la referencia afinada es 12.136, punto L);
     - una participación sin origen y marcada como añadida a mano que **pasó por la petición de hoja de
       vida** → origen carga masiva (1);
     - una participación sin origen y marcada como añadida a mano que no pasó por ella → origen alta
@@ -65,6 +65,23 @@ Tomadas con el usuario el 2026-10-19.
 11. **El candidato sintético del modo demo se guarda con origen alta manual** a partir de ahora. Hoy
     se crea sin origen y la tabla lo cuenta como portal. Va en el paso 1. Confirmado por el usuario el
     2026-10-19.
+
+Tomadas en la opinión previa del paso 1, el 2026-10-19.
+
+12. **Al vincular desde un portal, el portal se guarda solo si no hay duda** (usuario; punto K): todo lo
+    que manda el robot nombra el mismo portal, y ese portal es uno de los de la oferta. Si no, el
+    detalle de origen queda vacío —sale como «Portal sin identificar», como la decisión 2— y queda una
+    línea en el registro de la aplicación con la oferta y los portales recibidos, sin datos de la
+    persona. Quedarse con el primero de la lista sería inventar el dato.
+13. **En el script, «portal de la oferta» es el que tiene identificador externo** (punto L): por los
+    que nunca se publicaron no pudo llegar nadie. En producción no cambia ninguna cifra.
+14. **El script escribe localizando la participación por persona, no por posición**, con todas las
+    condiciones de su regla dentro de la misma escritura, y una operación por participación para que
+    las saltadas se cuenten bien. Las reglas y la escritura viven en el código fuente, con pruebas; el
+    script solo recorre la base, carga las fichas por oferta y da el resumen, usando la versión
+    compilada. Así la verificación no puede salir en verde sin haber probado lo que corre.
+15. **Los comentarios que se vuelven falsos se recortan, sin añadir texto** (la regla de cero
+    comentarios del proyecto). Si lo que queda deja de ser cierto, se borra entero.
 
 ## Lo que dice el código y los documentos no
 
@@ -121,9 +138,33 @@ de `requisitos.md` se sostiene punto por punto; estas son las correcciones y los
   antes. La base no tiene otro historial que diga el portal por oferta: las corridas de los robots no
   guardan el portal, y la ficha de la persona no dice a qué oferta llegó por cada uno.
 
+Vistos en la opinión previa del paso 1 y comprobados por el planificador el 2026-10-19.
+
+- **K. El robot manda una lista de pares «portal + identificador de la persona»**, con al menos uno
+  válido o la llamada se rechaza. El contrato no obliga a que sea uno solo, pero en la práctica lo es:
+  cada corrida trabaja un portal. 🔴 **La lista cerrada de portales solo se valida cuando la lista llega
+  como JSON**; cuando llega como texto, que es lo habitual porque viene con la hoja de vida adjunta,
+  solo se pasa a minúsculas. De ahí la decisión 12.
+- **L. Una oferta guarda una entrada por cada portal de la empresa, aunque nunca se publicara**
+  (pendiente, fallida, a falta de plan), y esas no tienen identificador externo hasta publicarse. El
+  robot solo recoge en las publicadas o en borrador. **Medido en producción el 2026-10-19 con los dos
+  criterios** (todas las entradas, o solo las que tienen identificador), sobre las participaciones de
+  portal sin la marca de añadida a mano: dan **lo mismo**, 12.136 con un portal en común, 1.229 con dos
+  o más y 1.368 con ninguno. **La cifra de referencia del modo de prueba en la regla 3 es 12.136** más
+  lo que haya entrado desde entonces; los 12.140 del punto H incluían algunas de las marcadas a mano.
+  En `develop` no hay código que quite entradas de esa lista: se buscaron las formas de sacar, filtrar
+  o reasignar la lista y la edición de la oferta no la toca. La búsqueda no cubre que se reescriba el
+  documento entero. Hay que volver a mirarlo al fusionar `develop`, por «Canales de publicación».
+- **M. La llamada de prueba que abre WhatsApp con un teléfono** crea una participación sin origen y le
+  pone a la persona un Computrabajo inventado («test-» más el teléfono). La regla 3 podría tomarlo como
+  real. **En producción no hay ninguna** (2026-10-19). No se toca.
+- **N. Para el paso 2: «manual» significa dos cosas.** En el detalle de origen es el enlace compartido;
+  en el origen, el alta individual. La analítica los lee siempre juntos.
+
 ## Fuera del alcance, a sabiendas
 
-Pendiente de acordar con el usuario.
+- **La llamada de prueba de WhatsApp** (punto M) sigue creando participaciones sin origen y un portal
+  inventado. Sin casos en producción.
 
 ## Preguntas abiertas
 
@@ -136,7 +177,7 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
 
 | Paso | Qué | Repositorio | Estado |
 | --- | --- | --- | --- |
-| 1 | Guardar el origen completo: el portal al vincular desde un portal, el origen del candidato de demo (decisión 11), y el script de relleno con modo de prueba (decisión 10). **Tratamiento completo**: escribe en producción | backend | Brief escrito (`brief-paso1-origen-completo.md`) |
+| 1 | Guardar el origen completo: el portal al vincular desde un portal, el origen del candidato de demo (decisión 11), y el script de relleno con modo de prueba (decisión 10). **Tratamiento completo**: escribe en producción | backend | Opinión previa contestada; en ejecución (`brief-paso1-origen-completo.md`) |
 | 2 | La analítica: lee el origen guardado, separa LinkedIn del enlace compartido, los ceros y el retiro del campo viejo | backend | Propuesto |
 | 3 | La tabla «Candidatos por canal», con un nombre por fila y visible siempre | portal | Propuesto |
 | Cierre | Fusionar `develop`, desplegar, **correr el script justo después** (pruebas, luego producción, con copia de seguridad), pruebas a mano y avisar del cambio de cifras | los dos | Propuesto |
@@ -150,6 +191,10 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
 - **2026-10-19** — Consulta del usuario sobre los portales de las ofertas (punto H). Decisiones 1 a 9.
   Pendiente: medir en la base cuántas participaciones quedan «sin identificar» (decisión 2) y el
   mensaje a Elvis.
+- **2026-10-19** — Paso 1: opinión previa del ejecutor, contestada contra el código. Línea base: 203
+  conjuntos de pruebas pasan y 1 omitido; 2.112 pruebas pasan y 43 omitidas. Decisiones 12 a 15, puntos
+  K a N. Dos consultas del usuario en producción: ninguna persona creada por la llamada de prueba
+  (punto M), y la medición del punto L.
 
 ## Antes de desplegar
 
