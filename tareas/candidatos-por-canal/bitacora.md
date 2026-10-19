@@ -177,7 +177,7 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
 
 | Paso | Qué | Repositorio | Estado |
 | --- | --- | --- | --- |
-| 1 | Guardar el origen completo: el portal al vincular desde un portal, el origen del candidato de demo (decisión 11), y el script de relleno con modo de prueba (decisión 10). **Tratamiento completo**: escribe en producción | backend | Opinión previa contestada; en ejecución (`brief-paso1-origen-completo.md`) |
+| 1 | Guardar el origen completo: el portal al vincular desde un portal, el origen del candidato de demo (decisión 11), y el script de relleno con modo de prueba (decisión 10). **Tratamiento completo**: escribe en producción | backend | Revisado y aprobado; commit del usuario pendiente (`brief-paso1-origen-completo.md`) |
 | 2 | La analítica: lee el origen guardado, separa LinkedIn del enlace compartido, los ceros y el retiro del campo viejo | backend | Propuesto |
 | 3 | La tabla «Candidatos por canal», con un nombre por fila y visible siempre | portal | Propuesto |
 | Cierre | Fusionar `develop`, desplegar, **correr el script justo después** (pruebas, luego producción, con copia de seguridad), pruebas a mano y avisar del cambio de cifras | los dos | Propuesto |
@@ -195,6 +195,13 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
   conjuntos de pruebas pasan y 1 omitido; 2.112 pruebas pasan y 43 omitidas. Decisiones 12 a 15, puntos
   K a N. Dos consultas del usuario en producción: ninguna persona creada por la llamada de prueba
   (punto M), y la medición del punto L.
+- **2026-10-19** — Paso 1 revisado por el planificador. Verificación corrida sobre el conjunto: compila;
+  205 conjuntos pasan y 2 omitidos, 2.140 pruebas pasan y 49 omitidas (las 6 de más omitidas son la
+  prueba en vivo contra Mongo local, que el ejecutor corrió a propósito: 6 de 6). El script está en
+  `scripts/`, que el `.gitignore` excluye: entra forzado al índice, como los demás scripts versionados.
+  Una persona repetida dos veces en la misma oferta sale en el resumen como una escrita y una
+  «saltada»: la primera escritura rellena las dos copias. **En producción no hay ninguna** (consulta
+  del usuario, 2026-10-19).
 
 ## Antes de desplegar
 
@@ -202,6 +209,16 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
   en el servidor de pruebas y después de verdad; luego en producción, **con copia de seguridad antes**,
   primero con `--dry-run`. Lo corre el usuario. Hasta que se corra, lo viejo sale como «Portal sin
   identificar» una vez desplegado el paso 2.
+  - Dentro del contenedor, desde su raíz: `docker exec selessia-backend node
+    scripts/backfill-candidate-source.mjs --dry-run`, y después sin `--dry-run`. Usa la versión
+    compilada de las reglas, que la imagen genera al construirse; la conexión sale del entorno del
+    contenedor.
+  - En producción, el modo de prueba debería dar: regla 1 · carga masiva, 1; regla 2 · alta manual,
+    43; regla 3, unas 12.136; sin resolver, unas 1.368 sin portal en común y 1.229 con dos o más (punto
+    L). Las tres últimas crecen con lo que haya entrado por portal antes del despliegue.
+  - En la pasada real, **«saltadas» tiene que ser cero**: en producción no hay personas repetidas en
+    una misma oferta (registro de avance del paso 1). Si sale otra cifra, algo cambió la lista mientras
+    corría y hay que mirarlo antes de seguir. Una segunda pasada debe dar cero en las tres reglas.
 
 - **Avisar de que las cifras de los portales cambian, a la baja**: deja de contarse a una persona en
   un portal por otra oferta (`requisitos.md`, *Notas de alcance*).
