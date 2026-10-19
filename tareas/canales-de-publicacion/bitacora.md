@@ -246,6 +246,21 @@ con la publicación): A a F se sostienen, con los matices de B y C.
   La edición de la empresa escribe además sin las validaciones del esquema y acepta claves con punto,
   que la base toma como rutas dentro de un campo; las credenciales y otros campos están expuestos así
   hoy. Este frente se protege por su cuenta (paso 2). Para el equipo.
+- **Con el portal en inglés, «Crear con IA» genera y muestra la oferta en español** (visto por el
+  usuario el 2026-10-14, en la C12 de las pruebas a mano; se lo comunica a Elvis). Caso: con el portal
+  en «English», el reclutador escribe «I need a english teacher for collage» y la IA devuelve el
+  título traducido al español («Profesor de inglés para colegio»), y en español también los
+  comentarios adicionales, las etiquetas de profesiones válidas y las preguntas de filtro. Además,
+  dentro del asistente salen en español los idiomas del selector de idiomas, la prueba psicométrica
+  y los demás pasos (en parte, los textos fijos que ya anotó ofertas sin ATS en *Fuera del alcance*).
+  El paso de canales sí sale en inglés. Mensaje del usuario a Elvis: «Holaaa Elvis, como vas? paso a
+  dejarte un mensajito, no se si sea el comportamiento adecuado pero cuando estamos en "English" y
+  creamos oferta con la IA, el "Additional comments" aparece en español, me puso "Profesor de inglés
+  para colegio", igualmente, le dije como "I need a english teacher for collage" y el titulo también
+  me lo traduce a español, los tags de "Valid professions" tambien aparecen en espa;ol, los idiomas
+  del selector de idiomas tambien en espa;ol, Filter questions tambien, pruebas psicometricas
+  tambien, los otros pasos tambien aparecen en espa;ol, es para que lo tengamos en cuenta 👍.» No es
+  de esta tarea.
 - **El asistente de creación vuelve al primer paso y pierde lo escrito si los datos de la empresa
   llegan o cambian mientras está abierto** (visto por el ejecutor en la opinión previa del paso 3). Se
   reinicia con cada cambio de la empresa, no solo al abrirse. Y si la consulta de la empresa falla, el
@@ -318,12 +333,15 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
 | 2 | La creación recibe, comprueba y guarda lo elegido (decisiones 8 a 10); el dato de republicación, su guardado y la línea de Elvis (decisión 6) | backend | Una empresa nueva con Pandapé deja de republicar | Hecho: `3bd0b88` (`brief-paso2-eleccion-y-republicacion.md`) |
 | 3 | El paso nuevo del asistente, con el aviso y la confirmación de Computrabajo (decisión 6) | portal | El paso | Hecho: `8ff8b17` (`brief-paso3-paso-del-asistente.md`). ⚠️ Las empresas existentes llegan **sin** el dato de republicación (el campo no viene): tratarlo como «sin republicación» |
 | 4 | El switch de republicación en el modal de Pandapé y el interruptor general (decisiones 6 y 11) | portal | Los dos interruptores | Hecho: `1f176c9` (`brief-paso4-mi-compania.md`). ⚠️ Apagar el switch manda **lista vacía, nunca nulo**: el backend rechaza el nulo. «No viene» se pinta como apagado |
-| 3b | Las notas del paso de canales a la derecha del nombre, en gris e itálica; bajan de línea si no caben (pedido en las pruebas a mano) | portal | El aspecto del paso | Hecho: `29fa609`, **directamente en `develop`** (usuario), sin subir todavía |
-| 3c | El paso de canales pide los datos de la empresa al entrar (decisión 14) | portal | Los cambios de otra pestaña llegan sin recargar | Aprobado; directo en `develop`, commit aparte encima del 3b |
-| Cierre | Fusión, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | — | Fusión hecha (backend #105, portal #77); pruebas a mano en curso (`pruebas-a-mano.md`) |
+| 3b | Las notas del paso de canales a la derecha del nombre, en gris e itálica; bajan de línea si no caben (pedido en las pruebas a mano) | portal | El aspecto del paso | Hecho: `29fa609`, directo en `develop` (deshecho por el 3d) |
+| 3c | El paso de canales pide los datos de la empresa al entrar (decisión 14) | portal | Los cambios de otra pestaña llegan sin recargar | Hecho: `8435450`, directo en `develop` |
+| 3d | Las notas vuelven debajo del nombre del portal, con gris e itálica (pedido en las pruebas a mano) | portal | El aspecto del paso | Hecho: `986bead`, directo en `develop` |
+| 3e | El contador de páginas del listado de ofertas, traducible | portal | «Page 1 of 8» en inglés | **Pendiente**: fuera del despliegue; anterior a esta tarea |
+| 3f | El modal de Pandapé guarda el enlace solo si se movió el switch | portal | Editar Pandapé desde una pestaña desactualizada no borra el enlace | **Pendiente**: propuesto, sin decisión del usuario |
 | 5 | Sin elección, el mismo valor por defecto que el paso de canales (decisión 15) | backend | Una empresa con Pandapé ligado deja de publicar dos veces en Computrabajo por WhatsApp | Hecho: `251bf67`, directo en `develop` (`brief-paso5-valor-por-defecto.md`) |
-| 6 | Maya pregunta por los canales (decisión 16) | backend | La pregunta en el recorrido de Maya | Aprobado (`brief-paso6-maya.md`); directo en `develop`, sin commit |
-| 7 | El agente de WhatsApp pregunta por los canales (decisión 16) | backend | Los portales en el borrador del agente | Sin brief |
+| 6 | Maya pregunta por los canales (decisión 16) | backend | La pregunta en el recorrido de Maya | Hecho: `c35c442`, directo en `develop` (`brief-paso6-maya.md`) |
+| 7 | El agente de WhatsApp pregunta por los canales (decisión 16) | backend | Los portales en el borrador del agente | Hecho: `7b1fee0`, directo en `develop` (`brief-paso7-agente.md`) |
+| Cierre | Fusión, pruebas a mano en el servidor de pruebas y paso a `main` | los dos | — | **Hecho** (2026-10-14): en `main` y desplegado en producción. Ver *Registro de avance* |
 
 ## Registro de avance
 
@@ -545,6 +563,70 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   de error es uno solo, compartido. Compila; **202 suites y 2.090 pruebas que pasan, 1 suite y 43
   omitidas**, con la caché limpia, corrido por el planificador: **nueva línea base**. Índice y árbol
   coincidiendo.
+- **2026-10-14** — Brief del paso 7 (el agente) escrito. Al prepararlo: el agente ya tiene una
+  herramienta para cambios puntuales del borrador, así que cambiar los portales va ahí, como las
+  preguntas de filtro; el borrador pendiente vive en la sesión del agente, en la base. Textos
+  propuestos, pendientes del usuario. El usuario quiere probar todo completo al terminar este paso.
+- **2026-10-14** — Textos del agente confirmados. Opinión previa del paso 7 contestada: la elección se
+  guarda junto al borrador, no dentro de lo que genera el modelo; un borrador nuevo la conserva,
+  recortada a los disponibles, sin añadir nunca; una consulta fallida deja el borrador sin portales;
+  modificar con un portal no disponible no aplica nada; tras un rechazo al crear se releen los
+  portales. Sin ningún portal disponible, el usuario pide un texto natural: «{portal} no está
+  disponible: tu empresa no tiene ningún portal de empleo disponible. Díselo al reclutador.». La
+  función que junta los nombres con «y» sale de Maya a la carpeta de canales (Maya es una prueba de
+  concepto que puede borrarse). Descripciones de las herramientas, las del ejecutor. La red de
+  seguridad ante un modelo que entienda mal un cambio es la confirmación del borrador, que ya existe:
+  la revisión comprobará que el resumen muestra siempre los portales y que la confirmación sigue
+  intacta.
+- **2026-10-14** — **Paso 7 revisado.** Seis archivos en `develop`, índice y árbol coincidiendo; textos
+  literales. Las tres comprobaciones prometidas, en el código y con pruebas: el resumen se rehace con
+  los portales tras cada modificación; la instrucción de pedir confirmación antes de crear sigue
+  intacta (solo se suma la de los portales); crear manda exactamente la elección guardada del último
+  borrador. La función de los nombres sale de Maya sin cambiar su comportamiento. Compila; **203
+  suites y 2.110 pruebas que pasan, 1 suite y 43 omitidas**, con la caché limpia, corrido por el
+  planificador. Decisiones del ejecutor aceptadas: una elección que vuelve nula de la base cuenta como
+  sin elección; si la lectura falla al rehacer, se conserva la elección anterior; modificar ordena y
+  quita repetidos. **Una corrección antes de aprobar**: si la lectura de los portales falló al generar
+  el borrador y el reclutador pide cambiarlos, el agente le diría que su empresa no tiene ningún
+  portal, que es falso; modificar tiene que releerlos si no los tiene.
+- **2026-10-14** — **Paso 7 aprobado, segunda ronda.** Modificar lee los portales si el borrador no los
+  tiene; si esa lectura también falla, no cambia nada, lo deja en el log y le pide al modelo
+  disculparse e invitar a reintentar, nunca decir que la empresa no tiene portales (texto del
+  ejecutor, con el tono de los demás errores del agente). Compila; **203 suites y 2.112 pruebas que
+  pasan, 1 suite y 43 omitidas**, con la caché limpia, corrido por el planificador: **nueva línea
+  base**. Índice y árbol coincidiendo. **Con esto están los siete pasos**; sigue el cierre.
+- **2026-10-14** — Desplegado todo en el servidor de pruebas. Pruebas a mano: C1 bien. Ninguna empresa
+  del servidor encaja como Pedro sin tocarla (todas las que tienen Computrabajo y elempleo tienen
+  Pandapé): se usa «Medicall QA Updated» con Pandapé apagado y elempleo encendido durante la sección
+  C. El usuario, al ver el paso, prefiere las notas **debajo** del nombre del portal: **paso 3d**,
+  directo en `develop`, conservando el gris y la itálica.
+- **2026-10-14** — Pruebas a mano C2 a C11 bien (C1 a C8 entrando por «Crear con IA»). En la C12 el
+  usuario ve en español, con el portal en inglés, el contador de páginas del listado de ofertas
+  («Página 1 de 8»): escrito a mano, anterior a esta tarea. Lo pide arreglar: **paso 3e**, directo en
+  `develop`, commit aparte del 3d.
+- **2026-10-14** — Pruebas a mano: secciones C (menos C5 y C13), D y G bien; la D13/D15 se repitió
+  porque el enlace había quedado apagado por olvido. Al investigarlo se ve un caso posible: el modal de
+  Pandapé manda siempre el valor del switch, así que guardarlo desde una pestaña de Mi Compañía
+  desactualizada borraría el enlace en silencio (propuesto **paso 3f**: mandar el dato solo si se
+  movió el switch). Maya no se puede probar a mano (no hay un usuario cuyo teléfono coincida con el
+  del simulador); C5 y G7 sin empresa sin portales. **Paso 3d revisado y aprobado** por el
+  planificador (notas debajo del nombre, gris e itálica; tipos sin errores). El usuario decide pasar a
+  producción sin las pruebas de Maya; 3e y 3f quedan para después. `develop` solo trae esta tarea
+  frente a `main` (cinco commits del backend, cuatro del portal más el 3d).
+- **2026-10-14** — Producción, antes del backend: tres empresas con Pandapé, ninguna con el dato
+  («Medicall Talento Humano», el cliente real; «Mayatest» y «Mayasoft Servicios Temporales»). Hoy las
+  tres republican; el usuario decide escribir el dato en las tres, para que nadie cambie de
+  comportamiento al desplegar (las internas pueden apagarlo después desde Mi Compañía). **Escrito**
+  (`matchedCount: 3`, `modifiedCount: 3`) y comprobado: las tres con Pandapé → [Computrabajo].
+- **2026-10-14** — **Tarea cerrada: en `main` y desplegada en producción** (usuario), backend primero y
+  servicio por servicio con el script de despliegue. Comprobado por el usuario sin crear ofertas: el
+  paso de canales aparece en el asistente, y en «Medicall Talento Humano» el switch de republicar en
+  Computrabajo sale encendido. **Queda pendiente**: el paso 3e (contador de páginas en inglés,
+  anterior a la tarea), el 3f (el modal de Pandapé desde una pestaña desactualizada), las pruebas a
+  mano de Maya (M), de Laura (C5, G7) y del aspecto (C13); LinkedIn como receta (decisión 17) y la
+  pregunta a Elvis sobre si el robot respeta publicar sin republicar. Hallazgos ajenos para el equipo:
+  la validación de peticiones apagada, la base del servidor de pruebas expuesta con el usuario
+  administrador (rotar la contraseña) y «Crear con IA» en español con el portal en inglés.
 
 ## Antes de desplegar
 
@@ -556,4 +638,5 @@ Rama nueva desde `develop`, en los dos repositorios. Alcance acordado el 2026-10
   `db.tenants.find({ "atsCredentials.platform": "pandape" }, { name: 1, atsCrossPosting: 1 })`.
   Para escribirlo:
   `db.tenants.updateMany({ "atsCredentials.platform": "pandape" }, { $set: { atsCrossPosting: [ { sourcePlatform: "pandape", targetPlatforms: ["computrabajo"] } ] } })`.
-  Entregada por el ejecutor del paso 2.
+  Entregada por el ejecutor del paso 2. **Hecho** en el servidor de pruebas (cuatro empresas) y en
+  producción (tres), los dos antes de su backend, el 2026-10-14.

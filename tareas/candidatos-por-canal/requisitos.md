@@ -14,25 +14,28 @@ portales de empleo, la **carga individual**, la **carga masiva** y **LinkedIn**.
 - [ ] **Respeta los filtros existentes**: empresa, oferta, grupo de ofertas, rango de fechas y estado.
 - [ ] **Los canales sin candidatos en el periodo se muestran en cero.**
 
-## 🔴 Actualizado el 2026-10-07: buena parte ya está hecha
+## 🔴 Actualizado el 2026-10-19: buena parte ya está hecha (comprobado en el código)
 
-**Elvis añadió el 2026-09-30 una tabla «Calidad por canal de entrada»** en la analítica (commit `054a480`,
-en `develop`). Ya cuenta cada candidato por su origen **en esta oferta**: la carga individual, la carga
-masiva y el enlace público tienen su propia fila, y los de portal se reparten por portal. Antes de
-planificar hay que releer el código y ver qué queda de esta lista. Lo que se ve desde fuera, sin
-comprobar todavía:
+**Elvis añadió el 2026-09-30 una tabla «Calidad por canal de entrada»** en la analítica (commit `054a480`).
+Leído en `develop` (backend `740f478`, portal `986bead`), punto por punto contra la aceptación:
 
-- **Probablemente hecho**: cada canal manual en su fila, y el origen por oferta.
-- **Probablemente pendiente**:
-  - el nombre, que es «Calidad por canal de entrada» y no «Candidatos por canal»;
-  - **los portales siguen saliendo de la ficha de la persona**, así que se mantiene el doble conteo por
-    otras ofertas que describe `planning.md`;
-  - **LinkedIn no tiene fila propia**: sus candidatos entran por el enlace público, con LinkedIn como
-    detalle de origen, y caen en la fila del enlace público;
-  - los canales sin candidatos en cero.
+| Punto de aceptación | Estado hoy |
+| --- | --- |
+| El nombre «Candidatos por canal» | ❌ Se llama «Calidad por canal de entrada» |
+| Cada portal por separado | ⚠️ Sí hay una fila por portal, pero **el portal sale de la ficha de la persona**, no de esta oferta: una persona que llegó por dos portales a lo largo de su vida suma en los dos, aunque a esta oferta llegara por uno, y puede sumar en un portal por otra oferta |
+| Carga individual y carga masiva | ✅ Fila propia cada una, por el origen guardado en esta oferta |
+| LinkedIn | ❌ No tiene fila. Sus candidatos entran por el **enlace público**, con LinkedIn guardado como detalle de origen, y caen todos en una fila «Public link», sin separar LinkedIn de lo compartido a mano. Esa fila además sale sin traducir |
+| El primer registro, si llegó por varios canales | ✅ para los canales manuales y el enlace público, porque una persona tiene una sola participación por oferta. ❌ para los portales, por lo del punto «cada portal» |
+| Los filtros existentes | ✅ Se aplican, igual que al resto del panel. ⚠️ El rango de fechas mira la creación de la oferta, no la llegada del candidato |
+| Los canales sin candidatos en cero | ❌ Solo salen los canales que tienen algún candidato |
 
-**La estimación de 2,5 jornadas probablemente sobra.** Hay que rehacerla con lo que de verdad falte y
-proponérsela al usuario antes de empezar.
+**Lo que queda**, en resumen: el nombre, el portal por oferta y no por persona, LinkedIn separado del
+resto del enlace público, los ceros, y la traducción de la fila del enlace público. **La estimación de
+2,5 jornadas sobra**: hay que rehacerla con esto y proponérsela al usuario antes de empezar (ver
+`planning.md`).
+
+⚠️ **«Canales de publicación» sigue abierta** (paso 7 en curso el 2026-10-19). No toca la analítica, pero sí
+la creación de la oferta y sus portales: rama aparte y cuidado al fusionar `develop`.
 
 ## Relación con otras tareas
 

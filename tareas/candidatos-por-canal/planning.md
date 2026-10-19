@@ -14,6 +14,46 @@ está cada pieza** y **qué hay que decidir antes de que alguien toque código**
 Es un cambio **de lectura**: no toca el embudo ni lo que le pasa a nadie. Pero **cambia cifras que alguien
 ya está mirando**, y eso hay que decirlo al entregarlo.
 
+## 🔴 Actualizado el 2026-10-19: el código de hoy (gana sobre las secciones de abajo)
+
+Las secciones de abajo se escribieron el 2026-09-23, **antes** de que Elvis añadiera la tabla por canal de
+entrada (`054a480`, 2026-09-30). Leído en `develop` (backend `740f478`, portal `986bead`). Qué queda contra
+la aceptación: tabla en `requisitos.md`.
+
+**Backend** (`src/metrics/metrics.service.ts`, en el cálculo del panel global):
+
+- La respuesta trae **`channels`**: una fila por canal con candidatos, viables y tasa. Cada candidato se
+  cuenta por el **origen guardado en su participación en esa oferta**: si no es portal, va a la fila de su
+  origen (`manual`, `bulk`, `public_link`); si es portal, se reparte por **los portales de la ficha de la
+  persona**, que es justo el doble conteo descrito más abajo, en *Cómo funciona hoy*.
+- 🔑 **El cruce por oferta está a medio camino**: el cálculo ya le pega a cada candidato las plataformas de
+  su oferta, pero no las usa para el canal. La ficha de la persona guarda cada portal con el identificador
+  de la vacante en ese portal, y la oferta también; cruzándolas por los dos se sabe **qué portal trajo a esa
+  persona a esa oferta**, también para los registros viejos. Hay que decidir qué hacer si el cruce da dos.
+- **LinkedIn ya tiene dónde mirarse.** Sus candidatos entran con origen `public_link` y, aparte, un
+  **detalle de origen** (`sourceChannel`: `linkedin` o `manual`, el enlace compartido a mano). La tabla hoy
+  no lo usa, así que todo cae en una sola fila de enlace público. Separarlo no necesita a Elvis: el dato ya
+  existe.
+- Sigue saliendo el campo viejo **`atsPlatforms`**, marcado como obsoleto, para no romper un portal
+  desplegado sin `channels`. Decidir si se retira aquí o se deja.
+- **Los ceros**: hoy solo salen canales con algún candidato. Hace falta una lista de canales que se
+  muestran siempre (pregunta 6, más abajo).
+- **Los filtros** se aplican igual que al resto del panel; el rango de fechas mira la creación de la oferta
+  (pregunta 3).
+
+**Portal** (`app/routes/analytics.tsx` y `app/i18n/locales/es.ts` y `en.ts`, bajo `analytics.channels`):
+
+- La tabla usa `channels`, con el campo viejo de respaldo. Título: **«Calidad por canal de entrada»**.
+- Las etiquetas traducidas son solo alta manual, carga masiva y «ATS sin plataforma identificada». El resto
+  sale del nombre crudo del canal: los portales se leen bien, pero **el enlace público sale como «Public
+  link»**, sin traducir.
+
+**Coordinación:** la tabla es de Elvis. No hay nada que preguntarle para hacerlo, pero sí conviene
+avisarle de que se toca su código y por qué (el doble conteo por persona).
+
+**«Canales de publicación» sigue abierta** (paso 7). No toca la analítica, pero sí la creación de la
+oferta y sus portales. Rama aparte, y fusionar `develop` con cuidado.
+
 ## Cómo funciona hoy
 
 La pantalla de analítica tiene una tabla por portal de empleo: cuántos candidatos trajo cada uno, cuántos
