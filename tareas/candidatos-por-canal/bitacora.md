@@ -47,7 +47,8 @@ Tomadas con el usuario el 2026-10-19.
    al vincular a alguien desde un portal. No se crea un campo nuevo.
 8. **Nombres de las filas**: «Enlace compartido» («Shared link») para el enlace que el reclutador
    comparte por su cuenta, y «LinkedIn». El resto de etiquetas, en el brief del portal.
-9. **Se avisa a Elvis** de que se toca su tabla. El planificador prepara el mensaje.
+9. **No se avisa a Elvis** (usuario, 2026-10-19; corrige la primera versión, que decía que sí). Era
+   solo un aviso de cortesía de que se toca su tabla; nada de la tarea depende de él.
 10. **Script de relleno para lo viejo** (usuario, 2026-10-19; punto I), en vez de deducir el portal
     cada vez que se abre la analítica. Escribe una sola vez, solo donde el dato está vacío:
     - una participación de portal cuya persona comparte **un solo** portal con la oferta → ese portal,
@@ -159,4 +160,3 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
 
 - **Avisar de que las cifras de los portales cambian, a la baja**: deja de contarse a una persona en
   un portal por otra oferta (`requisitos.md`, *Notas de alcance*).
-- **Avisar a Elvis** de que se toca su tabla, y por qué.
