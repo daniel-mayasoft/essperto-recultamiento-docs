@@ -35,7 +35,7 @@ Tomadas con el usuario el 2026-10-19.
 3. **Canales que salen en cero**: alta individual y carga masiva siempre; cada portal configurado y
    habilitado en la empresa; el enlace compartido si la empresa tiene el formulario público encendido;
    LinkedIn si tiene la cuenta vinculada. Un canal que ya no está disponible pero trajo gente en el
-   periodo sale igual, con sus cifras.
+   periodo sale igual, con sus cifras. **Ampliada por las decisiones 16 a 18.**
 4. **«En el periodo» es la creación de la oferta**, como el resto del panel (punto C).
 5. **Se retira el campo viejo `atsPlatforms` de la respuesta de la analítica**, y el portal quita su
    respaldo. Comprobado el 2026-10-19: solo lo lee la pantalla de analítica, y solo ella llama a ese
@@ -82,6 +82,26 @@ Tomadas en la opinión previa del paso 1, el 2026-10-19.
     compilada. Así la verificación no puede salir en verde sin haber probado lo que corre.
 15. **Los comentarios que se vuelven falsos se recortan, sin añadir texto** (la regla de cero
     comentarios del proyecto). Si lo que queda deja de ser cierto, se borra entero.
+
+Tomadas antes del brief del paso 2, el 2026-10-19 (usuario).
+
+16. **Un canal se esconde solo si la empresa no puede usarlo hoy y nunca le trajo a nadie.** «Alguna
+    vez», no «en el periodo»: se mira en todas las ofertas de la empresa, sin ningún filtro. Caso:
+    LinkedIn trajo 5 personas en septiembre y caducó en octubre; mirando octubre, Marta ve «LinkedIn:
+    0», no la fila desaparecida. Igual un portal que la empresa apagó después de usarlo. Sustituye a la
+    última frase de la decisión 3.
+17. **LinkedIn «se puede usar» si la cuenta está conectada del todo y el formulario público está
+    encendido** (punto P). Sin página elegida, con la conexión caducada o con el formulario apagado, no
+    puede traer a nadie, y solo sale si alguna vez trajo a alguien (decisión 16).
+18. **«Portal sin identificar» queda fuera de la decisión 16**: sale solo si tiene candidatos en el
+    periodo. Casi todas las empresas tienen gente vieja sin portal identificado, y con la regla de
+    «alguna vez» saldría en cero para siempre en cualquier periodo nuevo.
+19. **Computrabajo sale en cero aunque la empresa llegue a él a través de Pandapé** (usuario,
+    2026-10-19, en la opinión previa del paso 2). Quien postula en Computrabajo por la republicación de
+    Pandapé lo trae el robot de Pandapé y cuenta como Pandapé; «Computrabajo: 0» es cierto para la
+    publicación directa, que el reclutador puede elegir en cualquier oferta. La aclaración en la fila de
+    Pandapé se decide en el paso 3. **En producción ninguna empresa está en ese caso** (consulta del
+    usuario, 2026-10-19).
 
 ## Lo que dice el código y los documentos no
 
@@ -161,6 +181,23 @@ Vistos en la opinión previa del paso 1 y comprobados por el planificador el 202
 - **N. Para el paso 2: «manual» significa dos cosas.** En el detalle de origen es el enlace compartido;
   en el origen, el alta individual. La analítica los lee siempre juntos.
 
+Comprobados por el planificador antes del brief del paso 2, el 2026-10-19 (backend `3cbc499`).
+
+- **O. «Portal configurado» ya tiene criterio en el código**: la API de la empresa marca un portal como
+  configurado si tiene contraseña guardada, y el paso de canales del portal exige además usuario
+  (decisión 8 de «Canales de publicación»). Habilitado es no estar apagado; un portal sin el dato cuenta
+  como encendido. El interruptor general «Portales de empleo» no es un dato propio: apagarlo apaga cada
+  portal.
+- **P. LinkedIn tiene tres estados de conexión**: conectada, a falta de elegir la página de la empresa,
+  y caducada. Solo publica conectada, y su candidato entra por el formulario público. **En producción
+  ninguna empresa ha conectado LinkedIn y nadie ha entrado por el enlace público** (consultas del usuario,
+  2026-10-19).
+- **Q. «Canales de publicación» está cerrada**: en `main` y desplegada en producción el 2026-10-14. Una
+  fusión de `develop` no trae nada suyo a medias.
+- **R. La analítica carga hoy la ficha de cada candidato del periodo** para saber sus portales, y lo
+  usan solo la tabla por canal y el campo viejo. Con el paso 2 no lo usa nadie y se retira. La analítica
+  es siempre de una sola empresa, y ya lee su documento para el modelo de cobro.
+
 ## Fuera del alcance, a sabiendas
 
 - **La llamada de prueba de WhatsApp** (punto M) sigue creando participaciones sin origen y un portal
@@ -178,7 +215,7 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
 | Paso | Qué | Repositorio | Estado |
 | --- | --- | --- | --- |
 | 1 | Guardar el origen completo: el portal al vincular desde un portal, el origen del candidato de demo (decisión 11), y el script de relleno con modo de prueba (decisión 10). **Tratamiento completo**: escribe en producción | backend | Revisado y aprobado; commit del usuario pendiente (`brief-paso1-origen-completo.md`) |
-| 2 | La analítica: lee el origen guardado, separa LinkedIn del enlace compartido, los ceros y el retiro del campo viejo | backend | Propuesto |
+| 2 | La analítica: lee el origen guardado, separa LinkedIn del enlace compartido, los ceros y el retiro del campo viejo | backend | Brief escrito (`brief-paso2-analitica.md`) |
 | 3 | La tabla «Candidatos por canal», con un nombre por fila y visible siempre | portal | Propuesto |
 | Cierre | Fusionar `develop`, desplegar, **correr el script justo después** (pruebas, luego producción, con copia de seguridad), pruebas a mano y avisar del cambio de cifras | los dos | Propuesto |
 
@@ -202,6 +239,18 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
   Una persona repetida dos veces en la misma oferta sale en el resumen como una escrita y una
   «saltada»: la primera escritura rellena las dos copias. **En producción no hay ninguna** (consulta
   del usuario, 2026-10-19).
+- **2026-10-19** — Paso 2: opinión previa contestada. Línea base: 205 conjuntos pasan y 2 omitidos; 2.140
+  pruebas pasan y 49 omitidas. Aprobado:
+  - la historia de canales sale de una agregación por pareja origen + detalle, sin filtros;
+  - la empresa se lee una sola vez, solo con los subcampos necesarios y sin los tokens de las cuentas
+    sociales;
+  - la regla de «portal utilizable» de la publicación pasa a una función suelta que usan la publicación
+    y la analítica, sin tocar sus copias en el servicio de ofertas;
+  - se retira la ficha del candidato del módulo de la analítica;
+  - empates en orden fijo: los tres portales, LinkedIn, enlace compartido, alta manual, carga masiva,
+    portal sin identificar y el resto por nombre;
+  - tasa 0 en las filas en cero, y el «—» se decide en el paso 3.
+  Decisión 19.
 
 ## Antes de desplegar
 
