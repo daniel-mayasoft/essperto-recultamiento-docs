@@ -103,6 +103,20 @@ Tomadas antes del brief del paso 2, el 2026-10-19 (usuario).
     Pandapé se decide en el paso 3. **En producción ninguna empresa está en ese caso** (consulta del
     usuario, 2026-10-19).
 
+Tomadas antes del brief del paso 3, el 2026-10-20 (usuario).
+
+20. **Los textos de la tabla**: título «Candidatos por canal» («Candidates by channel»); filas
+    Computrabajo, ElEmpleo y Pandapé, escritos como en el resto del portal y en los dos idiomas;
+    LinkedIn; «Enlace compartido» («Shared link»); «Alta manual» («Manual entry») y «Carga masiva»
+    («Bulk upload»), sin cambios; y «Portal sin identificar» («Unidentified job board»). Un canal que el
+    portal no conozca sale con su nombre legible, como hoy.
+21. **Una fila sin candidatos muestra «—» en la tasa de viables**, no «0 %»: no trajo a nadie, que no
+    es lo mismo que «nadie de los que trajo era viable».
+22. **«Portal sin identificar» lleva una explicación al pasar el ratón**: «Candidatos que llegaron por
+    un portal antes de que el sistema guardara por cuál.» («Candidates who came from a job board before
+    the system recorded which one.»). La aclaración de Pandapé con Computrabajo (decisión 19) no se
+    pone: ninguna empresa está en ese caso.
+
 ## Lo que dice el código y los documentos no
 
 Comprobado leyendo `develop` el 2026-10-19 (backend `740f478`, portal `986bead`). La tabla de estado
@@ -216,7 +230,7 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
 | --- | --- | --- | --- |
 | 1 | Guardar el origen completo: el portal al vincular desde un portal, el origen del candidato de demo (decisión 11), y el script de relleno con modo de prueba (decisión 10). **Tratamiento completo**: escribe en producción | backend | Revisado y aprobado; commit del usuario pendiente (`brief-paso1-origen-completo.md`) |
 | 2 | La analítica: lee el origen guardado, separa LinkedIn del enlace compartido, los ceros y el retiro del campo viejo | backend | Revisado y aprobado; commit del usuario pendiente (`brief-paso2-analitica.md`) |
-| 3 | La tabla «Candidatos por canal», con un nombre por fila y visible siempre | portal | Propuesto |
+| 3 | La tabla «Candidatos por canal», con un nombre por fila y visible siempre (decisiones 20 a 22) | portal | Brief escrito (`brief-paso3-tabla.md`) |
 | Cierre | Fusionar `develop`, desplegar, **correr el script justo después** (pruebas, luego producción, con copia de seguridad), pruebas a mano y avisar del cambio de cifras | los dos | Propuesto |
 
 ## Registro de avance
@@ -267,6 +281,13 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
   conflictos. Variables nuevas, todas opcionales o con valor por defecto; sin dependencias nuevas.
   Portal: `develop` sigue en `986bead`. **Se despliega en pruebas sin el paso 3**: la tabla del portal
   todavía tiene el título viejo, y las filas `linkedin` y `shared_link` salen sin traducir.
+- **2026-10-20** — Pasos 1 y 2 fusionados en `develop` (`98b340a`, con un commit más de Elvis,
+  `1a876aa`, sobre el archivado de Pandapé, sin relación). Verificado `develop` fusionado: 210
+  conjuntos y 2.202 pruebas pasan. Desplegado en pruebas, sin nada raro según el usuario. Script corrido
+  por el usuario en pruebas: modo de prueba con 58 ofertas, 0 en la regla 1, 0 en la regla 2, 531 en
+  la regla 3, 238 sin portal en común y 0 con dos o más; la pasada real escribió 531 y saltó 0; una
+  segunda pasada en modo de prueba dio 0 en las tres reglas. La proporción sin portal en común (31 %)
+  es mayor que en producción, por el modo de simulación de portales y los candidatos de prueba.
 
 ## Antes de desplegar
 
@@ -284,6 +305,9 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
   - En la pasada real, **«saltadas» tiene que ser cero**: en producción no hay personas repetidas en
     una misma oferta (registro de avance del paso 1). Si sale otra cifra, algo cambió la lista mientras
     corría y hay que mirarlo antes de seguir. Una segunda pasada debe dar cero en las tres reglas.
+
+- **A producción van el backend y el portal juntos** (usuario, 2026-10-20): el paso 3 se espera para no
+  enseñar a los clientes la tabla a medio terminar.
 
 - **Avisar de que las cifras de los portales cambian, a la baja**: deja de contarse a una persona en
   un portal por otra oferta (`requisitos.md`, *Notas de alcance*).
