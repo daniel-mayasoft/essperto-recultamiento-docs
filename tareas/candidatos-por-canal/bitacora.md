@@ -230,7 +230,7 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
 | --- | --- | --- | --- |
 | 1 | Guardar el origen completo: el portal al vincular desde un portal, el origen del candidato de demo (decisión 11), y el script de relleno con modo de prueba (decisión 10). **Tratamiento completo**: escribe en producción | backend | Revisado y aprobado; commit del usuario pendiente (`brief-paso1-origen-completo.md`) |
 | 2 | La analítica: lee el origen guardado, separa LinkedIn del enlace compartido, los ceros y el retiro del campo viejo | backend | Revisado y aprobado; commit del usuario pendiente (`brief-paso2-analitica.md`) |
-| 3 | La tabla «Candidatos por canal», con un nombre por fila y visible siempre (decisiones 20 a 22) | portal | Brief escrito (`brief-paso3-tabla.md`) |
+| 3 | La tabla «Candidatos por canal», con un nombre por fila y visible siempre (decisiones 20 a 22) | portal | Hecho: `c2bb1dd`, probado a mano en el servidor de pruebas (`brief-paso3-tabla.md`) |
 | Cierre | Fusionar `develop`, desplegar, **correr el script justo después** (pruebas, luego producción, con copia de seguridad), pruebas a mano y avisar del cambio de cifras | los dos | Propuesto |
 
 ## Registro de avance
@@ -288,6 +288,25 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
   la regla 3, 238 sin portal en común y 0 con dos o más; la pasada real escribió 531 y saltó 0; una
   segunda pasada en modo de prueba dio 0 en las tres reglas. La proporción sin portal en común (31 %)
   es mayor que en producción, por el modo de simulación de portales y los candidatos de prueba.
+- **2026-10-21** — Paso 3: código revisado por el planificador, y la comprobación de tipos pasa sin
+  errores, igual que la línea base. La etiqueta de cada fila sale solo del identificador de canal;
+  `channels` deja de ser opcional, sin respaldo, y la tabla sale siempre. El contenido de la tarjeta
+  conserva la sangría anterior para no inflar el diff. **Los casos a mano no se pudieron recorrer en
+  local**: la base local está vacía y el ejecutor no tiene navegador. Propuesta: recorrerlos en el
+  servidor de pruebas, con esta rama del portal desplegada allí.
+- **2026-10-21** — Paso 3 commiteado (`c2bb1dd`) y desplegado en el servidor de pruebas. El usuario
+  recorrió allí los seis casos del brief, y los seis salen bien: nombres de las filas y suma igual al
+  total, fila en cero con tasa «—», tabla visible en un periodo sin ofertas, explicación de «Portal sin
+  identificar», «Enlace compartido» con el formulario encendido, y todo en inglés. Las 238 sin
+  identificar de pruebas se explicaron con una consulta: 223 en ofertas sin ningún portal publicado y
+  con personas sin portal en su ficha, 10 con personas sin portal y 5 en ofertas que nunca se
+  publicaron en el portal de la persona; ninguna de la llamada de prueba de WhatsApp.
+  **Se salta un séptimo caso**, añadir a mano a alguien que ya llegó por portal: en pruebas todas las
+  participaciones con portal identificado están en ofertas cerradas o canceladas, donde el alta manual
+  no deja añadir, y reactivar una oferta en la base volvería a meterla en los procesos automáticos
+  (extracción, mensajes de WhatsApp a los candidatos en curso, avisos). Lo cubren las pruebas
+  automáticas que ya existían para la doble llegada, y esta tarea no cambió ese comportamiento. Los
+  cinco puntos de aceptación de `requisitos.md`, marcados como cumplidos.
 
 ## Antes de desplegar
 

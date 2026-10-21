@@ -7,12 +7,15 @@ portales de empleo, la **carga individual**, la **carga masiva** y **LinkedIn**.
 
 ## Aceptación
 
-- [ ] La métrica se renombra a **«Candidatos por canal»**.
-- [ ] Muestra **cada canal por separado**: cada portal de empleo, carga individual, carga masiva y LinkedIn.
-- [ ] Un candidato que llegó a la misma oferta por varios canales **se atribuye al canal del registro
+Cumplidos los cinco el 2026-10-21, comprobados en el código y a mano en el servidor de pruebas (ver
+`bitacora.md`, registro de avance).
+
+- [x] La métrica se renombra a **«Candidatos por canal»**.
+- [x] Muestra **cada canal por separado**: cada portal de empleo, carga individual, carga masiva y LinkedIn.
+- [x] Un candidato que llegó a la misma oferta por varios canales **se atribuye al canal del registro
       conservado, el primero**.
-- [ ] **Respeta los filtros existentes**: empresa, oferta, grupo de ofertas, rango de fechas y estado.
-- [ ] **Los canales sin candidatos en el periodo se muestran en cero.**
+- [x] **Respeta los filtros existentes**: empresa, oferta, grupo de ofertas, rango de fechas y estado.
+- [x] **Los canales sin candidatos en el periodo se muestran en cero.**
 
 ## 🔴 Actualizado el 2026-10-19: buena parte ya está hecha (comprobado en el código)
 
