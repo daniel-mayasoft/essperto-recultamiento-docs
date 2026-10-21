@@ -215,7 +215,7 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
 | Paso | Qué | Repositorio | Estado |
 | --- | --- | --- | --- |
 | 1 | Guardar el origen completo: el portal al vincular desde un portal, el origen del candidato de demo (decisión 11), y el script de relleno con modo de prueba (decisión 10). **Tratamiento completo**: escribe en producción | backend | Revisado y aprobado; commit del usuario pendiente (`brief-paso1-origen-completo.md`) |
-| 2 | La analítica: lee el origen guardado, separa LinkedIn del enlace compartido, los ceros y el retiro del campo viejo | backend | Brief escrito (`brief-paso2-analitica.md`) |
+| 2 | La analítica: lee el origen guardado, separa LinkedIn del enlace compartido, los ceros y el retiro del campo viejo | backend | Revisado y aprobado; commit del usuario pendiente (`brief-paso2-analitica.md`) |
 | 3 | La tabla «Candidatos por canal», con un nombre por fila y visible siempre | portal | Propuesto |
 | Cierre | Fusionar `develop`, desplegar, **correr el script justo después** (pruebas, luego producción, con copia de seguridad), pruebas a mano y avisar del cambio de cifras | los dos | Propuesto |
 
@@ -251,6 +251,22 @@ repositorios. Pasos aprobados por el usuario el 2026-10-19.
     portal sin identificar y el resto por nombre;
   - tasa 0 en las filas en cero, y el «—» se decide en el paso 3.
   Decisión 19.
+- **2026-10-19** — Paso 2 revisado por el planificador, con dos ajustes pedidos en la revisión: se
+  borró entero el comentario del identificador de canal, que había quedado engañoso, y la agregación
+  de la historia proyecta solo el origen y el detalle antes de desplegar las participaciones.
+  Verificación corrida sobre el árbol final: compila; 205 conjuntos pasan y 2 omitidos; 2.162 pruebas
+  pasan y 49 omitidas. Los dos conjuntos que fallaron en la máquina del ejecutor (plan de la empresa
+  en administración y tope de la carga masiva) eran tiempos agotados por carga: pasan sin cambios.
+  Para el paso 3, la respuesta trae un identificador de canal por fila: `computrabajo`, `elempleo`,
+  `pandape`, `ats` (portal sin identificar), `manual`, `bulk`, `linkedin`, `shared_link`, más la de
+  cualquier origen nuevo, con su propio nombre.
+- **2026-10-20** — Revisado `develop` antes de fusionar y desplegar en pruebas (usuario). Backend: 6
+  commits de Elvis desde `740f478`, hasta `dcb59c5` (archivado de Pandapé, prioridad del orquestador,
+  aviso de tareas atascadas, compatibilidad mínima de 0,35, reintento del indexado). Comparte con esta
+  rama el servicio de ofertas y el esquema de la oferta, pero en otras zonas: la fusión simulada no da
+  conflictos. Variables nuevas, todas opcionales o con valor por defecto; sin dependencias nuevas.
+  Portal: `develop` sigue en `986bead`. **Se despliega en pruebas sin el paso 3**: la tabla del portal
+  todavía tiene el título viejo, y las filas `linkedin` y `shared_link` salen sin traducir.
 
 ## Antes de desplegar
 
